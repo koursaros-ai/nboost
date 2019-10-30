@@ -6,6 +6,7 @@ from aiohttp import web
 from ..clients import clients
 from ..models import models
 from ..cli import set_logger
+import threading
 
 STATUS = {
     200: lambda x: web.json_response(x, status=200),
@@ -13,8 +14,9 @@ STATUS = {
 }
 
 
-class RankProxy:
+class RankProxy(threading.Thread):
     def __init__(self, args):
+        super().__init__()
         self.args = args
         self.queries = dict()
 
