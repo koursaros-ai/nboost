@@ -1,5 +1,5 @@
-from ..proxy import RankProxy
-from ..cli import set_parser
+from proxies.rank import RankProxy
+from cli import set_parser
 import unittest
 import requests
 import json
@@ -31,3 +31,4 @@ class TestProxy(unittest.TestCase):
         pass
 
     def tearDown(self):
+        pass

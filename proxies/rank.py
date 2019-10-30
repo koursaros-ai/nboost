@@ -3,9 +3,9 @@ import itertools
 import functools
 import asyncio
 from aiohttp import web
-from ..clients import clients
-from ..models import models
-from ..cli import set_logger
+from clients import clients
+from models import models
+from cli import set_logger
 import threading
 
 STATUS = {
