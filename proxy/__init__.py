@@ -13,10 +13,20 @@ STATUS = {
 }
 
 
+class Message:
+    def __init__(self, request: 'web.BaseRequest'):
+        self.request = request
+        self.response = None
+        self.query = None
+        self.reordered = None
+        self.candidates = {}
+        self.ranks = {}
+
+
 class RankProxy:
     def __init__(self, args):
         self.args = args
-        self.queries = dict()
+        self.msgs = dict()
 
     @property
     def status(self):
@@ -24,7 +34,7 @@ class RankProxy:
 
     def create_site(self):
         logger = set_logger(self.__class__.__name__)
-        id_counter = itertools.count()
+        counter = itertools.count()
         loop = asyncio.get_event_loop()
         model = getattr(models, self.args.model)(self.args)
         client = getattr(clients, self.args.client)(self.args)
@@ -46,11 +56,12 @@ class RankProxy:
 
         @route_handler
         async def query(request):
-            query_id = next(id_counter)
-            response, q, candidates = await client.query(request)
-            self.queries[query_id] = q, candidates
-            ranks = model.rank(q, candidates)
-            return client.reorder(response, ranks)
+            msg = Message(request)
+            await client.query(msg)
+            model.rank(msg)
+            client.reorder(msg)
+            self.msgs[next(counter)] = msg
+            return msg.reordered
 
         @route_handler
         async def train(request):
