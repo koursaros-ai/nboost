@@ -1,4 +1,4 @@
-from ..proxy import RankProxy
+from ..proxies import proxies
 from ..cli import set_parser
 import unittest
 import requests
