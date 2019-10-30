@@ -3,16 +3,16 @@ from typing import Tuple, List
 
 
 class TestClient(BaseClient):
-    def query(self, request) -> Tuple[List[str], dict]:
+    def query(self, request):
         response = ES_EXAMPLE_DATA
         candidates = [response['hits']['hits'][0]['_source'][self.args.field]]
         candidates *= 10 * self.args.multiplier
         query = 'test query'
         return response, candidates, query
 
-    def reorder(self, full, ranks):
-        full['hits']['hits'] = full['hits']['hits'][:self.args.topk]
-        return full
+    def reorder(self, response, ranks):
+        response['hits']['hits'] = response['hits']['hits'][:self.args.topk]
+        return response
 
 
 ES_EXAMPLE_DATA = {
