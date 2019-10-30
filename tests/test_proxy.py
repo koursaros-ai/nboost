@@ -1,5 +1,5 @@
 from ..proxy import RankProxy
-from ..cli.parser import set_parser
+from ..cli import set_parser
 import unittest
 import requests
 import json
