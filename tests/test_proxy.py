@@ -15,7 +15,7 @@ class TestProxy(unittest.TestCase):
             '--client', 'TestClient',
             '--model', 'TestModel',
         ])
-        proxy = RankProxy(args)
+        proxy = proxies.RankProxy(args)
         t = threading.Thread(target=proxy.run)
         t.start()
         self.t = t
