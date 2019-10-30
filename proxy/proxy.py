@@ -1,65 +1,77 @@
-from multiprocessing import Process, Event
-
 from termcolor import colored
 
-from .utils import set_logger
+from ..utils import set_logger
+import itertools
+import asyncio
+import requests
+from aiohttp import web
+from ..es import clients
+from ..models import *
 
 
-class BertHTTPProxy(Process):
+
+class RankProxy:
     def __init__(self, args):
-        super().__init__()
         self.args = args
-        self.is_ready = Event()
 
-    def create_flask_app(self):
-        try:
-            from flask import Flask, request
-            from flask_compress import Compress
-            from flask_cors import CORS
-            from flask_json import FlaskJSON, as_json, JsonError
-            from bert_serving.client import ConcurrentBertClient
-        except ImportError:
-            raise ImportError('BertClient or Flask or its dependencies are not fully installed, '
-                              'they are required for serving HTTP requests.'
-                              'Please use "pip install -U bert-serving-server[http]" to install it.')
+    def create_site(self):
+        with DistilbertModel(max_concurrency=self.args.http_max_connect,
+                             port=self.args.port, port_out=self.args.es_port) as model:
 
-        # support up to 10 concurrent HTTP requests
-        bc = ConcurrentBertClient(max_concurrency=self.args.http_max_connect,
-                                  port=self.args.port, port_out=self.args.port_out,
-                                  output_fmt='list', ignore_all_checks=True)
-        app = Flask(__name__)
-        logger = set_logger(colored('PROXY', 'red'))
+            logger = set_logger(colored('PROXY', 'red'))
+            query_id = itertools.count()
+            train_id = itertools.count()
+            loop = asyncio.get_event_loop()
+            es_client = getattr(es_clients, self.args.es_client)(self.args)
 
-        @app.route('/status/server', methods=['GET'])
-        @as_json
-        def get_server_status():
-            return bc.server_status
+            def exception(ex):
+                return web.json_response(
+                    dict(error=str(ex), type=type(ex).__name__), status=400)
 
-        @app.route('/status/client', methods=['GET'])
-        @as_json
-        def get_client_status():
-            return bc.status
+            async def status(request):
+                return model.status
 
-        @app.route('/encode', methods=['POST'])
-        @as_json
-        def encode_query():
-            data = request.form if request.form else request.json
-            try:
-                logger.info('new request from %s' % request.remote_addr)
-                return {'id': data['id'],
-                        'result': bc.encode(data['texts'], is_tokenized=bool(
-                            data['is_tokenized']) if 'is_tokenized' in data else False)}
+            async def query(request):
+                logger.info('new query request from %s' % request.remote_addr)
+                try:
+                    async for line in request.content:
+                        hits = es_client.
+                        res = model.query(line)
+                        return web.json_response(dict(res=res))
 
-            except Exception as e:
-                logger.error('error when handling HTTP request', exc_info=True)
-                raise JsonError(description=str(e), type=str(type(e).__name__))
+                except Exception as ex:
+                    logger.error('Error handling query request', exc_info=True)
+                    return exception(ex)
 
-        CORS(app, origins=self.args.cors)
-        FlaskJSON(app)
-        Compress().init_app(app)
-        return app
+            async def train(request):
+                logger.info('new train request from %s' % request.remote_addr)
+                try:
+                    async for line in request.content:
+                        res = model.train(train)
+                        return web.json_response(dict(res=res))
+
+                except Exception as ex:
+                    logger.error('Error handling train request', exc_info=True)
+                    return exception(ex)
+
+            async def main():
+                app = web.Application()
+                app.add_routes([
+                    web.post('/train', train),
+                    web.post('/status', status),
+                    web.post('/query', query)
+                ])
+                runner = web.AppRunner(app)
+                await runner.setup()
+                site = web.TCPSite(runner, self.args.host, self.args.port)
+                await site.start()
+
+                logger.info('http server forwarding port %d to %d' % (
+                    self.args.port,
+                    self.args.es_port))
+
+            loop.run_until_complete(main())
+            loop.run_forever()
 
     def run(self):
-        app = self.create_flask_app()
-        self.is_ready.set()
-        app.run(port=self.args.http_port, threaded=True, host='0.0.0.0')
+        self.create_site()
