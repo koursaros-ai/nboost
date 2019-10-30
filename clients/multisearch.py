@@ -1,9 +1,9 @@
 
-from .base import Client
+from .base import BaseClient
 import requests
 
 
-class MutliSearchClient(Client):
+class MutliSearchClient(BaseClient):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.uri = f'http://%s:%s/%s/_msearch' % (

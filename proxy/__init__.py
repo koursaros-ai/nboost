@@ -1,13 +1,11 @@
 from termcolor import colored
 
-from ..utils import set_logger
-import itertools
 import functools
 import asyncio
-import requests
 from aiohttp import web
 from ..clients import clients
 from ..models import models
+from ..cli import set_logger
 
 STATUS = {
     200: lambda x: web.json_response(x, status=200),
@@ -24,7 +22,7 @@ class RankProxy:
         return dict(res='Chillin')
 
     def create_site(self):
-        logger = set_logger(colored('PROXY', 'red'))
+        logger = set_logger(self.__class__.__name__)
         # query_id = itertools.count()
         # train_id = itertools.count()
         loop = asyncio.get_event_loop()
@@ -48,15 +46,13 @@ class RankProxy:
 
         @route_handler
         async def query(request):
-            response, fields = await client.query(request)
-            ranks = await model.rank(request, fields)
+            response, q, candidates = await client.query(request)
+            ranks = model.rank(q, candidates)
             return client.reorder(response, ranks)
 
         @route_handler
         async def train(request):
-            async for line in request.content:
-                res = model.train(line)
-                return res
+            return model.train(request)
 
         async def main():
             app = web.Application()
@@ -67,7 +63,7 @@ class RankProxy:
             ])
             runner = web.AppRunner(app)
             await runner.setup()
-            site = web.TCPSite(runner, self.args.host, self.args.port)
+            site = web.TCPSite(runner, self.args.proxy_host, self.args.proxy_port)
             await site.start()
 
             logger.info('proxy forwarding %s:%d to %s:%d' % (
