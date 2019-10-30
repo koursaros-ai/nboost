@@ -6,7 +6,6 @@ from aiohttp import web
 from ..clients import clients
 from ..models import models
 from ..cli import set_logger
-import threading
 
 STATUS = {
     200: lambda x: web.json_response(x, status=200),
@@ -14,7 +13,7 @@ STATUS = {
 }
 
 
-class RankProxy(threading.Thread):
+class RankProxy:
     def __init__(self, args):
         super().__init__()
         self.args = args
@@ -78,7 +77,6 @@ class RankProxy(threading.Thread):
                 self.args.server_host, self.args.server_port))
 
         loop.run_until_complete(main())
-        loop.run_forever()
 
     def run(self):
         self.create_site()
