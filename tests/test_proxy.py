@@ -31,3 +31,4 @@ class TestProxy(unittest.TestCase):
         pass
 
     def tearDown(self):
+        pass
