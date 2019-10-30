@@ -13,20 +13,10 @@ STATUS = {
 }
 
 
-class Message:
-    def __init__(self, request: 'web.BaseRequest'):
-        self.request = request
-        self.response = None
-        self.query = None
-        self.reordered = None
-        self.candidates = {}
-        self.ranks = {}
-
-
 class RankProxy:
     def __init__(self, args):
         self.args = args
-        self.msgs = dict()
+        self.queries = dict()
 
     @property
     def status(self):
@@ -48,6 +38,7 @@ class RankProxy:
                 except Exception as ex:
                     logger.error('Error on %s request' % f.__name__, exc_info=True)
                     return STATUS[500](ex)
+
             return decorator
 
         @route_handler
@@ -56,18 +47,17 @@ class RankProxy:
 
         @route_handler
         async def query(request):
-            msg = Message(request)
-            await client.query(msg)
-            model.rank(msg)
-            client.reorder(msg)
-            self.msgs[next(counter)] = msg
-            return msg.reordered
+            response, candidates, q = await client.query(request)
+            ranks = model(q, candidates)
+            self.queries[next(counter)] = q, candidates
+            return client.reorder(response, ranks)
 
         @route_handler
         async def train(request):
-            clicked = request.query.clicked
-            query_id = request.query.query_id
-            return model.train(clicked, query_id)
+            q, candidates = self.queries[request.query.qid]
+            labels = [0] * len(candidates)
+            labels[request.query.cid] = 1
+            return model(q, candidates, labels=labels)
 
         async def main():
             app = web.Application()
