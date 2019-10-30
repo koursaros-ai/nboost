@@ -4,7 +4,7 @@ import numpy as np
 
 class DBRank(object):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         self.model_name = 'distilbert-base-uncased'
         self.data_dir = '.model-cache/'
         self.lr = 10e-3
@@ -22,7 +22,14 @@ class DBRank(object):
         self.optimizer = AdamW(self.rerank_model.parameters(), lr=self.lr, correct_bias=False)
         self.scheduler = ConstantLRSchedule(self.optimizer)
 
+
     def __call__(self, query, candidates, labels=None, k=None):
+        """
+        :param query: the search query
+        :param candidates: the candidate results
+        :param labels: optionally train given user feedback
+        :return sorted list of indices of topk candidates
+        """
         assert(labels is not None or k is not None)
 
         if labels:
