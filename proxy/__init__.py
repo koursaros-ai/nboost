@@ -1,5 +1,5 @@
 from termcolor import colored
-
+import itertools
 import functools
 import asyncio
 from aiohttp import web
@@ -16,6 +16,7 @@ STATUS = {
 class RankProxy:
     def __init__(self, args):
         self.args = args
+        self.queries = dict()
 
     @property
     def status(self):
@@ -23,8 +24,7 @@ class RankProxy:
 
     def create_site(self):
         logger = set_logger(self.__class__.__name__)
-        # query_id = itertools.count()
-        # train_id = itertools.count()
+        id_counter = itertools.count()
         loop = asyncio.get_event_loop()
         model = getattr(models, self.args.model)(self.args)
         client = getattr(clients, self.args.client)(self.args)
@@ -46,13 +46,17 @@ class RankProxy:
 
         @route_handler
         async def query(request):
+            query_id = next(id_counter)
             response, q, candidates = await client.query(request)
+            self.queries[query_id] = q, candidates
             ranks = model.rank(q, candidates)
             return client.reorder(response, ranks)
 
         @route_handler
         async def train(request):
-            return model.train(request)
+            clicked = request.query.clicked
+            query_id = request.query.query_id
+            return model.train(clicked, query_id)
 
         async def main():
             app = web.Application()
