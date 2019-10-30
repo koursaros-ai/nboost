@@ -5,6 +5,7 @@ import numpy as np
 class DBRank(object):
 
     def __init__(self, *args, **kwargs):
+
         self.model_name = 'distilibert'
         self.data_dir = '.model-cache/'
         self.lr = 10e-3
