@@ -13,28 +13,31 @@ STATUS = {
 }
 
 
+async def route_handler(f):
+    @functools.wraps(f)
+    def decorator(*args, **kwargs):
+        logger = set_logger(f.__name__)
+        try:
+            logger.info('new %s request' % f.__name__)
+            return STATUS[200](f(*args, **kwargs))
+        except Exception as ex:
+            logger.error('Error on %s request' % f.__name__, exc_info=True)
+            return STATUS[500](ex)
+
+    return decorator
+
+
 class BaseProxy:
     def __init__(self, args):
         super().__init__()
         self.args = args
         self.queries = dict()
-        self.logger = set_logger(self.__class__.__name__)
+        self.logger =
         self.model = getattr(models, self.args.model)(self.args)
         self.client = getattr(clients, self.args.client)(self.args)
         self.counter = itertools.count()
         self.loop = asyncio.get_event_loop()
 
-    async def route_handler(self, f):
-        @functools.wraps(f)
-        def decorator(*args, **kwargs):
-            try:
-                self.logger.info('new %s request' % f.__name__)
-                return STATUS[200](f(*args, **kwargs))
-            except Exception as ex:
-                self.logger.error('Error on %s request' % f.__name__, exc_info=True)
-                return STATUS[500](ex)
-
-        return decorator
 
     @route_handler
     async def status(self):

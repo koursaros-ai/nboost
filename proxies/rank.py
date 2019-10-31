@@ -1,17 +1,6 @@
 
-import itertools
-import functools
-import asyncio
-from aiohttp import web
-from ..clients import clients
-from .base import BaseProxy
-from ..models import models
-from ..cli import set_logger
 
-STATUS = {
-    200: lambda x: web.json_response(x, status=200),
-    500: lambda x: web.json_response(dict(error=str(x), type=type(x).__name__), status=500)
-}
+from .base import BaseProxy
 
 
 class RankProxy(BaseProxy):
