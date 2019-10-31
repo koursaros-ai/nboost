@@ -80,3 +80,4 @@ class RankProxy:
 
     def run(self):
         self.create_site()
+
