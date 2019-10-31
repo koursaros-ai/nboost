@@ -1,14 +1,16 @@
 
 
-from .base import BaseProxy, route_handler
+from .base import BaseProxy
+from aiohttp import web
 
 
 class RankProxy(BaseProxy):
-    @route_handler
+    routes = web.RouteTableDef()
+
     async def status(self, request):
         return dict(res='Chillin')
 
-    @route_handler
+    @routes.get('/query')
     async def query(self, request):
         response, query, candidates, topk = await self.client.query(request)
         ranks = self.model.rank(query, candidates)
@@ -16,7 +18,7 @@ class RankProxy(BaseProxy):
         self.queries[qid] = query, candidates
         return self.client.reorder(response, ranks, topk)
 
-    @route_handler
+    @routes.get('/train')
     async def train(self, request):
         qid = int(request.query['qid'])
         cid = int(request.query['cid'])
