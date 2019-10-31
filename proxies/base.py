@@ -37,18 +37,26 @@ class BaseProxy:
         self.counter = itertools.count()
         self.loop = asyncio.get_event_loop()
 
-
-    @route_handler
     async def status(self):
         pass
 
-    @route_handler
-    async def query(self, request):
+    async def query(self):
         pass
 
-    @route_handler
     async def train(self, request):
         pass
+
+    @property
+    def _status(self):
+        return route_handler(self.status)
+
+    @property
+    def _query(self):
+        return route_handler(self.query)
+
+    @property
+    def _train(self):
+        return route_handler(self.train)
 
     async def main(self):
         app = web.Application()
