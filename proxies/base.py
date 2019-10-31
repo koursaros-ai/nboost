@@ -58,13 +58,13 @@ class BaseProxy(Process):
     def create_site(self):
         return web.TCPSite(self.runner, self.args.proxy_host, self.args.proxy_port)
 
-    async def status(self):
+    async def status(self) -> dict:
         raise NotImplementedError
 
-    async def query(self, request: 'web.BaseRequest'):
+    async def query(self, request: 'web.BaseRequest') -> dict:
         raise NotImplementedError
 
-    async def train(self, request: 'web.BaseRequest'):
+    async def train(self, request: 'web.BaseRequest') -> dict:
         raise NotImplementedError
 
     def _status(self):
@@ -84,7 +84,7 @@ class BaseProxy(Process):
             self.args.proxy_host, self.args.proxy_port,
             self.args.server_host, self.args.server_port))
 
-    def close(self):
+    def stop(self):
         self.loop.run_until_complete(self.site.stop())
         self.join()
 

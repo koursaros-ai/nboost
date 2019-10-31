@@ -3,7 +3,6 @@ from ..cli import set_parser
 import unittest
 import requests
 import json
-import threading
 
 
 class TestProxy(unittest.TestCase):
@@ -15,20 +14,22 @@ class TestProxy(unittest.TestCase):
             '--client', 'TestClient',
             '--model', 'TestModel',
         ])
-        proxy = proxies.RankProxy(args)
-        t = threading.Thread(target=proxy.run)
-        t.start()
-        self.t = t
+        self.proxy = proxies.RankProxy(args)
+        self.proxy.start()
+        self.url = 'http://%s:%s/' % (args.proxy_host, args.proxy_port)
 
     def test_status(self):
-        res = requests.get('http://127.0.0.1/status')
+        res = requests.get(self.url + 'status')
         status = json.loads(res)
+        print(status)
 
     def test_query(self):
-        pass
+        res = requests.get(self.url + 'query')
+        print(res)
 
     def test_train(self):
-        pass
+        res = requests.post(self.url + 'train')
+        print(res)
 
     def tearDown(self):
-        pass
+        self.proxy.stop()
