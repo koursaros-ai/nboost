@@ -23,7 +23,10 @@ class ESProxy(BaseProxy):
             return (resp, query, candidates, topk)
 
     def reorder(self, response: 'client.ClientResponse', ranks: List[int]) -> dict:
-        pass
+        assert response.status == 200
+        data = await response.json()
+        data['hits']['hits']  = [data['hits']['hits'][i] for i in ranks]
+        return data
 
     def get_candidates(self, response: 'client.ClientResponse', field: str):
         data = await response.json()
