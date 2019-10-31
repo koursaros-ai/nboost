@@ -18,7 +18,6 @@ class ESProxy(BaseProxy):
         self.requests = dict()
         self.counter = 0
 
-
     @routes.post('/train')
     async def train(self, request: 'web.BaseRequest'):
         data = await request.json()
@@ -43,12 +42,14 @@ class ESProxy(BaseProxy):
             response_dict = self.reorder(data, ranks)
             return response_dict
 
+    @staticmethod
     def reorder(self, response: 'client.ClientResponse', ranks: List[int]) -> dict:
         assert response.status == 200
         data = await response.json()
-        data['hits']['hits']  = [data['hits']['hits'][i] for i in ranks]
+        data['hits']['hits'] = [data['hits']['hits'][i] for i in ranks]
         return data
 
+    @staticmethod
     def get_candidates(self, response: 'client.ClientResponse', field: str):
         data = await response.json()
         candidates = [hit['_source'][field] for hit in data['hits']['hits']]
