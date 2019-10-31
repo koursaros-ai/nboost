@@ -6,7 +6,7 @@ import json
 from .. import models, proxies, clients
 
 
-class TestProxy(unittest.TestCase):
+class TestRankProxy(unittest.TestCase):
 
     def setUp(self):
         parser = set_parser()
@@ -15,7 +15,7 @@ class TestProxy(unittest.TestCase):
             '--client', 'TestClient',
             '--model', 'TestModel',
         ])
-        self.proxy = proxies.RankProxy(args)
+        self.proxy = proxies['RankProxy'](args)
         self.proxy.start()
         self.url = 'http://%s:%s/' % (args.proxy_host, args.proxy_port)
 
