@@ -18,6 +18,7 @@ def set_parser():
     parser.add_argument('--proxy_host', type=str, default='127.0.0.1', help='host of the proxy')
     parser.add_argument('--proxy_port', type=int, default=53001, help='port of the proxy')
     parser.add_argument('--multiplier', type=int, default=10, help='factor to increase results by')
+    parser.add_argument('--field', type=str, help='specified meta field to train on')
     return parser
 
 

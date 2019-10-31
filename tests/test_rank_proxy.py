@@ -1,8 +1,8 @@
 from ..cli import set_parser
 import unittest
 import requests
-import json
 from .. import proxies
+from pprint import pprint
 
 
 class TestRankProxy(unittest.TestCase):
@@ -12,24 +12,27 @@ class TestRankProxy(unittest.TestCase):
         args = parser.parse_args([
             '--verbose',
             '--client', 'TestClient',
-            '--model', 'TestModel',
+            '--model', 'TestModel'
         ])
-        self.proxy = getattr(proxies, 'RankProxy')
-        self.proxy.start()
         self.url = 'http://%s:%s/' % (args.proxy_host, args.proxy_port)
+        self.proxy = getattr(proxies, 'RankProxy')(args)
+        self.proxy.start()
+        self.proxy.is_ready.wait()
 
     def test_status(self):
         res = requests.get(self.url + 'status')
-        status = json.loads(res)
-        print(status)
+        pprint(res.json())
+        self.assertTrue(res.ok)
 
     def test_query(self):
         res = requests.get(self.url + 'query')
-        print(res)
+        pprint(res.json())
+        self.assertTrue(res.ok)
+        qid = res.json()['qid']
 
-    def test_train(self):
-        res = requests.post(self.url + 'train')
-        print(res)
+        res = requests.post(self.url + 'train/?qid=' + str(qid))
+        pprint(res.json())
+        self.assertTrue(res.ok)
 
     def tearDown(self):
-        self.proxy.stop()
+        self.proxy.kill()
