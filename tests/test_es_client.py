@@ -1,5 +1,5 @@
 import unittest
-from clients.es import ESClient
+from ..clients.es import ESClient
 import aiohttp
 from elasticsearch import Elasticsearch
 
