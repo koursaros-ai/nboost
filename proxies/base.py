@@ -39,6 +39,7 @@ class BaseProxy(Process):
         self.logger = set_logger(self.__class__.__name__)
         self.is_ready = Event()
 
+    @handler.register
     async def default_route(self, request):
         pass
 
