@@ -1,8 +1,8 @@
-from .base import BaseClient
+from .base import BaseProxy
 import requests
 
 
-class MutliSearchClient(BaseClient):
+class MutliSearchClient(BaseProxy):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.uri = 'http://%s:%s/%s/_msearch' % (

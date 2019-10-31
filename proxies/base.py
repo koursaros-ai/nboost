@@ -6,7 +6,7 @@ import itertools
 import functools
 import argparse
 import asyncio
-from .. import models, clients
+from .. import models
 
 
 def route_handler(f):
