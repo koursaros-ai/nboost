@@ -7,9 +7,9 @@ class BaseClient:
     def __init__(self, args):
         self.args = args
 
-    def query(self, request: 'web.BaseRequest') -> Tuple[Any, List[str], str]:
+    def query(self, request: 'web.BaseRequest') -> Tuple[Any, str, List[str], int]:
         """
-        :return Tuple(response, candidates, query)
+        :return Tuple(response, query, candidates, topk)
         """
         raise NotImplementedError
 
