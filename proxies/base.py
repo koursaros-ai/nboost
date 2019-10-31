@@ -63,7 +63,7 @@ class BaseProxy:
 
     def run(self):
         self.loop.run_until_complete(self.main())
-        self.logger.info('proxy forwarding %s:%d to %s:%d' % (
+        print('proxy forwarding %s:%d to %s:%d' % (
             self.args.proxy_host, self.args.proxy_port,
             self.args.server_host, self.args.server_port))
 
