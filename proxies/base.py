@@ -32,7 +32,6 @@ class BaseProxy:
         super().__init__()
         self.args = args
         self.queries = dict()
-        self.logger =
         self.model = getattr(models, self.args.model)(self.args)
         self.client = getattr(clients, self.args.client)(self.args)
         self.counter = itertools.count()
