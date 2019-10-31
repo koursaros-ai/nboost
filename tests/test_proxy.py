@@ -1,4 +1,4 @@
-from ..proxies import proxies
+from ..proxies import test
 from ..cli import set_parser
 import unittest
 import requests
@@ -15,7 +15,7 @@ class TestProxy(unittest.TestCase):
             '--client', 'TestClient',
             '--model', 'TestModel',
         ])
-        proxy = proxies.RankProxy(args)
+        proxy = test.TestProxy(args)
         t = threading.Thread(target=proxy.run)
         t.start()
         self.t = t
