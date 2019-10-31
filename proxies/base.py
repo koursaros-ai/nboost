@@ -6,6 +6,7 @@ import itertools
 import argparse
 import asyncio
 from .. import models
+from enum import Enum
 
 
 class Response:

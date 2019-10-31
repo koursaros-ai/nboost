@@ -18,7 +18,7 @@ class ESProxy(BaseProxy):
     async def search(self, request: 'web.BaseRequest'):
         pass
 
-    @routes.post('/search')
+    @routes.post('/train')
     async def train(self, request: 'web.BaseRequest'):
         pass
 
