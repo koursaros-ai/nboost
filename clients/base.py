@@ -19,9 +19,10 @@ class BaseClient:
         """
         raise NotImplementedError
 
-    def get_candidates(self, response: 'web.Response'):
+    def get_candidates(self, response: 'web.Response', field: str):
         """
         :param response: response from index
+        :param field: field to extract candidates from
         :return: ids, candidates
         """
         raise NotImplementedError
