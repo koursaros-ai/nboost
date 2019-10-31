@@ -33,8 +33,8 @@ class TestESClient(unittest.TestCase):
     async def test_extract(self):
         field, value = ('description', 'test')
         async with aiohttp.request('GET', 'http://localhost:9200/test/_search?q={}:{}') as resp:
-            assert resp.status == 200
             print(resp)
+            assert resp.status == 200
             # self.client.query()
             # self.client.reorder()
 
