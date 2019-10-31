@@ -23,7 +23,7 @@ class TestESClient(unittest.TestCase):
         # id, query, product_title, product_description, median_relevance, relevance_variance
         with open(os.path.join(os.path.dirname(__file__), 'data', 'train.csv'), 'r') as file:
             sample_data = csv.reader(file)
-            for row in sample_data:
+            for row in list(sample_data)[:100]:
                 print('dumping line %s' % row[2])
                 self.es.index(index="test",
                               id=row[0],
