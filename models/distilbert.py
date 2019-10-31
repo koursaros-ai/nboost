@@ -28,10 +28,10 @@ class DBRank(BaseModel):
     def train(self, query, candidates, labels):
         self(query,candidates,labels=labels)
 
-    def rank(self, query, candidates, k):
-        return self(query,candidates,k=k)
+    def rank(self, query, candidates):
+        return self(query,candidates)
 
-    def __call__(self, query, candidates, labels=None, k=None):
+    def __call__(self, query, candidates, labels=None):
         """
         :param query: the search query
         :param candidates: the candidate results
@@ -75,4 +75,4 @@ class DBRank(BaseModel):
                 scores = np.squeeze(logits.detach().cpu().numpy())
                 if len(logits) == 1:
                     scores = [scores]
-                return list(np.argsort(scores)[::-1][:k])
+                return list(np.argsort(scores)[::-1])
