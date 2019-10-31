@@ -1,11 +1,11 @@
-from .base import BaseClient
+from .base import BaseProxy
 from typing import Tuple, List, Any
 
 from aiohttp import web, client
 import aiohttp
 
-class ESClient (BaseClient):
 
+class ESProxy(BaseProxy):
     def __init__(self, host, port, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.host = host
