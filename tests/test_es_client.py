@@ -34,7 +34,9 @@ class TestESClient(unittest.TestCase):
         query = ('description', 'test')
         async with aiohttp.request('GET', 'http://localhost:9200/test/_search?q=%s:%s' % query) as resp:
             assert resp.status == 200
-            print(await resp.json())
+            data = await resp.json()
+            import pdb
+            pdb.set_trace()
             # self.client.query()
             # self.client.reorder()
 
