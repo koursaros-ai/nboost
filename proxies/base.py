@@ -6,6 +6,8 @@ from aiohttp import web
 from ..clients import clients
 from ..models import models
 from ..cli import set_logger
+from multiprocessing import Process
+import argparse
 
 STATUS = {
     200: lambda x: web.json_response(x, status=200),
@@ -27,8 +29,8 @@ async def route_handler(f):
     return decorator
 
 
-class BaseProxy:
-    def __init__(self, args):
+class BaseProxy(Process):
+    def __init__(self, args: 'argparse.Namespace'):
         super().__init__()
         self.args = args
         self.queries = dict()
@@ -36,45 +38,66 @@ class BaseProxy:
         self.client = getattr(clients, self.args.client)(self.args)
         self.counter = itertools.count()
         self.loop = asyncio.get_event_loop()
+        self.logger = set_logger(self.__class__.__name__)
+        self.app = self.create_app()
+        self.runner = self.create_runner()
+        self.site = self.create_site()
+
+    def create_app(self):
+        app = web.Application()
+        self.app.add_routes([
+            web.get('/status', self._status),
+            web.get('/query', self._query),
+            web.post('/train', self._train),
+        ])
+        return app
+
+    def create_runner(self):
+        return web.AppRunner(self.app)
+
+    def create_site(self):
+        return web.TCPSite(self.runner, self.args.proxy_host, self.args.proxy_port)
 
     async def status(self):
-        pass
+        raise NotImplementedError
 
-    async def query(self):
-        pass
+    async def query(self, request: 'web.BaseRequest'):
+        raise NotImplementedError
 
-    async def train(self, request):
-        pass
+    async def train(self, request: 'web.BaseRequest'):
+        raise NotImplementedError
 
-    @property
     def _status(self):
         return route_handler(self.status)
 
-    @property
     def _query(self):
         return route_handler(self.query)
 
-    @property
     def _train(self):
         return route_handler(self.train)
 
-    async def main(self):
-        app = web.Application()
-        app.add_routes([
-            web.get('/status', self.status),
-            web.get('/query', self.query),
-            web.post('/train', self.train),
-        ])
-        runner = web.AppRunner(app)
-        await runner.setup()
-        site = web.TCPSite(runner, self.args.proxy_host, self.args.proxy_port)
-        await site.start()
+    def _run(self):
+        self.loop.run_until_complete(self.runner.setup())
+        self.loop.run_until_complete(self.site.start())
 
-    def run(self):
-        self.loop.run_until_complete(self.main())
         self.logger.info('proxy forwarding %s:%d to %s:%d' % (
             self.args.proxy_host, self.args.proxy_port,
             self.args.server_host, self.args.server_port))
 
-    def stop(self):
-        pass
+    def close(self):
+        self.loop.run_until_complete(self.site.stop())
+        self.join()
+
+    def run(self):
+        try:
+            self._run()
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
