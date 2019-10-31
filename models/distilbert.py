@@ -22,6 +22,11 @@ class DBRank(object):
         self.optimizer = AdamW(self.rerank_model.parameters(), lr=self.lr, correct_bias=False)
         self.scheduler = ConstantLRSchedule(self.optimizer)
 
+    def train(self, query, candidates, labels):
+        self(query,candidates,labels=labels)
+
+    def rank(self, query, candidates, k):
+        return self(query,candidates,k=k)
 
     def __call__(self, query, candidates, labels=None, k=None):
         """
