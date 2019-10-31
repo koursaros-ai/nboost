@@ -40,7 +40,7 @@ class BaseProxy(Process):
 
     def create_app(self):
         app = web.Application()
-        self.app.add_routes([
+        app.add_routes([
             web.get('/status', self._status),
             web.get('/query', self._query),
             web.post('/train', self._train),
