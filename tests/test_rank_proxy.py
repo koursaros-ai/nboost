@@ -2,7 +2,7 @@ from ..cli import set_parser
 import unittest
 import requests
 import json
-from .. import models, proxies, clients
+from .. import proxies
 
 
 class TestRankProxy(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestRankProxy(unittest.TestCase):
             '--client', 'TestClient',
             '--model', 'TestModel',
         ])
-        self.proxy = proxies['RankProxy'](args)
+        self.proxy = getattr(proxies, 'RankProxy')
         self.proxy.start()
         self.url = 'http://%s:%s/' % (args.proxy_host, args.proxy_port)
 
