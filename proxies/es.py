@@ -1,4 +1,4 @@
-from .base import BaseProxy
+from .base import BaseProxy, RouteHandler
 from typing import Tuple, List, Any
 
 from aiohttp import web, client
@@ -6,10 +6,16 @@ import aiohttp
 
 
 class ESProxy(BaseProxy):
+    handler = RouteHandler()
+
     def __init__(self, host, port, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.host = host
         self.port = port
+
+    @handler.register
+    async def search(self):
+        pass
 
     async def query(self, request: 'web.BaseRequest') -> Tuple[Any, str, List[str], int]:
         request_data = request.json()
