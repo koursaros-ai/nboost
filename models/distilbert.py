@@ -1,12 +1,12 @@
-from transformers import *
+from .base import BaseModel
 import torch, torch.nn
 import numpy as np
-from .base import BaseModel
-
 
 class DBRank(BaseModel):
 
     def __init__(self, *args, **kwargs):
+        from transformers import AutoConfig, AutoModelForSequenceClassification, AutoTokenizer, AdamW, ConstantLRSchedule
+
         super().__init__(*args, **kwargs)
         self.model_name = 'distilbert-base-uncased'
         self.data_dir = '.model-cache/'
@@ -39,6 +39,7 @@ class DBRank(BaseModel):
         :return sorted list of indices of topk candidates
         """
         assert(labels is not None or k is not None)
+
 
         if labels:
             inputs = []
