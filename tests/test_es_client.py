@@ -37,5 +37,8 @@ class TestESClient(unittest.TestCase):
             # self.client.query()
             # self.client.reorder()
 
+    def test_esclient(self):
+        await self.test_extract()
+
     def test_reorder(self):
         pass
