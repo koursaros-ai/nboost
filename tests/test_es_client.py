@@ -21,7 +21,7 @@ class TestESClient(unittest.TestCase):
         self.es.indices.create(index='test', ignore=400)
 
         # id, query, product_title, product_description, median_relevance, relevance_variance
-        with open(os.path.join(os.path.dirname(__file__), 'data', 'train.csv', 'r')) as file:
+        with open(os.path.join(os.path.dirname(__file__), 'data', 'train.csv'), 'r') as file:
             sample_data = csv.reader(file)
             for row in sample_data:
                 self.es.index(index="test",
