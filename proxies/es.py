@@ -14,7 +14,7 @@ class ESProxy(BaseProxy):
         self.port = port
 
     @handler.register
-    async def search(self):
+    async def search(self, request: 'web.BaseRequest'):
         pass
 
     async def query(self, request: 'web.BaseRequest') -> Tuple[Any, str, List[str], int]:
