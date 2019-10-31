@@ -37,6 +37,8 @@ class TestESClient(unittest.TestCase):
             data = await resp.json()
             import pdb
             pdb.set_trace()
+            print(data)
+
             # self.client.query()
             # self.client.reorder()
 
