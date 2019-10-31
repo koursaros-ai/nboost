@@ -3,6 +3,7 @@ from typing import Tuple, List
 
 
 class TestClient(BaseClient):
+
     def query(self, request):
         response = ES_EXAMPLE_DATA
         candidates = [response['hits']['hits'][0]['_source'][self.args.field]]

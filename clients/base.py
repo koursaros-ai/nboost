@@ -18,3 +18,9 @@ class BaseClient:
         :return: json response to return to user
         """
         raise NotImplementedError
+
+    def get_candidates(self, response: 'web.Response'):
+        """
+        :param response: response from index
+        :return: ids, candidates
+        """
