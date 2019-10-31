@@ -26,5 +26,6 @@ class ESClient (BaseClient):
         pass
 
     def get_candidates(self, response: 'client.ClientResponse', field: str):
+        data = await response.json()
         candidates = [hit['_source'][field] for hit in data['hits']['hits']]
         return candidates

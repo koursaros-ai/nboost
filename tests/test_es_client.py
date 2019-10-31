@@ -34,8 +34,7 @@ class TestESClient(unittest.TestCase):
                               body={"title": row[2], "description": row[3]})
 
     async def test_extract(self):
-        request = web.BaseRequest()
-        (resp, query, candidates, topk) = self.client.query(request)
+        (resp, query, candidates, topk) = await self.client.query()
         self.model.rank(query[1], candidates)
 
     def test_es(self):
