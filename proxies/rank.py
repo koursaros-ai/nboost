@@ -37,28 +37,7 @@ class RankProxy(BaseProxy):
         labels[request.query.cid] = 1
         return model(q, candidates, labels=labels)
 
-    def create_site(self):
 
-        counter = itertools.count()
-        loop = asyncio.get_event_loop()
-
-    async def main():
-        app = web.Application()
-        app.add_routes([
-            web.get('/status', status),
-            web.get('/query', query),
-            web.post('/train', train),
-        ])
-        runner = web.AppRunner(app)
-        await runner.setup()
-        site = web.TCPSite(runner, self.args.proxy_host, self.args.proxy_port)
-        await site.start()
-
-        logger.info('proxy forwarding %s:%d to %s:%d' % (
-            self.args.proxy_host, self.args.proxy_port,
-            self.args.server_host, self.args.server_port))
-
-        loop.run_until_complete(main())
 
     def run(self):
         self.create_site()
