@@ -2,6 +2,7 @@ import unittest
 from ..clients.es import ESClient
 import aiohttp
 from elasticsearch import Elasticsearch
+import asyncio
 
 import os
 import csv
@@ -29,16 +30,13 @@ class TestESClient(unittest.TestCase):
                               id=row[0],
                               body={"title": row[2], "description": row[3]})
 
-    async def test_extract(self):
+    def test_extract(self):
         field, value = ('description', 'test')
-        async with aiohttp.request('GET', 'http://localhost:9200/test/_search?q={}:{}') as resp:
+        with aiohttp.request('GET', 'http://localhost:9200/test/_search?q={}:{}') as resp:
             assert resp.status == 200
             print(resp)
             # self.client.query()
             # self.client.reorder()
-
-    def test_esclient(self):
-        await self.test_extract()
 
     def test_reorder(self):
         pass
