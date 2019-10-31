@@ -30,9 +30,9 @@ class TestESClient(unittest.TestCase):
                               id=row[0],
                               body={"title": row[2], "description": row[3]})
 
-    def test_extract(self):
+    async def test_extract(self):
         field, value = ('description', 'test')
-        with aiohttp.request('GET', 'http://localhost:9200/test/_search?q={}:{}') as resp:
+        async with aiohttp.request('GET', 'http://localhost:9200/test/_search?q={}:{}') as resp:
             assert resp.status == 200
             print(resp)
             # self.client.query()
