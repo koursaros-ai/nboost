@@ -9,53 +9,49 @@ import asyncio
 from .. import models
 
 
-def route_handler(f):
-    @functools.wraps(f)
-    async def decorator(*args, **kwargs):
-        logger = set_logger(f.__name__)
-        try:
-            logger.info('new %s request' % f.__name__)
-            ret = await f(*args, **kwargs)
-            return web.json_response(ret, status=200)
-        except Exception as ex:
-            logger.error('Error on %s request' % f.__name__, exc_info=True)
-            return web.json_response(dict(error=str(ex), type=type(ex).__name__), status=500)
+class RouteHandler:
+    routes = dict()
 
-    return decorator
+    def register(self, f):
+        @functools.wraps(f)
+        async def decorator(*args, **kwargs):
+            logger = set_logger(f.__name__)
+            try:
+                logger.info('new %s request' % f.__name__)
+                ret = await f(*args, **kwargs)
+                return web.json_response(ret, status=200)
+            except Exception as ex:
+                logger.error('Error on %s request' % f.__name__, exc_info=True)
+                return web.json_response(dict(error=str(ex), type=type(ex).__name__), status=500)
+
+        self.routes['/%s' % f.__name__] = decorator
 
 
 class BaseProxy(Process):
+    handler = RouteHandler()
+
     def __init__(self, args: 'argparse.Namespace'):
         super().__init__()
         self.args = args
         self.queries = dict()
         self.model = getattr(models, self.args.model)(self.args)
-        self.client = getattr(clients, self.args.client)(self.args)
         self.counter = itertools.count()
         self.logger = set_logger(self.__class__.__name__)
         self.is_ready = Event()
 
-    async def default_handler(self, request):
+    async def default_route(self, request):
         pass
 
-    @route_handler
-    async def get_handler(self, request: 'web.BaseRequest') -> dict:
-        f = getattr(self, request.path[1:], self.default_handler)
+    async def request_handler(self, request: 'web.BaseRequest'):
+        f = self.handler.routes.get(request.path, self.default_route)
         return f(request)
-
-    @route_handler
-    async def post_handler(self, request: 'web.BaseRequest') -> dict:
-        raise NotImplementedError
 
     def _run(self):
         loop = asyncio.get_event_loop()
 
         async def create_site():
             app = web.Application()
-            app.add_routes([
-                web.get('/{tail:.*}', self.get_handler),
-                web.post('/{tail:.*}', self.post_handler),
-            ])
+            app.router.add_route('*', '/{path:.*}', self.request_handler)
             runner = web.AppRunner(app)
             await runner.setup()
             site = web.TCPSite(runner, self.args.proxy_host, self.args.proxy_port)
