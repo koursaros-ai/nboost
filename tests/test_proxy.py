@@ -1,4 +1,3 @@
-
 from ..cli import set_parser
 import unittest
 import requests
