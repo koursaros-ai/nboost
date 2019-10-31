@@ -1,8 +1,8 @@
-from .base import BaseClient
+from .base import BaseProxy
 from typing import Tuple, List
 
 
-class TestClient(BaseClient):
+class TestClient(BaseProxy):
     async def query(self, request):
         topk = 3
         response = ES_EXAMPLE_DATA
