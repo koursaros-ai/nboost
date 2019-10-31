@@ -39,7 +39,8 @@ class TestESClient(unittest.TestCase):
             # self.client.reorder()
 
     def test_es(self):
-        asyncio.run(self.test_extract())
+        loop = asyncio.get_event_loop()
+        result = loop.run_until_complete((self.test_extract()))
 
     def test_reorder(self):
         pass
