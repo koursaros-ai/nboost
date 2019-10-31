@@ -17,6 +17,10 @@ class ESProxy(BaseProxy):
     async def search(self, request: 'web.BaseRequest'):
         pass
 
+    @handler.register
+    async def train(self, request: 'web.BaseRequest'):
+        pass
+
     async def query(self, request: 'web.BaseRequest') -> Tuple[Any, str, List[str], int]:
         request_data = request.json()
         field, query = request.rel_url.query['q'].split(':')
