@@ -1,5 +1,3 @@
-
-
 from .base import BaseProxy
 
 
@@ -22,4 +20,3 @@ class RankProxy(BaseProxy):
         labels = [0] * len(candidates)
         labels[cid] = 1
         return self.model.train(query, candidates, labels)
-
