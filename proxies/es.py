@@ -1,4 +1,5 @@
-from .base import BaseProxy, RouteHandler
+from .base import BaseProxy
+from aiohttp import web
 from typing import Tuple, List, Any
 
 from aiohttp import web, client
@@ -6,18 +7,18 @@ import aiohttp
 
 
 class ESProxy(BaseProxy):
-    handler = RouteHandler()
+    routes = web.RouteTableDef()
 
     def __init__(self, host, port, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.host = host
         self.port = port
 
-    @handler.register
+    @routes.get('/search')
     async def search(self, request: 'web.BaseRequest'):
         pass
 
-    @handler.register
+    @routes.post('/search')
     async def train(self, request: 'web.BaseRequest'):
         pass
 
