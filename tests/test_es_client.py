@@ -24,7 +24,7 @@ class TestESClient(unittest.TestCase):
         with open(os.path.join(os.path.dirname(__file__), 'data', 'train.csv'), 'r') as file:
             sample_data = csv.reader(file)
             for row in list(sample_data)[:100]:
-                print('dumping line %s' % row[2])
+                # print('dumping line %s' % row[2])
                 self.es.index(index="test",
                               id=row[0],
                               body={"title": row[2], "description": row[3]})
