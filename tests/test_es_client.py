@@ -31,12 +31,12 @@ class TestESClient(unittest.TestCase):
                               body={"title": row[2], "description": row[3]})
 
     async def test_extract(self):
-        field, value = ('description', 'test')
-        async with aiohttp.request('GET', 'http://localhost:9200/test/_search?q={}:{}') as resp:
-            print(resp)
+        query = ('description', 'test')
+        async with aiohttp.request('GET', 'http://localhost:9200/test/_search?q=%s:%s' % query) as resp:
+            assert resp.status == 200
+            print(resp.content)
             import pdb
             pdb.set_trace()
-            assert resp.status == 200
             # self.client.query()
             # self.client.reorder()
 
