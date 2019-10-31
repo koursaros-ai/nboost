@@ -3,32 +3,33 @@ from ..cli import set_logger
 from multiprocessing import Process, Event
 from aiohttp import web
 import itertools
-import functools
 import argparse
 import asyncio
 from .. import models
 
 
-class RouteHandler:
-    routes = dict()
+class Response:
+    @staticmethod
+    def json_200(response: dict):
+        return web.json_response(response, status=200)
 
-    def register(self, f):
-        @functools.wraps(f)
-        async def decorator(*args, **kwargs):
-            logger = set_logger(f.__name__)
-            try:
-                logger.info('new %s request' % f.__name__)
-                ret = await f(*args, **kwargs)
-                return web.json_response(ret, status=200)
-            except Exception as ex:
-                logger.error('Error on %s request' % f.__name__, exc_info=True)
-                return web.json_response(dict(error=str(ex), type=type(ex).__name__), status=500)
+    @staticmethod
+    def exception_500(ex: Exception):
+        return web.json_response(dict(error=str(ex), type=type(ex).__name__), status=500)
 
-        self.routes['/%s' % f.__name__] = decorator
+
+# class RouteHandler:
+#     routes = dict()
+#
+#     def register(self, path):
+#         def decorator(f):
+#             self.routes[path] = f.__name__
+#             return f
+#         return decorator
 
 
 class BaseProxy(Process):
-    handler = RouteHandler()
+    routes = web.RouteTableDef()
 
     def __init__(self, args: 'argparse.Namespace'):
         super().__init__()
@@ -39,20 +40,12 @@ class BaseProxy(Process):
         self.logger = set_logger(self.__class__.__name__)
         self.is_ready = Event()
 
-    @handler.register
-    async def default_route(self, request):
-        pass
-
-    async def request_handler(self, request: 'web.BaseRequest'):
-        f = self.handler.routes.get(request.path, self.default_route)
-        return f(request)
-
     def _run(self):
         loop = asyncio.get_event_loop()
 
         async def create_site():
             app = web.Application()
-            app.router.add_route('*', '/{path:.*}', self.request_handler)
+            app.add_routes(self.routes)
             runner = web.AppRunner(app)
             await runner.setup()
             site = web.TCPSite(runner, self.args.proxy_host, self.args.proxy_port)
