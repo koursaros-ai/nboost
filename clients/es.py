@@ -11,7 +11,7 @@ class ESClient (BaseClient):
         self.host = host
         self.port = port
 
-    def query(self, request: 'web.BaseRequest') -> Tuple[Any, str, List[str], int]:
+    async def query(self, request: 'web.BaseRequest') -> Tuple[Any, str, List[str], int]:
         request_data = request.json()
         field, query = request.rel_url.query['q'].split(':')
         topk = 10
