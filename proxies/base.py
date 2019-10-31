@@ -37,7 +37,6 @@ class BaseProxy:
         self.counter = itertools.count()
         self.loop = asyncio.get_event_loop()
 
-
     @route_handler
     async def status(self):
         pass
