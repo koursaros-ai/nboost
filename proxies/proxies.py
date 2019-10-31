@@ -1,1 +1,0 @@
-from .rank import RankProxy

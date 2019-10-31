@@ -1,10 +1,10 @@
-class TestModel(object):
+from .base import BaseModel
 
-    def __init__(self, args):
-        pass
+
+class TestModel(BaseModel):
 
     def train(self, query, candidates, labels):
         pass
 
-    def rank(self, query, candidates, k):
-        return range(0, k)
+    def rank(self, query, candidates, topk):
+        return list(range(0, topk))

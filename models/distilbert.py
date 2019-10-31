@@ -1,10 +1,13 @@
 from transformers import *
 import torch, torch.nn
 import numpy as np
+from .base import BaseModel
 
-class DBRank(object):
 
-    def __init__(self):
+class DBRank(BaseModel):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.model_name = 'distilbert-base-uncased'
         self.data_dir = '.model-cache/'
         self.lr = 10e-3

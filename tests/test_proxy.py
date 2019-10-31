@@ -1,8 +1,9 @@
-from ..proxies import proxies
+
 from ..cli import set_parser
 import unittest
 import requests
 import json
+from .. import models, proxies, clients
 
 
 class TestProxy(unittest.TestCase):

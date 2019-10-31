@@ -1,18 +1,12 @@
-from termcolor import colored
-import itertools
-import functools
-import asyncio
-from aiohttp import web
-from ..clients import clients
-from ..models import models
+
 from ..cli import set_logger
 from multiprocessing import Process
+from aiohttp import web
+import itertools
+import functools
 import argparse
-
-STATUS = {
-    200: lambda x: web.json_response(x, status=200),
-    500: lambda x: web.json_response(dict(error=str(x), type=type(x).__name__), status=500)
-}
+import asyncio
+from .. import models, clients
 
 
 async def route_handler(f):
@@ -21,10 +15,11 @@ async def route_handler(f):
         logger = set_logger(f.__name__)
         try:
             logger.info('new %s request' % f.__name__)
-            return STATUS[200](f(*args, **kwargs))
+            ret = f(*args, **kwargs)
+            return web.json_response(ret, status=200)
         except Exception as ex:
             logger.error('Error on %s request' % f.__name__, exc_info=True)
-            return STATUS[500](ex)
+            return web.json_response(dict(error=str(ex), type=type(ex).__name__), status=500)
 
     return decorator
 
