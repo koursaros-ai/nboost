@@ -7,7 +7,7 @@ class BaseClient:
     def __init__(self, args):
         self.args = args
 
-    def query(self, request: 'web.BaseRequest') -> Tuple[Any, str, List[str], int]:
+    async def query(self, request: 'web.BaseRequest') -> Tuple[Any, str, List[str], int]:
         """
         :return Tuple(response, query, candidates, topk)
         """
