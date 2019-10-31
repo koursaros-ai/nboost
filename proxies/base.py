@@ -36,7 +36,7 @@ class BaseProxy:
 
         return decorator
 
-    @route_handler
+    @Broute_handler
     async def status(self):
         pass
 

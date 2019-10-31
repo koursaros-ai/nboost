@@ -1,9 +1,10 @@
-from termcolor import colored
+
 import itertools
 import functools
 import asyncio
 from aiohttp import web
 from ..clients import clients
+from .base import BaseProxy
 from ..models import models
 from ..cli import set_logger
 
@@ -13,30 +14,10 @@ STATUS = {
 }
 
 
-class RankProxy:
-    def __init__(self, args):
-        super().__init__()
-        self.args = args
-        self.queries = dict()
-        self.logger = set_logger(self.__class__.__name__)
-        self.model = getattr(models, self.args.model)(self.args)
-        self.client = getattr(clients, self.args.client)(self.args)
-
+class RankProxy(BaseProxy):
     @property
     def status(self):
         return dict(res='Chillin')
-
-    async def route_handler(self, f):
-        @functools.wraps(f)
-        def decorator(*args, **kwargs):
-            try:
-                self.logger.info('new %s request' % f.__name__)
-                return STATUS[200](f(*args, **kwargs))
-            except Exception as ex:
-                self.logger.error('Error on %s request' % f.__name__, exc_info=True)
-                return STATUS[500](ex)
-
-        return decorator
 
     @route_handler
     async def status(self):
