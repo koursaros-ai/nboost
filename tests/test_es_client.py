@@ -1,8 +1,10 @@
 import unittest
 from ..clients.es import ESClient
+from ..models.test import TestModel
 import aiohttp
 from elasticsearch import Elasticsearch
 import asyncio
+from aiohttp import web
 
 import os
 import csv
@@ -17,9 +19,10 @@ class TestESClient(unittest.TestCase):
             '--client', 'TestClient',
             '--model', 'TestModel',
         ])
-        self.client = ESClient(args)
+        self.client = ESClient('localhost', 9200, args)
         self.es = Elasticsearch()
         self.es.indices.create(index='test', ignore=400)
+        self.model = TestModel(args)
 
         # id, query, product_title, product_description, median_relevance, relevance_variance
         with open(os.path.join(os.path.dirname(__file__), 'data', 'train.csv'), 'r') as file:
@@ -31,16 +34,9 @@ class TestESClient(unittest.TestCase):
                               body={"title": row[2], "description": row[3]})
 
     async def test_extract(self):
-        query = ('description', 'test')
-        async with aiohttp.request('GET', 'http://localhost:9200/test/_search?q=%s:%s' % query) as resp:
-            assert resp.status == 200
-            data = await resp.json()
-            import pdb
-            pdb.set_trace()
-            print(data)
-
-            # self.client.query()
-            # self.client.reorder()
+        request = web.BaseRequest()
+        (resp, query, candidates, topk) = self.client.query(request)
+        self.model.rank(query[1], candidates)
 
     def test_es(self):
         loop = asyncio.get_event_loop()
