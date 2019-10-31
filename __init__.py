@@ -15,5 +15,5 @@ models = {
 }
 
 proxies = {
-    RankProxy.__name__,
+    RankProxy.__name__: RankProxy
 }

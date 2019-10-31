@@ -29,8 +29,8 @@ class BaseProxy(Process):
         super().__init__()
         self.args = args
         self.queries = dict()
-        self.model = getattr(models, self.args.model)(self.args)
-        self.client = getattr(clients, self.args.client)(self.args)
+        self.model = models[self.args.model][self.args]
+        self.client = clients[self.args.client][self.args]
         self.counter = itertools.count()
         self.loop = asyncio.get_event_loop()
         self.logger = set_logger(self.__class__.__name__)
