@@ -9,7 +9,10 @@ class ESClient (BaseClient):
         super().__init__(*args, **kwargs)
 
     def query(self, request: 'web.BaseRequest') -> Tuple[Any, str, List[str], int]:
-        return
+        pass
 
     def reorder(self, response: Any, ranks: List[int]) -> dict:
-        return
+        pass
+
+    def get_candidates(self, response: 'web.Response'):
+        pass

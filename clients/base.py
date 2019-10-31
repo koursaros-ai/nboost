@@ -24,3 +24,4 @@ class BaseClient:
         :param response: response from index
         :return: ids, candidates
         """
+        raise NotImplementedError
