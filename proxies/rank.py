@@ -1,4 +1,4 @@
-from ..base import BaseProxy
+from ..proxies.base import BaseProxy
 from aiohttp import web
 
 

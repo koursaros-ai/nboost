@@ -1,4 +1,4 @@
-from ..base.model import BaseModel
+from ..models.base import BaseModel
 
 
 class TestModel(BaseModel):

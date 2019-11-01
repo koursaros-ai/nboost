@@ -1,4 +1,4 @@
-from ..base.model import BaseModel
+from .base import BaseModel
 import torch, torch.nn
 import numpy as np
 
