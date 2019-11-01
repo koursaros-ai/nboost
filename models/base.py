@@ -2,8 +2,8 @@ from typing import List
 
 
 class BaseModel:
-    def __init__(self, args):
-        self.args = args
+    def __init__(self, **kwargs):
+        pass
 
     def rank(self, query: str, candidates: List[str]) -> List[int]:
         raise NotImplementedError

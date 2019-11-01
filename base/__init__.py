@@ -1,8 +1,6 @@
-
 from ..cli import set_logger
 from multiprocessing import Process, Event
 from aiohttp import web, web_exceptions
-import argparse
 import asyncio
 
 
@@ -21,12 +19,14 @@ class Response:
 
 
 class RouteHandler:
-    routes = []
+    def __init__(self):
+        self.routes = []
 
     def add_route(self, method, path):
         def decorator(f):
             self.routes += [(method, path, f)]
             return f
+
         return decorator
 
     def bind_routes(self, obj):
@@ -36,10 +36,11 @@ class RouteHandler:
 class BaseServer(Process):
     handler = RouteHandler()
 
-    def __init__(self, pargs: 'argparse.Namespace'):
+    def __init__(self, host: str = '127.0.0.1', port: int = 53001, **kwargs):
         super().__init__()
-        self.args = pargs
         self.logger = set_logger(self.__class__.__name__)
+        self.host = host
+        self.port = port
         self.is_ready = Event()
 
     async def default_handler(self, request: 'web.BaseRequest'):
@@ -48,8 +49,7 @@ class BaseServer(Process):
     @web.middleware
     async def middleware(self, request: 'web.BaseRequest', handler):
         try:
-            self.logger.info('Recieved %s request for %s' % (request.method, request.path))
-            self.logger.info('Processing with %s' % handler.__name__)
+            self.logger.info('%s request %s' % (request.method, request.path))
             return await handler(request)
 
         except web_exceptions.HTTPNotFound:
@@ -69,15 +69,12 @@ class BaseServer(Process):
             app.add_routes(routes)
             runner = web.AppRunner(app)
             await runner.setup()
-            site = web.TCPSite(runner, self.args.proxy_host, self.args.proxy_port)
+            site = web.TCPSite(runner, self.host, self.port)
             await site.start()
+            self.logger.critical('listening on  %s:%d' % (self.host, self.port))
+            self.is_ready.set()
 
         loop.run_until_complete(create_site())
-        self.logger.info('proxy forwarding %s:%d to %s:%d' % (
-            self.args.proxy_host, self.args.proxy_port,
-            self.args.server_host, self.args.server_port))
-
-        self.is_ready.set()
         loop.run_forever()
 
     def run(self):
@@ -92,9 +89,3 @@ class BaseServer(Process):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
-
-
-
-
-
-
