@@ -1,4 +1,4 @@
-from .base import BaseProxy
+from ..proxies.base import BaseProxy, Response, RouteHandler
 from typing import Tuple, List, Any
 from ..models.test import TestModel
 
@@ -7,7 +7,7 @@ import aiohttp
 
 
 class ESProxy(BaseProxy):
-    routes = web.RouteTableDef()
+    handler = RouteHandler()
 
     def __init__(self, host, port, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -17,15 +17,16 @@ class ESProxy(BaseProxy):
         self.requests = dict()
         self.counter = 0
 
-    @routes.post('/train')
+    @handler.add_route('POST', '/train')
     async def train(self, request: 'web.BaseRequest'):
         data = await request.json()
         field, query, candidates = self.requests[data['qid']]
         selected = data['cid']  # candidate that was selected by user
         labels = [1 if i == selected else 0 for i in range(len(candidates))]
         self.model.train(query, candidates, labels=labels)
+        return Response.json_200({'status' : 'success'})
 
-    @routes.get('/search')
+    @handler.add_route('GET', '/{index}/_search')
     async def query(self, request: 'web.BaseRequest') -> dict:
         request_data = request.json()
         field, query = request.rel_url.query['q'].split(':')
@@ -39,7 +40,7 @@ class ESProxy(BaseProxy):
             self.counter += 1
             ranks = self.model.rank(query, candidates)
             response_dict = self.reorder(data, ranks)
-            return response_dict
+            return Response.json_200(response_dict)
 
     @staticmethod
     def reorder(response: 'client.ClientResponse', ranks: List[int]) -> dict:
