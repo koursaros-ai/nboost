@@ -1,5 +1,4 @@
 from .base import BaseProxy
-from aiohttp import web
 from typing import Tuple, List, Any
 
 from aiohttp import web, client
