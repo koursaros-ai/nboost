@@ -1,6 +1,4 @@
-
-
-from .base import BaseProxy
+from ..base import BaseProxy
 from aiohttp import web
 
 
@@ -12,11 +10,11 @@ class RankProxy(BaseProxy):
 
     @routes.get('/query')
     async def query(self, request):
-        response, query, candidates, topk = await self.client.query(request)
+        response, query, candidates, topk = await self.model.query(request)
         ranks = self.model.rank(query, candidates)
         qid = next(self.counter)
         self.queries[qid] = query, candidates
-        return self.client.reorder(response, ranks, topk)
+        return self.model.reorder(response, ranks, topk)
 
     @routes.get('/train')
     async def train(self, request):

@@ -5,6 +5,7 @@ import aiohttp
 from elasticsearch import Elasticsearch
 import asyncio
 from aiohttp import web
+import requests
 
 import os
 import csv
@@ -14,31 +15,33 @@ class TestESProxy(unittest.TestCase):
 
     def setUp(self):
         parser = set_parser()
-        args = parser.parse_args([
+        self.args = parser.parse_args([
             '--verbose',
-            '--client', 'TestClient',
-            '--model', 'TestModel',
+            '--host', 'localhost',
+            '--port', '9200',
         ])
-        self.client = ESClient('localhost', 9200, args)
         self.es = Elasticsearch()
         self.es.indices.create(index='test', ignore=400)
-        self.model = TestModel(args)
+        self.model = TestModel(self.args)
+        self.url = 'http://%s:%s/' % (self.args.proxy_host, self.args.proxy_port)
+        self.es_index = 'test'
 
         # id, query, product_title, product_description, median_relevance, relevance_variance
         with open(os.path.join(os.path.dirname(__file__), 'data', 'train.csv'), 'r') as file:
             sample_data = csv.reader(file)
             for row in list(sample_data)[:100]:
                 # print('dumping line %s' % row[2])
-                self.es.index(index="test",
+                self.es.index(index=self.es_index,
                               id=row[0],
                               body={"title": row[2], "description": row[3]})
 
-    async def test_extract(self):
-        pass
-
-    def test_es(self):
-        loop = asyncio.get_event_loop()
-        result = loop.run_until_complete((self.test_extract()))
+    def test_search(self):
+        client = ESProxy(self.args)
+        client.start()
+        client.is_ready.wait()
+        res = requests.get(self.url + self.es_index + '/_search?q=description:test')
+        print(res)
+        assert res.ok
 
     def test_reorder(self):
         pass
