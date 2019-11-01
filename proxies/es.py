@@ -9,11 +9,11 @@ import aiohttp
 class ESProxy(BaseProxy):
     handler = RouteHandler()
 
-    def __init__(self, host, port, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.host = host
-        self.port = port
-        self.model = TestModel(*args)
+    def __init__(self, args):
+        super().__init__(args)
+        self.host = args.host
+        self.port = args.port
+        self.model = TestModel(args)
         self.requests = dict()
         self.counter = 0
 
