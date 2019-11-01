@@ -53,7 +53,7 @@ class TestBaseProxy(unittest.TestCase):
 
     def test_default(self):
         res = requests.get(self.url + 'server')
-        pprint(res.content)
+        pprint('%s:%s' % (res.status_code, res.content))
         self.assertTrue(res.ok)
         self.assertEqual(res.json()['msg'], 'server_route')
 

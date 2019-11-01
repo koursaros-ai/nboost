@@ -11,7 +11,7 @@ class Response:
 
     @staticmethod
     def status_404():
-        return web.json_response(status=400)
+        return web.json_response(status=404)
 
     @staticmethod
     def exception_500(ex: Exception):
