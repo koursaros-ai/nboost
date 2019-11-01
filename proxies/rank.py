@@ -1,6 +1,4 @@
-
-
-from .base import BaseProxy
+from ..base import BaseProxy
 from aiohttp import web
 
 
