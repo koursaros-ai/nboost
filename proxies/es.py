@@ -24,7 +24,7 @@ class ESProxy(BaseProxy):
         selected = data['cid']  # candidate that was selected by user
         labels = [1 if i == selected else 0 for i in range(len(candidates))]
         self.model.train(query, candidates, labels=labels)
-        return Response.json_200({})
+        return Response.json_200({'status' : 'success'})
 
     @handler.add_route('GET', '/{index}/_search')
     async def query(self, request: 'web.BaseRequest') -> dict:
