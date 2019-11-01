@@ -2,11 +2,8 @@
 from ..cli import set_logger
 from multiprocessing import Process, Event
 from aiohttp import web, web_exceptions
-import itertools
 import argparse
 import asyncio
-from .. import models
-from typing import List
 
 
 class Response:
@@ -39,12 +36,9 @@ class RouteHandler:
 class BaseServer(Process):
     handler = RouteHandler()
 
-    def __init__(self, args: 'argparse.Namespace'):
+    def __init__(self, pargs: 'argparse.Namespace'):
         super().__init__()
-        self.args = args
-        self.queries = dict()
-        self.model = getattr(models, self.args.model)(self.args)
-        self.counter = itertools.count()
+        self.args = pargs
         self.logger = set_logger(self.__class__.__name__)
         self.is_ready = Event()
 
@@ -100,17 +94,7 @@ class BaseServer(Process):
         self.close()
 
 
-class BaseModel:
-    def __init__(self, args):
-        self.args = args
-
-    def rank(self, query: str, candidates: List[str]) -> List[int]:
-        raise NotImplementedError
-
-    def train(self, query: str, candidates: List[str], labels: List[int]) -> None:
-        raise NotImplementedError
 
 
-class BaseProxy(BaseServer):
-    async def default_handler(self, request: 'web.BaseRequest'):
-        return Response.status_404()
+
+

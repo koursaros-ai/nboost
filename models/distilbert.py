@@ -1,6 +1,7 @@
-from .base import BaseModel
+from ..base.model import BaseModel
 import torch, torch.nn
 import numpy as np
+
 
 class DBRank(BaseModel):
 
