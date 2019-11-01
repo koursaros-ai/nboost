@@ -6,12 +6,17 @@ import itertools
 import argparse
 import asyncio
 from .. import models
+from typing import List
 
 
 class Response:
     @staticmethod
     def json_200(response: dict):
         return web.json_response(response, status=200)
+
+    @staticmethod
+    def status_404():
+        return web.json_response(status=400)
 
     @staticmethod
     def exception_500(ex: Exception):
@@ -31,7 +36,7 @@ class RouteHandler:
         return [web.route(method, path, getattr(obj, f.__name__)) for method, path, f in self.routes]
 
 
-class BaseProxy(Process):
+class BaseServer(Process):
     handler = RouteHandler()
 
     def __init__(self, args: 'argparse.Namespace'):
@@ -44,7 +49,7 @@ class BaseProxy(Process):
         self.is_ready = Event()
 
     async def default_handler(self, request: 'web.BaseRequest'):
-        return Response.json_200({})
+        return Response.status_404()
 
     @web.middleware
     async def middleware(self, request: 'web.BaseRequest', handler):
@@ -94,3 +99,18 @@ class BaseProxy(Process):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
+
+class BaseModel:
+    def __init__(self, args):
+        self.args = args
+
+    def rank(self, query: str, candidates: List[str]) -> List[int]:
+        raise NotImplementedError
+
+    def train(self, query: str, candidates: List[str], labels: List[int]) -> None:
+        raise NotImplementedError
+
+
+class BaseProxy(BaseServer):
+    async def default_handler(self, request: 'web.BaseRequest'):
+        return Response.status_404()
