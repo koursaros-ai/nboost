@@ -1,4 +1,5 @@
-from ..base import BaseProxy, RouteHandler, Response
+from ..base import RouteHandler, Response
+from ..base.proxy import BaseProxy
 from ..cli import set_parser
 import unittest
 import requests
