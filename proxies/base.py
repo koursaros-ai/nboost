@@ -15,12 +15,5 @@ class BaseProxy(BaseServer):
         self.queries = dict()
 
     async def default_handler(self, request: 'web.BaseRequest'):
-        async with ClientSession(headers=request.headers) as session:
-            route = (request.method, self.ext_url + str(request.rel_url))
-            self.logger.info('Proxying %s request to %s' % route)
-            response = await session.request(*route)
-            return web.Response(
-                body=response.content,
-                headers=response.headers,
-                status=response.status
-            )
+        self.logger.info('Redirecting request to %s' % self.ext_url)
+        raise web.HTTPTemporaryRedirect(self.ext_url + str(request.rel_url))
