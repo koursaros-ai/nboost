@@ -1,5 +1,5 @@
 import unittest
-from ..clients.es import ESClient
+from ..proxies.es import ESProxy
 from ..models.test import TestModel
 import aiohttp
 from elasticsearch import Elasticsearch
@@ -10,7 +10,7 @@ import os
 import csv
 from ..cli import set_parser
 
-class TestESClient(unittest.TestCase):
+class TestESProxy(unittest.TestCase):
 
     def setUp(self):
         parser = set_parser()
