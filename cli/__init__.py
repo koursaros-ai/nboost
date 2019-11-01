@@ -2,7 +2,7 @@ import logging
 import termcolor
 import argparse
 import os
-
+import copy
 
 def set_parser():
     # create the top-level parser
@@ -22,20 +22,46 @@ def set_parser():
     return parser
 
 
+class ColoredFormatter(logging.Formatter):
+    MAPPING = {
+        'DEBUG': dict(color='white', on_color=None),  # white
+        'INFO': dict(color='cyan', on_color=None),  # cyan
+        'WARNING': dict(color='yellow', on_color='on_grey'),  # yellow
+        'ERROR': dict(color='white', on_color='on_red'),  # 31 for red
+        'CRITICAL': dict(color='white', on_color='on_green'),  # white on red bg
+    }
+
+    PREFIX = '\033['
+    SUFFIX = '\033[0m'
+
+    def format(self, record):
+        cr = copy.copy(record)
+        seq = self.MAPPING.get(cr.levelname, self.MAPPING['INFO'])  # default white
+        cr.msg = termcolor.colored(cr.msg, **seq)
+        return super().format(cr)
+
+
 def set_logger(context, verbose=False):
     if os.name == 'nt':  # for Windows
         return NTLogger(context, verbose)
 
+    # Remove all handlers associated with the root logger object.
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+
     logger = logging.getLogger(context)
-    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
-    formatter = logging.Formatter(
-        '%(levelname)-.1s:' + context + ':[%(filename).3s:%(funcName).3s:%(lineno)3d]:%(message)s', datefmt=
-        '%m-%d %H:%M:%S')
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG if verbose else logging.INFO)
-    console_handler.setFormatter(formatter)
-    logger.handlers = []
-    logger.addHandler(console_handler)
+    logger.propagate = False
+    if not logger.handlers:
+        logger.setLevel(logging.DEBUG if verbose else logging.INFO)
+        formatter = ColoredFormatter(
+            '%(levelname)-.1s:' + context + ':[%(filename).3s:%(funcName).3s:%(lineno)3d]:%(message)s', datefmt=
+            '%m-%d %H:%M:%S')
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.DEBUG if verbose else logging.INFO)
+        console_handler.setFormatter(formatter)
+        logger.handlers = []
+        logger.addHandler(console_handler)
+
     return logger
 
 
