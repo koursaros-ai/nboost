@@ -1,8 +1,33 @@
+from ..base import RouteHandler, Response, BaseServer
 from ..cli import set_parser
+from ..proxies.rank import RankProxy
 import unittest
 import requests
-from .. import proxies
-from pprint import pprint
+
+
+class TestProxy(RankProxy):
+    handler = RouteHandler()
+
+    @handler.add_route('GET', '/client')
+    async def client(self, request):
+        async with self.client_handler(
+                request.method,
+                self.ext_url(request),
+                request.content) as client_response:
+
+            return Response.plain_200(await client_response.read())
+
+
+class TestServer(BaseServer):
+    handler = RouteHandler()
+
+    @handler.add_route('GET', '/server')
+    async def server(self, request):
+        return Response.json_200(dict(msg='server_response'))
+
+    @handler.add_route('GET', '/client')
+    async def client(self, request):
+        return Response.json_200(dict(msg='client_response'))
 
 
 class TestRankProxy(unittest.TestCase):
@@ -11,77 +36,40 @@ class TestRankProxy(unittest.TestCase):
         parser = set_parser()
         args = parser.parse_args([
             '--verbose',
-            '--client', 'TestClient',
-            '--model', 'TestModel'
+            '--port', '54001'
         ])
-        self.url = 'http://%s:%s/' % (args.proxy_host, args.proxy_port)
-        self.proxy = getattr(proxies, 'RankProxy')(args)
+        self.server = TestServer(**vars(args))
+        self.server.start()
+        self.server.is_ready.wait()
+
+        args = parser.parse_args([
+            '--verbose',
+            '--model', 'TestModel',
+            '--ext_port', '54001'
+        ])
+        # return f(**vars(p_args))
+        self.proxy = TestProxy(**vars(args))
         self.proxy.start()
         self.proxy.is_ready.wait()
 
-    def test_status(self):
-        res = requests.get(self.url + 'status')
-        pprint(res.json())
+    def test_server(self):
+        res = requests.get(self.server.url + '/server')
+        self.proxy.logger.info('%s:%s' % (res.status_code, res.content))
         self.assertTrue(res.ok)
+        self.assertEqual(res.json()['msg'], 'server_response')
 
-    def test_query(self):
-        res = requests.get(self.url + 'query')
-        pprint(res.json())
+    def test_proxy_fallback(self):
+        res = requests.get(self.proxy.url + '/server')
+        self.proxy.logger.info('%s:%s' % (res.status_code, res.content))
         self.assertTrue(res.ok)
-        qid = res.json()['qid']
+        self.assertEqual(res.json()['msg'], 'server_response')
 
-        res = requests.post(self.url + 'train/?qid=' + str(qid))
-        pprint(res.json())
+    def test_proxy_client(self):
+        res = requests.get(self.proxy.url + '/client')
+        self.proxy.logger.info('%s:%s' % (res.status_code, res.content))
         self.assertTrue(res.ok)
+        self.assertEqual(res.json()['msg'], 'client_response')
 
     def tearDown(self):
+        self.server.kill()
         self.proxy.kill()
-
-
-#     @routes.get('/query')
-#     async def query(self, request):
-#         topk = 3
-#         response = ES_EXAMPLE_DATA
-#         response['hits']['hits'] = [response['hits']['hits'][0]] * topk * self.args.multiplier
-#         candidates = [hit['_source']['message'] for hit in response['hits']['hits']]
-#         query = 'test query'
-#         return response, candidates, query, topk
-#
-#     def reorder(self, response, ranks):
-#         hits = response['hits']['hits']
-#         response['hits']['hits'] = [hit for _, hit in sorted(zip(ranks, hits))]
-#
-#         return response
-#
-#
-# ES_EXAMPLE_DATA = {
-#     "took": 5,
-#     "timed_out": False,
-#     "_shards": {
-#         "total": 1,
-#         "successful": 1,
-#         "skipped": 0,
-#         "failed": 0
-#     },
-#     "hits": {
-#         "total": {
-#             "value": 1,
-#             "relation": "eq"
-#         },
-#         "max_score": 1.3862944,
-#         "hits": [
-#             {
-#                 "_index": "twitter",
-#                 "_type": "_doc",
-#                 "_id": "0",
-#                 "_score": 1.3862944,
-#                 "_source": {
-#                     "date": "2009-11-15T14:12:12",
-#                     "likes": 0,
-#                     "message": "trying out Elasticsearch",
-#                     "user": "kimchy"
-#                 }
-#             }
-#         ]
-#     }
-# }

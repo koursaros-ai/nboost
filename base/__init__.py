@@ -10,6 +10,10 @@ class Response:
         return web.json_response(response, status=200)
 
     @staticmethod
+    def plain_200(response: bytes):
+        return web.Response(body=response, status=200)
+
+    @staticmethod
     def status_404():
         return web.json_response(status=404)
 
@@ -41,15 +45,16 @@ class BaseServer(Process):
         self.logger = set_logger(self.__class__.__name__)
         self.host = host
         self.port = port
+        self.url = 'http://%s:%s' % (host, port)
         self.is_ready = Event()
 
     async def default_handler(self, request: 'web.BaseRequest'):
-        return Response.status_404()
+        raise web.HTTPNotFound
 
     @web.middleware
-    async def middleware(self, request: 'web.BaseRequest', handler):
+    async def middleware(self, request: 'web.BaseRequest', handler) -> 'web.Response':
         try:
-            self.logger.info('%s request %s' % (request.method, request.path))
+            self.logger.info(request)
             return await handler(request)
 
         except web_exceptions.HTTPNotFound:
