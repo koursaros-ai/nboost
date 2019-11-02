@@ -1,5 +1,5 @@
 from ..base import RouteHandler, Response, BaseServer
-from ..cli import set_parser
+from ..cli import set_parser, set_logger
 from ..proxies.rank import RankProxy
 import unittest
 import requests
@@ -45,6 +45,7 @@ class TestServer(BaseServer):
 class TestRankProxy(unittest.TestCase):
 
     def setUp(self):
+        self.logger = set_logger(self.__class__.__name__)
         parser = set_parser()
         args = parser.parse_args([
             '--verbose',
@@ -66,7 +67,7 @@ class TestRankProxy(unittest.TestCase):
 
     def test_search_and_train(self):
         res = requests.get(self.proxy.url + '/_search?size=5&q=testing')
-        self.proxy.logger.info('%s:%s' % (res.status_code, res.content))
+        self.logger.info('%s:%s' % (res.status_code, res.content))
         self.assertTrue(res.ok)
         # self.assertEqual(res.json()['msg'], 'server_response')
 

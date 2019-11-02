@@ -1,9 +1,5 @@
 from ..base import RouteHandler, Response
 from .base import RankProxy
-from typing import Tuple, List, Any
-
-from aiohttp import web, client
-import aiohttp
 
 
 class ESRankProxy(RankProxy):
@@ -11,24 +7,20 @@ class ESRankProxy(RankProxy):
     search_path = '/{index}/_search'
 
     async def magnify(self, request):
-        size = request.query['size'] if 'size' in request.query else 10
-        size *= self.multiplier
-        ext_url = (
-            request
-            .rel_url
-            .with_host(self.ext_host)
-            .with_port(self.ext_port)
-            .human_repr()
-        )
-        return request.method, ext_url, request.content
+        topk = int(request.query['size']) if 'size' in request.query else 10
+        ext_url = self.ext_url(request)
+        params = dict(ext_url.query)
+        params['size'] = topk * self.multiplier
+        ext_url = ext_url.with_query(params)
+        return topk, request.method, ext_url, await request.read()
 
     async def parse(self, request, client_response):
-        data = await client_response.json()
-        candidates = [hit['_source'][self.field] for hit in data['hits']['hits']]
-        return request.query['q'], candidates
+        query = request.query['q']
+        hits = (await client_response.json())['hits']['hits']
+        candidates = [hit['_source'][self.field] for hit in hits]
+        return query, candidates
 
-    async def reorder(self, client_response, ranks):
-        data = await client_response.json()
-        data['hits']['hits'] = [data['hits']['hits'][i] for i in ranks]
-        return Response.json_200(data)
-
+    async def reorder(self, client_response, topk, ranks):
+        res = await client_response.json()
+        res['hits']['hits'] = [res['hits']['hits'][i] for i in ranks[:topk]]
+        return Response.json_200(res)
