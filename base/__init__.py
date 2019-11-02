@@ -3,6 +3,7 @@ from multiprocessing import Process, Event
 from aiohttp import web, web_exceptions
 import copy
 import asyncio
+import pprint
 
 
 class Response:
@@ -37,12 +38,43 @@ class RouteHandler:
         return [web.route(method, path, getattr(obj, f.__name__)) for method, path, f in self.routes]
 
 
-class BaseServer(Process):
+class BaseProcess(Process):
+    def __new__(cls, **kwargs):
+        cls.logger = set_logger(cls.__name__)
+        cls.logger.info(cls._format_kwargs(kwargs))
+        return super().__new__(cls)
+
+    @classmethod
+    def _format_kwargs(cls, kwargs):
+        return ''.join([cls._format_kwarg(k, v) for k, v in kwargs.items()])
+
+    @staticmethod
+    def _format_kwarg(k, v):
+        switch = k[:14], ' '*(15 - len(k)), v, v.__class__.__name__
+        return '\n--%s%s%s (%s)' % switch
+
+    def _run(self):
+        raise NotImplementedError
+
+    def run(self):
+        try:
+            self._run()
+        except Exception as ex:
+            self.logger.error(ex, exc_info=True)
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+
+class BaseServer(BaseProcess):
     handler = RouteHandler()
 
     def __init__(self, host: str = '127.0.0.1', port: int = 53001, **kwargs):
         super().__init__()
-        self.logger = set_logger(self.__class__.__name__)
         self.host = host
         self.port = port
         self.url = 'http://%s:%s' % (host, port)
@@ -84,15 +116,4 @@ class BaseServer(Process):
         loop.run_until_complete(create_site())
         loop.run_forever()
 
-    def run(self):
-        try:
-            self._run()
-        except Exception as ex:
-            self.logger.error(ex, exc_info=True)
 
-    def __enter__(self):
-        self.start()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()

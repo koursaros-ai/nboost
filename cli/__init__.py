@@ -12,7 +12,6 @@ def set_parser():
                         termcolor.colored('Koursaros AI', 'cyan', attrs=['underline'])),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--verbose', action='store_true', default=False, help='turn on detailed logging')
-    parser.add_argument('--client', type=str, default='BaseClient', help='which client to use')
     parser.add_argument('--model', type=str, default='BaseModel', help='which model to use')
     parser.add_argument('--ext_host', type=str, default='127.0.0.1', help='host of the server')
     parser.add_argument('--ext_port', type=int, default=54001, help='port of the server')
