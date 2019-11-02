@@ -29,7 +29,7 @@ class ColoredFormatter(logging.Formatter):
         'INFO': dict(color='cyan', on_color=None),  # cyan
         'WARNING': dict(color='yellow', on_color='on_grey'),  # yellow
         'ERROR': dict(color='white', on_color='on_red'),  # 31 for red
-        'CRITICAL': dict(color='white', on_color='on_green'),  # white on red bg
+        'CRITICAL': dict(color='white', on_color='on_blue'),  # white on red bg
     }
 
     PREFIX = '\033['
