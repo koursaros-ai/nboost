@@ -4,7 +4,7 @@ from typing import List, Tuple, Any
 
 
 class RankProxy(BaseProxy):
-    handler = RouteHandler()
+    handler = RouteHandler(BaseProxy.handler)
     search_path = '/search'
     train_path = '/train'
 
@@ -12,11 +12,12 @@ class RankProxy(BaseProxy):
         super().__init__(**kwargs)
         self.multiplier = multiplier
         self.field = field
+        self.handler.add_route('*', self.search_path)(self.search)
+        self.handler.add_route('*', self.train_path)(self.train)
 
     async def status(self, request):
         return Response.json_200(dict(res='Chillin'))
 
-    @handler.add_route('*', train_path)
     async def train(self, request: 'web.BaseRequest') -> 'web.Response':
         qid = int(request.query['qid'])
         cid = int(request.query['cid'])
@@ -27,21 +28,23 @@ class RankProxy(BaseProxy):
         self.model.train(query, candidates, labels)
         return Response.json_200({})
 
-    @handler.add_route('*', search_path)
     async def search(self, request: 'web.BaseRequest') -> 'web.Response':
-        method, ext_url, data = await self.magnify(request)
-        client_response = await self.client_handler(method, ext_url, data)
-        query, candidates = await self.parse(request, client_response)
-        ranks = await self.model.rank(query, candidates)
-        response = await self.reorder(client_response, ranks)
+        topk, method, ext_url, data = await self.magnify(request)
+        async with self.client_handler(method, ext_url, data) as client_response:
+            self.logger.info(repr(client_response).split('\n')[0])
+            query, candidates = await self.parse(request, client_response)
+            ranks = await self.model.rank(query, candidates)
+            response = await self.reorder(client_response, topk, ranks)
+            qid = next(self.counter)
+            self.queries[qid] = query, candidates
+            response.headers['qid'] = str(qid)
+            return response
 
-        qid = next(self.counter)
-        self.queries[qid] = query, candidates
-        response.headers['qid'] = qid
-        return response
-
-    async def magnify(self, request: 'web.BaseRequest') -> Tuple[str, str, bytes]:
-        """ :return method, ext_url, data"""
+    async def magnify(self, request: 'web.BaseRequest') -> Tuple[int, str, str, bytes]:
+        """
+        Magnify the size of the request by the multiplier
+        :return topk, method, ext_url, data
+        """
         raise NotImplementedError
 
     async def parse(
@@ -49,11 +52,16 @@ class RankProxy(BaseProxy):
             request: 'web.BaseRequest',
             client_response: 'client.ClientResponse') -> Tuple[str, List[str]]:
         """
+        Parse out the query and candidates
         :return: query, candidates
         """
         raise NotImplementedError
 
     async def reorder(self,
                       client_response: 'client.ClientResponse',
+                      topk: int,
                       ranks: List[int]) -> 'web.Response':
+        """
+        Reorder the client response by the ranks from the model
+        """
         raise NotImplementedError

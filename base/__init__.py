@@ -1,6 +1,7 @@
 from ..cli import set_logger
 from multiprocessing import Process, Event
 from aiohttp import web, web_exceptions
+import copy
 import asyncio
 
 
@@ -23,14 +24,13 @@ class Response:
 
 
 class RouteHandler:
-    def __init__(self):
-        self.routes = []
+    def __init__(self, rh: 'RouteHandler' = None):
+        self.routes = copy.deepcopy(rh.routes) if rh else []
 
     def add_route(self, method, path):
         def decorator(f):
             self.routes += [(method, path, f)]
             return f
-
         return decorator
 
     def bind_routes(self, obj):
@@ -48,22 +48,24 @@ class BaseServer(Process):
         self.url = 'http://%s:%s' % (host, port)
         self.is_ready = Event()
 
-    async def default_handler(self, request: 'web.BaseRequest'):
-        raise web.HTTPNotFound
+    async def not_found_handler(self, request: 'web.BaseRequest'):
+        raise web_exceptions.HTTPNotFound
 
     @web.middleware
     async def middleware(self, request: 'web.BaseRequest', handler) -> 'web.Response':
         try:
             self.logger.info(request)
-            return await handler(request)
+            response = await handler(request)
 
         except web_exceptions.HTTPNotFound:
-            self.logger.info('Error 404, falling back to %s' % self.default_handler.__name__)
-            return await self.default_handler(request)
+            response = await self.not_found_handler(request)
 
         except Exception as ex:
             self.logger.error(ex, exc_info=True)
-            return Response.exception_500(ex)
+            response = Response.exception_500(ex)
+
+        self.logger.info(response)
+        return response
 
     def _run(self):
         loop = asyncio.get_event_loop()
