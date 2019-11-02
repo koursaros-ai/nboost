@@ -7,7 +7,7 @@ import aiohttp
 
 
 class BaseProxy(BaseServer):
-    handler = RouteHandler()
+    handler = RouteHandler(BaseServer.handler)
 
     def __init__(self, model: str = 'BaseModel', ext_host: str = '127.0.0.1',
                  ext_port: int = 53001, **kwargs):
@@ -19,20 +19,14 @@ class BaseProxy(BaseServer):
         self.queries = dict()
 
     def ext_url(self, request: 'web.BaseRequest'):
-        return (
-            request
-            .url
-            .with_host(self.ext_host)
-            .with_port(self.ext_port)
-            .human_repr()
-        )
+        return request.url.with_host(self.ext_host).with_port(self.ext_port)
 
-    async def default_handler(self, request: 'web.BaseRequest'):
+    async def not_found_handler(self, request: 'web.BaseRequest'):
         ext_url = self.ext_url(request)
-        self.logger.info('Redirecting request to %s' % ext_url)
+        self.logger.info('<RedirectResponse(%s) >' % ext_url)
 
         raise web.HTTPTemporaryRedirect(ext_url)
 
     def client_handler(self, method, ext_url, data):
-        self.logger.info('<Request %s %s>' % (method, ext_url))
+        self.logger.info('<ClientRequest %s %s >' % (method, ext_url))
         return aiohttp.request(method, ext_url, data=data)
