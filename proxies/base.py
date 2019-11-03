@@ -15,7 +15,6 @@ class BaseProxy(BaseServer):
         self.ext_port = ext_port
         self.model = getattr(models, model)(**kwargs)
         self.counter = itertools.count()
-        self.queries = dict()
 
     def ext_url(self, request: 'web.BaseRequest'):
         return request.url.with_host(self.ext_host).with_port(self.ext_port)
@@ -28,3 +27,10 @@ class BaseProxy(BaseServer):
     def client_handler(self, method, ext_url, data):
         self.logger.info('SEND: <ClientRequest %s %s >' % (method, ext_url))
         return aiohttp.request(method, ext_url, data=data)
+
+    def status(self):
+        return dict(
+            model=self.model.__class__.__name__,
+            ext_host=self.ext_host,
+            ext_port=self.ext_port
+        )

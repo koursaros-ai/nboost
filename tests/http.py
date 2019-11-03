@@ -28,6 +28,16 @@ class HTTPTestCase(unittest.TestCase):
         self.logger.debug(format_response(response))
         return response
 
+    def get_from(self, server: BaseServer, path: str = '/',
+                 headers: dict = None, params: dict = None):
+        return self.send(
+            'GET',
+            host=server.host,
+            port=server.port,
+            path=path,
+            headers=headers,
+            params=params)
+
     @staticmethod
     def setUpServer(cls: BaseServer.__class__, cmdline: List):
         parser = set_parser()
