@@ -4,7 +4,7 @@ from ..http import HTTPTestCase
 
 
 class TestProxy(BaseProxy):
-    handler = RouteHandler()
+    handler = RouteHandler(BaseProxy.handler)
 
     @handler.add_route('GET', '/client')
     async def client(self, request):
@@ -16,7 +16,7 @@ class TestProxy(BaseProxy):
 
 
 class TestServer(BaseServer):
-    handler = RouteHandler()
+    handler = RouteHandler(BaseServer.handler)
 
     @handler.add_route('GET', '/server')
     async def server(self, request):
@@ -36,23 +36,32 @@ class TestBaseProxy(HTTPTestCase):
             '--ext_port', '54001'
         ])
 
-    def test_server(self):
-        res = self.send(
-            'GET', host=self.server.host, port=self.server.port, path='/server')
+    def test_proxy(self):
+        # test server
+        res = self.get_from(self.server, path='/server')
         self.assertTrue(res.ok)
         self.assertEqual(res.json()['msg'], 'server_response')
 
-    def test_proxy_fallback(self):
-        res = self.send(
-            'GET', host=self.proxy.host, port=self.proxy.port, path='/server')
+        # test fallback
+        res = self.get_from(self.proxy, path='/server')
         self.assertTrue(res.ok)
         self.assertEqual(res.json()['msg'], 'server_response')
 
-    def test_proxy_client(self):
-        res = self.send(
-            'GET', host=self.proxy.host, port=self.proxy.port, path='/client')
+        # test client
+        res = self.get_from(self.proxy, path='/client')
         self.assertTrue(res.ok)
         self.assertEqual(res.json()['msg'], 'client_response')
+
+        # test status
+        res = self.get_from(self.proxy, path='/status')
+        self.assertTrue(res.ok)
+        self.assertTrue(res.json()['is_ready'])
+        self.assertEqual(res.json()['cls'], TestProxy.__name__)
+        self.assertEqual(res.json()['ext_host'], '127.0.0.1')
+        self.assertEqual(res.json()['ext_port'], 54001)
+        self.assertEqual(res.json()['model'], 'TestModel')
+        self.assertEqual(res.json()['traffic']['/server'], 1)
+        self.assertEqual(res.json()['traffic']['/client'], 1)
 
     def tearDown(self):
         self.server.kill()

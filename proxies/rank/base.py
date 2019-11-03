@@ -15,9 +15,16 @@ class RankProxy(BaseProxy):
         self.field = field
         self.handler.add_route('*', self.search_path)(self.search)
         self.handler.add_route('*', self.train_path)(self.train)
+        self.queries = dict()
 
-    async def status(self, request):
-        return Response.JSON_OK(dict(chillin=True), status=200)
+    def status(self):
+        return dict(
+            multiplier=self.multiplier,
+            field=self.field,
+            queries=len(self.queries),
+            search_path=self.search_path,
+            train_path=self.train_path
+        )
 
     async def train(self, request: 'web.BaseRequest') -> 'web.Response':
         qid = int(request.headers['qid'])
@@ -32,7 +39,8 @@ class RankProxy(BaseProxy):
     async def search(self, request: 'web.BaseRequest') -> 'web.Response':
         topk, method, ext_url, data = await self.magnify(request)
         async with self.client_handler(method, ext_url, data) as client_response:
-            self.logger.info(repr(client_response).split('\n')[0])
+            self.logger.info('RECV: ' + repr(client_response).split('\n')[0])
+
             query, candidates = await self.parse(request, client_response)
             ranks = await self.model.rank(query, candidates)
             response = await self.reorder(client_response, topk, ranks)

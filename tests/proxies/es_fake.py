@@ -20,45 +20,31 @@ class TestESProxy(HTTPTestCase):
         self.topk = 5
         self.es_index = 'test_index'
 
-        self.server = self.setUpServer(FakeESServer, ['--port', '9200'])
+        self.server = self.setUpServer(FakeESServer, ['--port', '9500'])
         self.proxy = self.setUpServer(ESProxy, [
             '--model', 'TestModel',
-            '--ext_port', '9200',
+            '--ext_port', '9500',
             '--field', 'message'
         ])
 
     def test_search_and_train(self):
         # search
         params = dict(size=self.topk, q='message:test query')
+        path = '/%s/_search' % self.es_index
 
-        proxy_res = self.send(
-            'GET',
-            host=self.proxy.host,
-            port=self.proxy.port,
-            path='/%s/_search' % self.es_index,
-            params=params)
-        server_res = self.send(
-            'GET',
-            host=self.server.host,
-            port=self.server.port,
-            path='/%s/_search' % self.es_index,
-            params=params)
-
-        proxy_candidates = proxy_res.json()['hits']['hits']
-        server_candidates = server_res.json()['hits']['hits']
+        proxy_res = self.get_from(self.proxy, path=path, params=params)
+        server_res = self.get_from(self.server, path=path, params=params)
 
         self.assertTrue(proxy_res.ok)
         self.assertTrue(server_res.ok)
-        self.assertEqual(len(proxy_candidates), len(server_candidates))
+        self.assertEqual(
+            len(proxy_res.json()['hits']['hits']),
+            len(server_res.json()['hits']['hits'])
+        )
 
         # train
         headers = dict(qid=proxy_res.headers['qid'], cid=str(self.topk - 1))
-        train_res = self.send(
-            'GET',
-            host=self.proxy.host,
-            port=self.proxy.port,
-            path='/train',
-            headers=headers)
+        train_res = self.get_from(self.proxy, path='/train', headers=headers)
 
         self.assertTrue(train_res.ok)
 

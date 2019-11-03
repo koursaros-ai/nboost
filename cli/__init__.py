@@ -11,7 +11,21 @@ import json
 from aiohttp import web
 
 
-def format_attrs(obj, attrs: 'Iterable' = None) -> str:
+def format_pyobj(obj: object) -> str:
+    try:
+        obj = dict(obj)
+    except (TypeError, ValueError, RuntimeError):
+        pass
+
+    try:
+        obj = json.loads(obj)
+    except (TypeError, json.decoder.JSONDecodeError):
+        pass
+
+    return pprint.pformat(obj)
+
+
+def format_attrs(obj, attrs: Iterable = None) -> str:
     """
 
     :param obj: any python obj
@@ -34,17 +48,7 @@ def format_attrs(obj, attrs: 'Iterable' = None) -> str:
             except AssertionError:
                 continue
 
-            try:
-                attr = dict(attr)
-            except (TypeError, ValueError, RuntimeError):
-                pass
-
-            try:
-                attr = json.loads(attr)
-            except (TypeError, json.decoder.JSONDecodeError):
-                pass
-
-            fmt_dir[key] = pprint.pformat(attr).split('\n')
+            fmt_dir[key] = format_pyobj(attr).split('\n')
 
     for attr in fmt_dir:
         lines = fmt_dir[attr]

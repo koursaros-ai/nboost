@@ -1,4 +1,4 @@
-from ..cli import set_logger, format_async_response, format_async_request
+from ..cli import set_logger, format_async_response, format_async_request, format_pyobj
 from multiprocessing import Process, Event
 from aiohttp import web, web_exceptions
 import copy
@@ -62,6 +62,7 @@ class BaseProcess(Process):
 
 class BaseServer(BaseProcess):
     handler = RouteHandler()
+    state = dict(traffic={})
 
     def __init__(self, host: str = '127.0.0.1', port: int = 53001, **kwargs):
         super().__init__()
@@ -72,9 +73,34 @@ class BaseServer(BaseProcess):
     async def not_found_handler(self, request: 'web.BaseRequest'):
         raise web_exceptions.HTTPNotFound
 
+    @classmethod
+    def update_state(cls, obj):
+        """ Recursively updates the state with each superclass status() """
+
+        if 'status' in cls.__dict__:
+            obj.state.update(cls.status(obj))
+
+        for base in cls.__bases__:
+            if hasattr(base, 'update_state'):
+                base.update_state(obj)
+
+    def status(self) -> dict:
+        return dict(
+            cls=self.__class__.__name__,
+            is_ready=self.is_ready.is_set(),
+            routes={p: m for m, p, _ in self.handler.routes}
+        )
+
+    @handler.add_route('*', '/status')
+    async def _status(self, request: 'web.BaseRequest'):
+        self.update_state(self)
+        return Response.JSON_OK(self.state)
+
     @web.middleware
     async def middleware(self, request: 'web.BaseRequest', handler) -> 'web.Response':
         try:
+            self.state['traffic'].setdefault(request.path, 0)
+            self.state['traffic'][request.path] += 1
             self.logger.info('RECV: %s' % request)
             self.logger.debug(await format_async_request(request))
             response = await handler(request)
@@ -88,6 +114,10 @@ class BaseServer(BaseProcess):
 
         self.logger.info('SEND: %s' % response)
         self.logger.debug(await format_async_response(response))
+
+        if 'pretty' in request.query:
+            response.body = format_pyobj(response.body)
+
         return response
 
     def _run(self):
