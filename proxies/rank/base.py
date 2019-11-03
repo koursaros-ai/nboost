@@ -1,6 +1,7 @@
-from ..base import BaseProxy, RouteHandler, Response
+from ...base import Response
+from ..base import BaseProxy, RouteHandler
 from aiohttp import web, client
-from typing import List, Tuple, Any
+from typing import List, Tuple
 
 
 class RankProxy(BaseProxy):
@@ -16,17 +17,17 @@ class RankProxy(BaseProxy):
         self.handler.add_route('*', self.train_path)(self.train)
 
     async def status(self, request):
-        return Response.json_200(dict(res='Chillin'))
+        return Response.JSON_OK(dict(chillin=True), status=200)
 
     async def train(self, request: 'web.BaseRequest') -> 'web.Response':
-        qid = int(request.query['qid'])
-        cid = int(request.query['cid'])
+        qid = int(request.headers['qid'])
+        cid = int(request.headers['cid'])
 
         query, candidates = self.queries[qid]
         labels = [0] * len(candidates)
         labels[cid] = 1
-        self.model.train(query, candidates, labels)
-        return Response.json_200({})
+        await self.model.train(query, candidates, labels)
+        return Response.NO_CONTENT()
 
     async def search(self, request: 'web.BaseRequest') -> 'web.Response':
         topk, method, ext_url, data = await self.magnify(request)
@@ -45,7 +46,7 @@ class RankProxy(BaseProxy):
         Magnify the size of the request by the multiplier
         :return topk, method, ext_url, data
         """
-        raise NotImplementedError
+        raise web.HTTPNotImplemented
 
     async def parse(
             self,
@@ -55,7 +56,7 @@ class RankProxy(BaseProxy):
         Parse out the query and candidates
         :return: query, candidates
         """
-        raise NotImplementedError
+        raise web.HTTPNotImplemented
 
     async def reorder(self,
                       client_response: 'client.ClientResponse',
@@ -64,4 +65,4 @@ class RankProxy(BaseProxy):
         """
         Reorder the client response by the ranks from the model
         """
-        raise NotImplementedError
+        raise web.HTTPNotImplemented

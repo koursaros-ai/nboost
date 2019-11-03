@@ -1,13 +1,14 @@
-from ..base import RouteHandler, Response
+from ...base import Response
 from .base import RankProxy
 
+DEFAULT_TOPK = 10
 
-class ESRankProxy(RankProxy):
-    handler = RouteHandler()
+
+class ESProxy(RankProxy):
     search_path = '/{index}/_search'
 
     async def magnify(self, request):
-        topk = int(request.query['size']) if 'size' in request.query else 10
+        topk = int(request.query['size']) if 'size' in request.query else DEFAULT_TOPK
         ext_url = self.ext_url(request)
         params = dict(ext_url.query)
         params['size'] = topk * self.multiplier
@@ -23,4 +24,4 @@ class ESRankProxy(RankProxy):
     async def reorder(self, client_response, topk, ranks):
         res = await client_response.json()
         res['hits']['hits'] = [res['hits']['hits'][i] for i in ranks[:topk]]
-        return Response.json_200(res)
+        return Response.JSON_OK(res)

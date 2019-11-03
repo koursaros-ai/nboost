@@ -1,8 +1,7 @@
-from ..base import BaseServer, Response, RouteHandler
+from ..base import BaseServer, RouteHandler
 from .. import models
-from typing import Tuple
+from aiohttp import web
 import itertools
-from aiohttp import web, client
 import aiohttp
 
 
@@ -23,10 +22,9 @@ class BaseProxy(BaseServer):
 
     async def not_found_handler(self, request: 'web.BaseRequest'):
         ext_url = self.ext_url(request)
-        self.logger.info('<RedirectResponse(%s) >' % ext_url)
-
+        self.logger.info('SEND: <RedirectResponse(%s) >' % ext_url)
         raise web.HTTPTemporaryRedirect(ext_url)
 
     def client_handler(self, method, ext_url, data):
-        self.logger.info('<ClientRequest %s %s >' % (method, ext_url))
+        self.logger.info('SEND: <ClientRequest %s %s >' % (method, ext_url))
         return aiohttp.request(method, ext_url, data=data)

@@ -1,27 +1,16 @@
-from ..cli import set_logger
+from ..cli import set_logger, format_async_response, format_async_request
 from multiprocessing import Process, Event
 from aiohttp import web, web_exceptions
 import copy
 import asyncio
-import pprint
 
 
 class Response:
-    @staticmethod
-    def json_200(response: dict):
-        return web.json_response(response, status=200)
-
-    @staticmethod
-    def plain_200(response: bytes):
-        return web.Response(body=response, status=200)
-
-    @staticmethod
-    def status_404():
-        return web.json_response(status=404)
-
-    @staticmethod
-    def exception_500(ex: Exception):
-        return web.json_response(dict(error=str(ex), type=type(ex).__name__), status=500)
+    PLAIN_OK = lambda x: web.Response(body=x, status=200)
+    JSON_OK = lambda x: web.json_response(x, status=200)
+    NO_CONTENT = lambda: web.Response(status=204)
+    INTERNAL_ERROR = lambda x: web.json_response(
+        dict(error=str(x), type=type(x).__name__), status=500)
 
 
 class RouteHandler:
@@ -32,6 +21,7 @@ class RouteHandler:
         def decorator(f):
             self.routes += [(method, path, f)]
             return f
+
         return decorator
 
     def bind_routes(self, obj):
@@ -39,9 +29,9 @@ class RouteHandler:
 
 
 class BaseProcess(Process):
-    def __new__(cls, **kwargs):
-        cls.logger = set_logger(cls.__name__)
-        cls.logger.info(cls._format_kwargs(kwargs))
+    def __new__(cls, verbose=False, **kwargs):
+        cls.logger = set_logger(cls.__name__, verbose=verbose)
+        cls.logger.info('\nINIT: %s%s' % (cls.__name__, cls._format_kwargs(kwargs)))
         return super().__new__(cls)
 
     @classmethod
@@ -50,8 +40,8 @@ class BaseProcess(Process):
 
     @staticmethod
     def _format_kwarg(k, v):
-        switch = k[:14], ' '*(15 - len(k)), v, v.__class__.__name__
-        return '\n--%s%s%s (%s)' % switch
+        switch = k[:14], ' ' * (15 - len(k)), v, v.__class__.__name__
+        return '\n\t--%s%s%s (%s)' % switch
 
     def _run(self):
         raise NotImplementedError
@@ -77,7 +67,6 @@ class BaseServer(BaseProcess):
         super().__init__()
         self.host = host
         self.port = port
-        self.url = 'http://%s:%s' % (host, port)
         self.is_ready = Event()
 
     async def not_found_handler(self, request: 'web.BaseRequest'):
@@ -86,7 +75,8 @@ class BaseServer(BaseProcess):
     @web.middleware
     async def middleware(self, request: 'web.BaseRequest', handler) -> 'web.Response':
         try:
-            self.logger.info(request)
+            self.logger.info('RECV: %s' % request)
+            self.logger.debug(await format_async_request(request))
             response = await handler(request)
 
         except web_exceptions.HTTPNotFound:
@@ -94,9 +84,10 @@ class BaseServer(BaseProcess):
 
         except Exception as ex:
             self.logger.error(ex, exc_info=True)
-            response = Response.exception_500(ex)
+            response = Response.INTERNAL_ERROR(ex)
 
-        self.logger.info(response)
+        self.logger.info('SEND: %s' % response)
+        self.logger.debug(await format_async_response(response))
         return response
 
     def _run(self):
@@ -115,5 +106,3 @@ class BaseServer(BaseProcess):
 
         loop.run_until_complete(create_site())
         loop.run_forever()
-
-

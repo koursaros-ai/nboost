@@ -1,2 +1,2 @@
 from .base import RankProxy
-from .es import ESRankProxy
+from .es import ESProxy

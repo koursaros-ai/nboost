@@ -3,6 +3,73 @@ import termcolor
 import argparse
 import os
 import copy
+import pprint
+import requests
+from typing import Iterable
+import shutil
+import json
+from aiohttp import web
+
+
+def format_attrs(obj, attrs: 'Iterable' = None) -> str:
+    """
+
+    :param obj: any python obj
+    :param attrs: list of attrs you want to print (default prints all)
+    :return:
+        ATTR1: VALUE1
+        ATTR2: VALUE2
+        ...
+    """
+    fmt = ''
+    fmt_dir = dict()
+    size = shutil.get_terminal_size((80, 20))
+    max_height = round(size.lines / 8)
+    max_width = round(size.columns / 3 * 2)
+
+    for key in dir(obj):
+        if not attrs or key in attrs:
+            try:
+                attr = getattr(obj, key)
+            except AssertionError:
+                continue
+
+            try:
+                attr = dict(attr)
+            except (TypeError, ValueError, RuntimeError):
+                pass
+
+            try:
+                attr = json.loads(attr)
+            except (TypeError, json.decoder.JSONDecodeError):
+                pass
+
+            fmt_dir[key] = pprint.pformat(attr).split('\n')
+
+    for attr in fmt_dir:
+        lines = fmt_dir[attr]
+        lines = lines[:max_height] + ['...'] if len(lines) >= max_height else lines
+        lines = [attr + ': ' + lines[0]] + [' ' * len(attr) + line for line in lines[1:]]
+        lines = [line[:max_width] + '...' if len(line) > max_width else line for line in lines]
+
+        fmt += '\n' + '\n'.join(lines)
+
+    return fmt
+
+
+def format_response(response: 'requests.models.Response'):
+    attrs = ['url', 'status_code', 'reason', 'headers', 'content']
+    return format_attrs(response, attrs=attrs)
+
+
+async def format_async_response(response: 'web.Response'):
+    attrs = ['body', 'reason', 'status', 'headers']
+    return format_attrs(response, attrs=attrs)
+
+
+async def format_async_request(response: 'web.BaseRequest'):
+    attrs = ['host', 'path', 'remote', 'headers', 'query', 'method']
+    return format_attrs(response, attrs=attrs)
 
 
 def set_parser():
@@ -24,11 +91,11 @@ def set_parser():
 
 class ColoredFormatter(logging.Formatter):
     MAPPING = {
-        'DEBUG': dict(color='white', on_color=None),  # white
-        'INFO': dict(color='cyan', on_color=None),  # cyan
-        'WARNING': dict(color='yellow', on_color='on_grey'),  # yellow
-        'ERROR': dict(color='white', on_color='on_red'),  # 31 for red
-        'CRITICAL': dict(color='white', on_color='on_blue'),  # white on red bg
+        'DEBUG': dict(color='green', on_color=None),
+        'INFO': dict(color='cyan', on_color=None),
+        'WARNING': dict(color='yellow', on_color='on_grey'),
+        'ERROR': dict(color='white', on_color='on_red'),
+        'CRITICAL': dict(color='white', on_color='on_blue'),
     }
 
     PREFIX = '\033['
@@ -54,8 +121,9 @@ def set_logger(context, verbose=False):
     if not logger.handlers:
         logger.setLevel(logging.DEBUG if verbose else logging.INFO)
         formatter = ColoredFormatter(
-            '%(levelname)-.1s:' + context + ':[%(filename).3s:%(funcName).3s:%(lineno)3d]:%(message)s', datefmt=
-            '%m-%d %H:%M:%S')
+            '%(levelname)-.1s:' + context +
+            ':[%(filename).3s:%(funcName).3s:%(lineno)3d]:%(message)s',
+            datefmt='%m-%d %H:%M:%S')
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.DEBUG if verbose else logging.INFO)
         console_handler.setFormatter(formatter)
