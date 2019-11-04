@@ -50,15 +50,11 @@ class BaseProxy(BaseClient, BaseModel, BaseServer):
         topk, method, ext_url, data = await self.magnify(request)
         async with self.client_handler(method, ext_url, data) as client_response:
             self.logger.info('RECV: ' + repr(client_response).split('\n')[0])
-
             query, candidates = await self.parse(request, client_response)
             self.logger.info('RANK: %s' % query)
             self.logger.debug('candidates: %s' % format_pyobj(candidates))
             ranks = await self.rank(query, candidates)
-            print(ranks)
-            print(candidates)
-            reranked = [candidates[i] for i in ranks[:topk]]
-            response = await self.format(client_response, reranked)
+            response = await self.format(client_response, topk, ranks)
             qid = next(self.counter)
             self.queries[qid] = query, candidates
             response.headers['qid'] = str(qid)

@@ -22,7 +22,7 @@ class ESClient(BaseClient):
         candidates = [hit['_source'][self.field] for hit in hits]
         return query, candidates
 
-    async def reorder(self, client_response, topk, ranks):
+    async def format(self, client_response, topk, ranks):
         res = await client_response.json()
         res['hits']['hits'] = [res['hits']['hits'][i] for i in ranks[:topk]]
         return Response.JSON_OK(res)
