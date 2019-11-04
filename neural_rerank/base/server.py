@@ -55,7 +55,12 @@ class BaseServer(Base, Process):
         raise web_exceptions.HTTPNotFound
 
     def _run(self):
-        loop = asyncio.get_event_loop()
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
         routes = self.handler.get_routes(self)
 
         async def create_site():
