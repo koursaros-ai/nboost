@@ -1,8 +1,8 @@
-from ...base import BaseServer, Handler, Response
-from ...clients import ESClient
-from ...proxies import BaseProxy
-from ...models import TestModel
-from ..http import HTTPTestCase
+from neural_rerank.base import BaseServer, Handler, Response
+from neural_rerank.proxies import ESProxy
+from neural_rerank.cli import set_parser
+import unittest
+import requests
 import copy
 
 
@@ -16,29 +16,41 @@ class MockESServer(BaseServer):
         return Response.JSON_OK(response)
 
 
-class ESProxy(BaseProxy, ESClient, TestModel):
-    pass
-
-
-class TestESProxy(HTTPTestCase):
+class TestESProxy(unittest.TestCase):
 
     def setUp(self):
         self.topk = 5
         self.es_index = 'test_index'
+        parser = set_parser()
 
-        self.server = self.setUpServer(MockESServer, ['--port', '9500'])
-        self.proxy = self.setUpServer(ESProxy, [
+        self.server = MockESServer(**vars(parser.parse_args([
+            '--port', '9500',
+            '--verbose'
+        ])))
+        self.proxy = ESProxy(**vars(parser.parse_args([
             '--ext_port', '9500',
-            '--field', 'message'
-        ])
+            '--field', 'message',
+            '--verbose'
+        ])))
+
+        self.server.start()
+        self.proxy.start()
+        self.server.is_ready.wait()
+        self.proxy.is_ready.wait()
 
     def test_search_and_train(self):
         # search
         params = dict(size=self.topk, q='message:test query')
         path = '/%s/_search' % self.es_index
 
-        proxy_res = self.get_from(self.proxy, path=path, params=params)
-        server_res = self.get_from(self.server, path=path, params=params)
+        proxy_res = requests.get(
+            'http://%s:%s/%s/_search' % (self.proxy.host, self.proxy.port, path),
+            params=params
+        )
+        server_res = requests.get(
+            'http://%s:%s/%s/_search' % (self.server.host, self.server.port, path),
+            params=params
+        )
 
         self.assertTrue(proxy_res.ok)
         self.assertTrue(server_res.ok)
@@ -49,7 +61,10 @@ class TestESProxy(HTTPTestCase):
 
         # train
         headers = dict(qid=proxy_res.headers['qid'], cid=str(self.topk - 1))
-        train_res = self.get_from(self.proxy, path='/train', headers=headers)
+        train_res = requests.get(
+            'http://%s:%s/train' % (self.server.host, self.server.port),
+            headers=headers
+        )
 
         self.assertTrue(train_res.ok)
 
