@@ -1,4 +1,4 @@
-from ...base import BaseServer, RouteHandler, Response
+from ...base import BaseServer, Handler, Response
 from ...proxies.rank import ESProxy
 from ..http import HTTPTestCase
 import copy
