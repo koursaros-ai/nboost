@@ -13,6 +13,7 @@ class HTTPTestCase(unittest.TestCase):
         self.logger = set_logger(
             self.__class__.__name__,
             verbose=True if '--verbose' in sys.argv else False)
+        self.logger.error(sys.argv)
 
     def send(self, method: str,
              host: str = '127.0.0.1',
