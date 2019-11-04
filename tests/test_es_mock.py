@@ -1,10 +1,16 @@
 from neural_rerank.base import BaseServer, Handler, Response
-from neural_rerank.proxies import ESProxy
+from neural_rerank.clients import ESClient
+from neural_rerank.models import TestModel
+from neural_rerank.proxies import BaseProxy
 from neural_rerank.cli import set_parser
 import unittest
 import requests
 import copy
 import time
+
+
+class ESProxy(BaseProxy, ESClient, TestModel):
+    _search_path = '/{index}/_search'
 
 
 class MockESServer(BaseServer):

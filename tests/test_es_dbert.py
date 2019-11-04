@@ -1,5 +1,5 @@
 from neural_rerank.clients import ESClient
-from neural_rerank.models import TestModel
+from neural_rerank.models import DBERTRank
 from neural_rerank.proxies import BaseProxy
 from neural_rerank.cli import set_parser
 from tests.paths import RESOURCES
@@ -15,7 +15,7 @@ INDEX_SIZE = 1000
 ES_INDEX = 'test_index'
 
 
-class ESProxy(BaseProxy, ESClient, TestModel):
+class ESDBERTProxy(BaseProxy, ESClient, DBERTRank):
     _search_path = '/{index}/_search'
 
 
@@ -24,7 +24,7 @@ class TestESProxy(unittest.TestCase):
     def setUp(self):
         self.es_index = 'test_index'
         parser = set_parser()
-        self.proxy = ESProxy(**vars(parser.parse_args([
+        self.proxy = ESDBERTProxy(**vars(parser.parse_args([
             '--ext_host', ES_HOST,
             '--ext_port', ES_PORT,
             '--field', 'description',
