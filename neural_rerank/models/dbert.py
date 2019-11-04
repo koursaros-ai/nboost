@@ -15,16 +15,15 @@ class DBERTRank(BaseModel):
                                   ConstantLRSchedule)
 
         super().__init__(*args, **kwargs)
-        model_config = AutoConfig.from_pretrained(self.model_name, cache_dir=self.data_dir)
+        model_config = AutoConfig.from_pretrained(self.model_name)
         model_config.num_labels = 1  # set up for regression
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if self.device == "cpu":
             self.logger.info("RUNNING ON CPU")
         self.rerank_model = AutoModelForSequenceClassification.from_pretrained(
             self.model_name,
-            config=model_config,
-            cache_dir=self.data_dir)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, cache_dir=self.data_dir)
+            config=model_config)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.rerank_model.to(self.device)
 
         self.optimizer = AdamW(self.rerank_model.parameters(), lr=self.lr, correct_bias=False)
