@@ -9,6 +9,7 @@ import unittest
 import time
 import requests
 
+
 ES_HOST = '127.0.01'
 ES_PORT = '9200'
 INDEX_SIZE = 1000
