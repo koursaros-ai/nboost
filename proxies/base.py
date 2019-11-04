@@ -1,4 +1,4 @@
-from ..base import BaseServer, Response
+from ..base import BaseServer, Response, Handler
 from ..clients import BaseClient
 from ..models import BaseModel
 from ..cli import format_pyobj
@@ -8,6 +8,7 @@ import itertools
 
 class BaseProxy(BaseClient, BaseModel, BaseServer):
     requires = BaseClient, BaseModel, BaseServer
+    handler = Handler(BaseClient.handler, BaseModel.handler, BaseServer.handler)
     search_path = '/search'
     train_path = '/train'
 
@@ -15,18 +16,18 @@ class BaseProxy(BaseClient, BaseModel, BaseServer):
         super().__init__(**kwargs)
         self.queries = dict()
         self.counter = itertools.count()
-        self.add_route('*', self.search_path)(self._search)
-        self.add_route('*', self.train_path)(self._train)
+        self.handler.add_route('*', self.search_path)(self._search)
+        self.handler.add_route('*', self.train_path)(self._train)
 
-    @BaseServer.add_state
+    @handler.add_state()
     def queries(self):
-        return self.queries
+        return list(self.queries)
 
-    @BaseServer.add_state
+    @handler.add_state()
     def search_path(self):
         return self.search_path
 
-    @BaseServer.add_state
+    @handler.add_state()
     def train_path(self):
         return self.train_path
 
@@ -54,6 +55,8 @@ class BaseProxy(BaseClient, BaseModel, BaseServer):
             self.logger.info('RANK: %s' % query)
             self.logger.debug('candidates: %s' % format_pyobj(candidates))
             ranks = await self.rank(query, candidates)
+            print(ranks)
+            print(candidates)
             reranked = [candidates[i] for i in ranks[:topk]]
             response = await self.format(client_response, reranked)
             qid = next(self.counter)

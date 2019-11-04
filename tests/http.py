@@ -25,7 +25,7 @@ class HTTPTestCase(unittest.TestCase):
         self.logger.info('SEND: <Request %s %s >' % (method, url))
         response = requests.request(method, url, params=params, headers=headers)
         self.logger.info('RECV: %s' % response)
-        self.logger.debug(format_response(response))
+        (self.logger.debug if response.ok else self.logger.error)(format_response(response))
         return response
 
     def get_from(self, server: BaseServer, path: str = '/',

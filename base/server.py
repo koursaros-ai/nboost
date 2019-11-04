@@ -1,35 +1,31 @@
 from ..cli import format_async_response, format_async_request, format_pyobj
-from . import Base, Response
+from . import Base, Response, Handler
 from multiprocessing import Process, Event
 from aiohttp import web, web_exceptions
 import asyncio
 
 
 class BaseServer(Base, Process):
+    handler = Handler(Base.handler)
+
     def __init__(self, host: str = '127.0.0.1', port: int = 53001, **kwargs):
         super().__init__()
         self.host = host
         self.port = port
         self.is_ready = Event()
         self.traffic = {}
-        self.add_route('*', '/status')(self._status)
 
-    @Base.add_state
+    @handler.add_state()
     def is_ready(self) -> bool:
         return self.is_ready.is_set()
 
-    @classmethod
-    def add_route(cls, method, path):
-        def decorator(f):
-            Base.add_state(lambda: (method, path, f.__name__), name='routes')
-        return decorator
-
-    @Base.add_state
+    @handler.add_state()
     def traffic(self):
         return self.traffic
 
+    @handler.add_route('*', '/status')
     async def _status(self, request: web.BaseRequest):
-        return Response.JSON_OK(self.state)
+        return Response.JSON_OK(self.handler.get_states(self))
 
     @web.middleware
     async def middleware(self, request: web.BaseRequest, handler) -> web.Response:
@@ -60,7 +56,7 @@ class BaseServer(Base, Process):
 
     def _run(self):
         loop = asyncio.get_event_loop()
-        routes = [web.route(m, p, getattr(self, f)) for m, p, f in self.state['routes']]
+        routes = self.handler.get_routes(self)
 
         async def create_site():
             app = web.Application(middlewares=[self.middleware])
@@ -70,7 +66,7 @@ class BaseServer(Base, Process):
             site = web.TCPSite(runner, self.host, self.port)
             await site.start()
             self.logger.critical('LISTENING: %s:%d' % (self.host, self.port))
-            self.logger.critical('ROUTES: %s' % self.state['routes'])
+            self.logger.critical('ROUTES: %s' % self.handler.routes)
             self.is_ready.set()
 
         loop.run_until_complete(create_site())
