@@ -2,7 +2,7 @@ from neural_rerank.base import Response, BaseServer, Handler
 from neural_rerank.proxies import BaseProxy
 from neural_rerank.clients import TestClient
 from neural_rerank.models import TestModel
-from ..http import HTTPTestCase
+from neural_rerank.testing import HTTPTestCase
 import time
 
 
