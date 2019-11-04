@@ -1,10 +1,11 @@
-from ...base import Response
-from .base import RankProxy
+from .base import BaseClient
+from ..base import Response
+
 
 DEFAULT_TOPK = 10
 
 
-class ESProxy(RankProxy):
+class ESClient(BaseClient):
     search_path = '/{index}/_search'
 
     async def magnify(self, request):
