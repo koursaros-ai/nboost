@@ -1,6 +1,5 @@
-
-from ...models import DBERTRank
-from ...paths import RESOURCES
+from neural_rerank.models import DBERTRank
+from tests.paths import RESOURCES
 import unittest
 import asyncio
 
