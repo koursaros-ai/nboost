@@ -9,15 +9,15 @@ import itertools
 class BaseProxy(BaseClient, BaseModel, BaseServer):
     requires = BaseClient, BaseModel, BaseServer
     handler = Handler(BaseClient.handler, BaseModel.handler, BaseServer.handler)
-    search_path = '/search'
-    train_path = '/train'
+    _search_path = '/search'
+    _train_path = '/train'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.queries = dict()
         self.counter = itertools.count()
-        self.handler.add_route('*', self.search_path)(self._search)
-        self.handler.add_route('*', self.train_path)(self._train)
+        self.handler.add_route('*', self._search_path)(self._search)
+        self.handler.add_route('*', self._train_path)(self._train)
 
     @handler.add_state()
     def queries(self):
@@ -25,11 +25,11 @@ class BaseProxy(BaseClient, BaseModel, BaseServer):
 
     @handler.add_state()
     def search_path(self):
-        return self.search_path
+        return self._search_path
 
     @handler.add_state()
     def train_path(self):
-        return self.train_path
+        return self._train_path
 
     async def _train(self, request: web.BaseRequest) -> web.Response:
         qid = int(request.headers['qid'])
