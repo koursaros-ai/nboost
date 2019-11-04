@@ -62,10 +62,10 @@ class TestESProxy(unittest.TestCase):
         # train
         headers = dict(qid=proxy_res.headers['qid'], cid=str(self.topk - 1))
         train_res = requests.get(
-            'http://%s:%s/train' % (self.server.host, self.server.port),
+            'http://%s:%s/train' % (self.proxy.host, self.proxy.port),
             headers=headers
         )
-        time.sleep(30)
+        # time.sleep(30)
         print(train_res)
         self.assertTrue(train_res.ok)
 
