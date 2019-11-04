@@ -100,7 +100,7 @@ class ColoredFormatter(logging.Formatter):
         'INFO': dict(color='cyan', on_color=None),
         'WARNING': dict(color='yellow', on_color='on_grey'),
         'ERROR': dict(color='white', on_color='on_red'),
-        'CRITICAL': dict(color='white', on_color='on_blue'),
+        'CRITICAL': dict(color='magenta', on_color='on_yellow'),
     }
 
     PREFIX = '\033['

@@ -42,6 +42,7 @@ class TestBaseProxy(HTTPTestCase):
         self.assertEqual(len(proxy_res.json()), len(server_res.json()))
 
         # train
+        self.logger.error(proxy_res.headers)
         headers = {
             'qid': proxy_res.headers['qid'],
             'cid': str(self.topk - 1)
