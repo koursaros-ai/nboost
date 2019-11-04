@@ -1,1 +1,1 @@
-from .rank import RankProxy
+from .base import BaseProxy
