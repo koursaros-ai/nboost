@@ -61,17 +61,17 @@ def format_attrs(obj, attrs: Iterable = None) -> str:
     return fmt
 
 
-def format_response(response: 'requests.models.Response'):
+def format_response(response: requests.models.Response):
     attrs = ['url', 'status_code', 'reason', 'headers', 'content']
     return format_attrs(response, attrs=attrs)
 
 
-async def format_async_response(response: 'web.Response'):
+async def format_async_response(response: web.Response):
     attrs = ['body', 'reason', 'status', 'headers']
     return format_attrs(response, attrs=attrs)
 
 
-async def format_async_request(response: 'web.BaseRequest'):
+async def format_async_request(response: web.BaseRequest):
     attrs = ['host', 'path', 'remote', 'headers', 'query', 'method']
     return format_attrs(response, attrs=attrs)
 
@@ -99,8 +99,8 @@ class ColoredFormatter(logging.Formatter):
         'DEBUG': dict(color='green', on_color=None),
         'INFO': dict(color='cyan', on_color=None),
         'WARNING': dict(color='yellow', on_color='on_grey'),
-        'ERROR': dict(color='white', on_color='on_red'),
-        'CRITICAL': dict(color='magenta', on_color='on_yellow'),
+        'ERROR': dict(color='grey', on_color='on_red'),
+        'CRITICAL': dict(color='grey', on_color='on_blue'),
     }
 
     PREFIX = '\033['
