@@ -1,9 +1,9 @@
 import unittest
 import requests
-from ..cli import set_logger, format_response, set_parser
+from neural_rerank.cli import set_logger, format_response, set_parser
 import sys
 from typing import List
-from ..base import BaseServer
+from neural_rerank.base import BaseServer
 
 
 class HTTPTestCase(unittest.TestCase):
