@@ -20,7 +20,7 @@ class TestServer(BaseServer):
         return Response.JSON_OK(candidates)
 
 
-class TestRankProxy(HTTPTestCase):
+class TestBaseProxy(HTTPTestCase):
 
     def setUp(self):
         self.topk = 5
@@ -62,7 +62,6 @@ class TestRankProxy(HTTPTestCase):
         self.assertEqual(len(res.json()['queries']), 1)
         self.assertEqual(res.json()['search_path'], '/_search')
         self.assertEqual(res.json()['train_path'], '/_train')
-
 
     def tearDown(self):
         self.server.kill()

@@ -1,17 +1,23 @@
 from ...base import BaseServer, Handler, Response
-from ...proxies.rank import ESProxy
+from ...clients import ESClient
+from ...proxies import BaseProxy
+from ...models import TestModel
 from ..http import HTTPTestCase
 import copy
 
 
 class MockESServer(BaseServer):
-    handler = RouteHandler(BaseServer.handler)
+    handler = Handler(BaseServer.handler)
 
     @handler.add_route('GET', '/{index}/_search')
     async def search(self, request):
         response = copy.deepcopy(MOCK_ES_DATA)
         response['hits']['hits'] = [MOCK_ES_HIT] * int(request.query['size'])
         return Response.JSON_OK(response)
+
+
+class ESProxy(BaseProxy, ESClient, TestModel):
+    pass
 
 
 class TestESProxy(HTTPTestCase):
@@ -22,7 +28,6 @@ class TestESProxy(HTTPTestCase):
 
         self.server = self.setUpServer(MockESServer, ['--port', '9500'])
         self.proxy = self.setUpServer(ESProxy, [
-            '--model', 'TestModel',
             '--ext_port', '9500',
             '--field', 'message'
         ])
