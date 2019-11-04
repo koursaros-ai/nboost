@@ -1,4 +1,3 @@
-
 from ...proxies.rank import ESProxy
 from ..http import HTTPTestCase
 from ...paths import RESOURCES
