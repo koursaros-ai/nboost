@@ -4,13 +4,13 @@ from ..http import HTTPTestCase
 import copy
 
 
-class FakeESServer(BaseServer):
+class MockESServer(BaseServer):
     handler = RouteHandler(BaseServer.handler)
 
     @handler.add_route('GET', '/{index}/_search')
     async def search(self, request):
-        response = copy.deepcopy(FAKE_ES_DATA)
-        response['hits']['hits'] = [FAKE_ES_HIT] * int(request.query['size'])
+        response = copy.deepcopy(MOCK_ES_DATA)
+        response['hits']['hits'] = [MOCK_ES_HIT] * int(request.query['size'])
         return Response.JSON_OK(response)
 
 
@@ -20,7 +20,7 @@ class TestESProxy(HTTPTestCase):
         self.topk = 5
         self.es_index = 'test_index'
 
-        self.server = self.setUpServer(FakeESServer, ['--port', '9500'])
+        self.server = self.setUpServer(MockESServer, ['--port', '9500'])
         self.proxy = self.setUpServer(ESProxy, [
             '--model', 'TestModel',
             '--ext_port', '9500',
@@ -53,7 +53,7 @@ class TestESProxy(HTTPTestCase):
         self.proxy.kill()
 
 
-FAKE_ES_DATA = {
+MOCK_ES_DATA = {
     "took": 5,
     "timed_out": False,
     "_shards": {
@@ -72,7 +72,7 @@ FAKE_ES_DATA = {
     }
 }
 
-FAKE_ES_HIT = {
+MOCK_ES_HIT = {
     "_index": "twitter",
     "_type": "_doc",
     "_id": "0",

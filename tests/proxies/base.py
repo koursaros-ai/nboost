@@ -1,56 +1,52 @@
-from ...base import RouteHandler, Response, BaseServer
+from ...base import Response, BaseServer
 from ...proxies import BaseProxy
+from ...clients import TestClient
+from ...models import TestModel
 from ..http import HTTPTestCase
+import time
 
 
-class TestProxy(BaseProxy):
-    handler = RouteHandler(BaseProxy.handler)
-
-    @handler.add_route('GET', '/client')
-    async def client(self, request):
-        async with self.client_handler(
-                request.method,
-                self.ext_url(request),
-                request.content) as client_response:
-            return Response.JSON_OK(await client_response.json())
+class TestProxy(BaseProxy, TestClient, TestModel):
+    search_path = '/_search'
+    train_path = '/_train'
 
 
 class TestServer(BaseServer):
-    handler = RouteHandler(BaseServer.handler)
-
-    @handler.add_route('GET', '/server')
-    async def server(self, request):
-        return Response.JSON_OK(dict(msg='server_response'))
-
-    @handler.add_route('GET', '/client')
-    async def client(self, request):
-        return Response.JSON_OK(dict(msg='client_response'))
+    @BaseServer.add_route('GET', '/_search')
+    async def search(self, request):
+        candidates = ['candidate %s' % x for x in range(int(request.query['topk']))]
+        return Response.JSON_OK(dict(candidates=candidates))
 
 
-class TestBaseProxy(HTTPTestCase):
+class TestRankProxy(HTTPTestCase):
 
     def setUp(self):
+        self.topk = 5
+
         self.server = self.setUpServer(TestServer, ['--port', '54001'])
-        self.proxy = self.setUpServer(TestProxy, [
-            '--model', 'TestModel',
-            '--ext_port', '54001'
-        ])
+        self.proxy = self.setUpServer(TestProxy, ['--ext_port', '54001', '--multiplier', '6'])
 
-    def test_proxy(self):
-        # test server
-        res = self.get_from(self.server, path='/server')
-        self.assertTrue(res.ok)
-        self.assertEqual(res.json()['msg'], 'server_response')
-
-        # test fallback
-        res = self.get_from(self.proxy, path='/server')
-        self.assertTrue(res.ok)
-        self.assertEqual(res.json()['msg'], 'server_response')
-
-        # test client
-        res = self.get_from(self.proxy, path='/client')
-        self.assertTrue(res.ok)
-        self.assertEqual(res.json()['msg'], 'client_response')
+    def test_search_and_train(self):
+        # search
+        # params = dict(topk=self.topk, q='test query')
+        #
+        # proxy_res = self.get_from(self.proxy, path='/_search', params=params)
+        # server_res = self.get_from(self.server, path='/_search', params=params)
+        #
+        # self.assertTrue(proxy_res.ok)
+        # self.assertTrue(server_res.ok)
+        # self.assertEqual(
+        #     len(proxy_res.json()['candidates']),
+        #     len(server_res.json()['candidates'])
+        # )
+        #
+        # # train
+        # headers = {
+        #     'qid': proxy_res.headers['qid'],
+        #     'cid': str(self.topk - 1)
+        # }
+        # train_res = self.get_from(self.proxy, path='/_train', headers=headers)
+        # self.assertEqual(train_res.status_code, 204)
 
         # test status
         res = self.get_from(self.proxy, path='/status')
@@ -62,6 +58,11 @@ class TestBaseProxy(HTTPTestCase):
         self.assertEqual(res.json()['model'], 'TestModel')
         self.assertEqual(res.json()['traffic']['/server'], 1)
         self.assertEqual(res.json()['traffic']['/client'], 1)
+        self.assertEqual(res.json()['multiplier'], 6)
+        self.assertEqual(len(res.json()['queries']), 1)
+        self.assertEqual(res.json()['search_path'], '/_search')
+        self.assertEqual(res.json()['train_path'], '/_train')
+        # time.sleep(30)
 
     def tearDown(self):
         self.server.kill()
