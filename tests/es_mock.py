@@ -4,6 +4,7 @@ from neural_rerank.cli import set_parser
 import unittest
 import requests
 import copy
+import time
 
 
 class MockESServer(BaseServer):
@@ -41,14 +42,13 @@ class TestESProxy(unittest.TestCase):
     def test_search_and_train(self):
         # search
         params = dict(size=self.topk, q='message:test query')
-        path = '/%s/_search' % self.es_index
 
         proxy_res = requests.get(
-            'http://%s:%s/%s/_search' % (self.proxy.host, self.proxy.port, path),
+            'http://%s:%s/%s/_search' % (self.proxy.host, self.proxy.port, self.es_index),
             params=params
         )
         server_res = requests.get(
-            'http://%s:%s/%s/_search' % (self.server.host, self.server.port, path),
+            'http://%s:%s/%s/_search' % (self.server.host, self.server.port, self.es_index),
             params=params
         )
 
@@ -65,7 +65,8 @@ class TestESProxy(unittest.TestCase):
             'http://%s:%s/train' % (self.server.host, self.server.port),
             headers=headers
         )
-
+        time.sleep(30)
+        print(train_res)
         self.assertTrue(train_res.ok)
 
     def tearDown(self):
