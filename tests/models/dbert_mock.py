@@ -1,5 +1,5 @@
 
-from ...proxies import RankProxy
+from ...models import DBERTRank
 from ...paths import RESOURCES
 import unittest
 import asyncio
