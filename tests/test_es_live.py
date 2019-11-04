@@ -1,5 +1,5 @@
-from neural_rerank.proxies.rank import ESProxy
-from ..http import HTTPTestCase
+from neural_rerank.proxies import ESProxy
+from http import HTTPTestCase
 from paths import RESOURCES
 from elasticsearch import Elasticsearch
 import csv
