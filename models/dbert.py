@@ -31,7 +31,7 @@ class DBERTRank(BaseModel):
         self.scheduler = ConstantLRSchedule(self.optimizer)
 
     async def train(self, query, candidates, labels):
-        input_ids, attention_mask = await self.mask(query, candidates)
+        input_ids, attention_mask = await self.encode(query, candidates)
 
         labels = torch.tensor(labels, dtype=torch.float).to(self.device, non_blocking=True)
         loss = self.rerank_model(input_ids, labels=labels, attention_mask=attention_mask)[0]
@@ -42,7 +42,7 @@ class DBERTRank(BaseModel):
         self.rerank_model.zero_grad()
 
     async def rank(self, query, candidates):
-        input_ids, attention_mask = await self.mask(query, candidates)
+        input_ids, attention_mask = await self.encode(query, candidates)
 
         with torch.no_grad():
             logits = self.rerank_model(input_ids, attention_mask=attention_mask)[0]
@@ -51,7 +51,7 @@ class DBERTRank(BaseModel):
                 scores = [scores]
             return list(np.argsort(scores)[::-1])
 
-    async def mask(self, query, candidates):
+    async def encode(self, query, candidates):
         inputs = [self.tokenizer.encode_plus(
             query, candidate, add_special_tokens=True
         ) for candidate in candidates]
