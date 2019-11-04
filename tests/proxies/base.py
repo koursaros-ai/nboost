@@ -1,7 +1,7 @@
-from ...base import Response, BaseServer, Handler
-from ...proxies import BaseProxy
-from ...clients import TestClient
-from ...models import TestModel
+from neural_rerank.base import Response, BaseServer, Handler
+from neural_rerank.proxies import BaseProxy
+from neural_rerank.clients import TestClient
+from neural_rerank.models import TestModel
 from ..http import HTTPTestCase
 import time
 
