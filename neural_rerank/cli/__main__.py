@@ -5,8 +5,6 @@ from neural_rerank import models
 from neural_rerank.proxies import BaseProxy
 from neural_rerank.cli import set_parser
 
-proxy_cls, client_cls, server_cls = BaseProxy, ESClient, DBERTRank
-
 if __name__ == '__main__':
     parser = set_parser()
     es = Elasticsearch()
