@@ -18,7 +18,11 @@ class TestDBERTRank(unittest.TestCase):
 
     def test_train(self):
         labels = [float(i % 2) for i in range(len(self.candidates))]
-        asyncio.run(self.model.train(self.query, self.candidates, labels=labels))
+        res = (
+            asyncio.get_event_loop()
+            .run_until_complete(self.model.train(self.query, self.candidates, labels=labels))
+        )
+        self.assertIsInstance(res, list)
 
     def test_rank(self):
         res = (
