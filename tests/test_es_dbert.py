@@ -76,4 +76,4 @@ class TestESProxy(unittest.TestCase):
         # time.sleep(30)
 
     def tearDown(self):
-        self.proxy.kill()
+        self.proxy.terminate()
