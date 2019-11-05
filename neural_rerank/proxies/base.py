@@ -4,6 +4,7 @@ from ..models import BaseModel
 from ..cli import format_pyobj
 from aiohttp import web
 import itertools
+import json
 
 
 class BaseProxy(BaseClient, BaseModel, BaseServer):
@@ -32,11 +33,10 @@ class BaseProxy(BaseClient, BaseModel, BaseServer):
         return self._train_path
 
     async def _train(self, request: web.BaseRequest) -> web.Response:
-        req = await request.json()
-
-        query, candidates = self.queries[req['qid']]
+        qid, cid = await self.parse_qid_cid(request)
+        query, candidates = self.queries[qid]
         labels = [0] * len(candidates)
-        labels[req['cid']] = 1
+        labels[cid] = 1
 
         self.logger.info('TRAIN: %s' % query)
         self.logger.debug('candidates: %s\nlabels:%s' % (
@@ -46,16 +46,16 @@ class BaseProxy(BaseClient, BaseModel, BaseServer):
         return Response.NO_CONTENT()
 
     async def _search(self, request: web.BaseRequest) -> web.Response:
-        topk, method, ext_url, data = await self.magnify(request)
+        topk, method, ext_url, data = await self.magnify_request(request)
         async with self.client_handler(method, ext_url, data) as client_response:
             self.logger.info('RECV: ' + repr(client_response).split('\n')[0])
-            query, candidates = await self.parse(request, client_response)
+            query, candidates = await self.parse_query_candidates(request, client_response)
             self.logger.info('RANK: %s' % query)
             self.logger.debug('candidates: %s' % format_pyobj(candidates))
             ranks = await self.rank(query, candidates)
             qid = next(self.counter)
             self.queries[qid] = query, candidates
-            response = await self.format(client_response, topk, ranks, qid)
+            response = await self.format_response(client_response, topk, ranks, qid)
 
             return response
 
