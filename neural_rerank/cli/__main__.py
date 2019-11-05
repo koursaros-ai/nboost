@@ -1,9 +1,9 @@
-from neural_rerank.cli import set_parser
 from elasticsearch import Elasticsearch
 
 from neural_rerank.clients import ESClient
 from neural_rerank.models import DBERTRank
 from neural_rerank.proxies import BaseProxy
+from neural_rerank.cli import set_parser
 
 proxy_cls, client_cls, server_cls = BaseProxy, ESClient, DBERTRank
 
