@@ -13,7 +13,7 @@ class BaseClient(Base):
                  multiplier: int = 10,
                  field: str = None,
                  **kwargs):
-        super().__init__(**kwargs)
+        super().__init__()
         self.ext_host = ext_host
         self.ext_port = ext_port
         self.multiplier = multiplier
