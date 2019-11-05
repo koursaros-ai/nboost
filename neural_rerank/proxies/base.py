@@ -32,12 +32,11 @@ class BaseProxy(BaseClient, BaseModel, BaseServer):
         return self._train_path
 
     async def _train(self, request: web.BaseRequest) -> web.Response:
-        qid = int(request.headers['qid'])
-        cid = int(request.headers['cid'])
+        req = await request.json()
 
-        query, candidates = self.queries[qid]
+        query, candidates = self.queries[req['qid']]
         labels = [0] * len(candidates)
-        labels[cid] = 1
+        labels[req['cid']] = 1
 
         self.logger.info('TRAIN: %s' % query)
         self.logger.debug('candidates: %s\nlabels:%s' % (

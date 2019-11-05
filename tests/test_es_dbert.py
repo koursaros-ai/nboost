@@ -64,15 +64,6 @@ class TestESProxy(unittest.TestCase):
             )
         self.assertTrue(proxy_res.ok)
 
-        total = proxy_res.json()['hits']['total']
-        num_hits = len(proxy_res.json()['hits']['hits'])
-        if isinstance(total, int):
-            self.assertLess(num_hits, total)
-        elif isinstance(total, dict):
-            self.assertLess(num_hits, total['value'])
-        else:
-            self.skipTest('Expecting total to be int or dict but found type %s "%s"' % (type(total), total))
-
         # time.sleep(30)
 
     def tearDown(self):
