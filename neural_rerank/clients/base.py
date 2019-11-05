@@ -1,11 +1,12 @@
 import aiohttp
-from ..base import Base, Handler
+from ..base import Base
+from .handler import ClientHandler
 from aiohttp import web, client
 from typing import Tuple, List
 
 
 class BaseClient(Base):
-    handler = Handler(Base.handler)
+    handler = ClientHandler()
 
     def __init__(self,
                  ext_host: str = '127.0.0.1',
@@ -19,25 +20,21 @@ class BaseClient(Base):
         self.multiplier = multiplier
         self.field = field
 
-    @handler.add_state()
+    @handler.add_state
     def ext_host(self):
         return self.ext_host
 
-    @handler.add_state()
+    @handler.add_state
     def ext_port(self):
         return self.ext_port
 
-    @handler.add_state()
+    @handler.add_state
     def multiplier(self):
         return self.multiplier
 
-    @handler.add_state()
+    @handler.add_state
     def field(self):
         return self.field
-
-    def client_handler(self, method, ext_url, data):
-        self.logger.info('SEND: <ClientRequest %s %s >' % (method, ext_url))
-        return aiohttp.request(method, ext_url, data=data)
 
     def ext_url(self, request: web.BaseRequest):
         return request.url.with_host(self.ext_host).with_port(self.ext_port)
