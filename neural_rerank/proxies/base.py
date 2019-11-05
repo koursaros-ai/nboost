@@ -28,8 +28,8 @@ class BaseProxy(Base, Process):
         self._host = host
         self._port = port
         self._read_bytes = read_bytes
-        self._queries = {}
-        self._is_ready = Event()
+        self.queries = {}
+        self.is_ready = Event()
         self.counter = itertools.count()
         self.handler.add_route('*', status_path)(self.status)
         self.handler.add_route('*', search_path)(self.search)
@@ -60,7 +60,11 @@ class BaseProxy(Base, Process):
 
     @handler.add_state
     def backlog(self):
-        return len(self._queries)
+        return len(self.queries)
+
+    @handler.add_state
+    def ready(self):
+        return self.is_ready.is_set()
 
     @web.middleware
     async def middleware(self, request: web.BaseRequest, handler: Callable) -> web.Response:
