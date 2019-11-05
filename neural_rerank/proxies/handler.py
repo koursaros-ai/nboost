@@ -1,6 +1,6 @@
 from ..base import *
 from aiohttp import web_routedef
-from typing import List
+from typing import List, Union
 import time
 
 
@@ -53,7 +53,7 @@ class ProxyHandler(BaseHandler):
         return web.Response(body=body, status=200)
 
     @staticmethod
-    def json_ok(body: dict):
+    def json_ok(body: Union[dict, list]):
         return web.json_response(body, status=200)
 
     @staticmethod
