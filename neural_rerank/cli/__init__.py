@@ -93,7 +93,7 @@ def set_parser():
     parser.add_argument('--data_dir', type=str, default='/.cache', help='dir for model binary')
     parser.add_argument('--client', type=str, default='ESClient', help='client class to load')
     parser.add_argument('--model', type=str, default='DBERTRank', help='model class to load')
-    parser.add_argument('--read_bytes', type=int, default=2048, help='chunks to read/write')
+    parser.add_argument('--read_bytes', type=int, default=2048, help='chunk size to read/write')
     return parser
 
 
