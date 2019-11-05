@@ -63,6 +63,7 @@ class TestBaseProxy(unittest.TestCase):
         self.assertEqual(len(proxy_res.json()), len(server_res.json()))
 
         # train
+        print(proxy_res.headers)
         headers = {
             'qid': proxy_res.headers['qid'],
             'cid': str(self.topk - 1)

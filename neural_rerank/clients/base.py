@@ -1,4 +1,3 @@
-
 import aiohttp
 from ..base import Base, Handler
 from aiohttp import web, client
@@ -51,28 +50,35 @@ class BaseClient(Base):
     def status(self):
         return dict(ext_host=self.ext_host, ext_port=self.ext_port)
 
-    async def magnify(self, request: web.BaseRequest) -> Tuple[int, str, str, bytes]:
+    async def magnify_request(self, request: web.BaseRequest) -> Tuple[int, str, str, bytes]:
         """
         Magnify the size of the request by the multiplier
         :return topk, method, ext_url, data
         """
         raise web.HTTPNotImplemented
 
-    async def parse(self,
-                    request: web.BaseRequest,
-                    client_response: client.ClientResponse) -> Tuple[str, List[str]]:
+    async def parse_query_candidates(self,
+                                     request: web.BaseRequest,
+                                     client_response: client.ClientResponse) -> Tuple[str, List[str]]:
         """
         Parse out the query and candidates
         :return: query, candidates
         """
         raise web.HTTPNotImplemented
 
-    async def format(self,
-                     client_response: client.ClientResponse,
-                     topk: int,
-                     ranks: List[int],
-                     qid: int) -> web.Response:
+    async def format_response(self,
+                              client_response: client.ClientResponse,
+                              topk: int,
+                              ranks: List[int],
+                              qid: int) -> web.Response:
         """
         Reformat the client response according to the reranked candidates
+        """
+        raise web.HTTPNotImplemented
+
+    async def parse_qid_cid(self, request: web.BaseRequest) -> Tuple[int, int]:
+        """
+        Parse out the qid and cid
+        :return: qid, cid
         """
         raise web.HTTPNotImplemented

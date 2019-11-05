@@ -63,6 +63,12 @@ class TestESProxy(unittest.TestCase):
                 params={'q': 'description:light'}
             )
         self.assertTrue(proxy_res.ok)
+        self.assertEqual(proxy_res.json()['qid'], 0)
+
+        train_res = requests.post(
+                'http://%s:%s/%s/train' % (self.proxy.host, self.proxy.port, ES_INDEX),
+                params={'qid': 0, 'cid': 0}
+            )
 
         # time.sleep(30)
 
