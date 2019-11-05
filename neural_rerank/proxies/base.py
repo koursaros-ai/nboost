@@ -53,9 +53,9 @@ class BaseProxy(BaseClient, BaseModel, BaseServer):
             self.logger.info('RANK: %s' % query)
             self.logger.debug('candidates: %s' % format_pyobj(candidates))
             ranks = await self.rank(query, candidates)
-            response = await self.format(client_response, topk, ranks)
             qid = next(self.counter)
             self.queries[qid] = query, candidates
-            response.headers['qid'] = str(qid)
+            response = await self.format(client_response, topk, ranks, qid)
+
             return response
 

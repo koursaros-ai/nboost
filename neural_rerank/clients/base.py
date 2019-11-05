@@ -67,7 +67,11 @@ class BaseClient(Base):
         """
         raise web.HTTPNotImplemented
 
-    async def format(self, client_response: client.ClientResponse, topk: int, ranks: List[int]) -> web.Response:
+    async def format(self,
+                     client_response: client.ClientResponse,
+                     topk: int,
+                     ranks: List[int],
+                     qid: int) -> web.Response:
         """
         Reformat the client response according to the reranked candidates
         """

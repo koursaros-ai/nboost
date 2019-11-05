@@ -19,7 +19,7 @@ class TestClient(BaseClient):
         candidates = await client_response.json()
         return query, candidates
 
-    async def format(self, client_response, topk, ranks):
+    async def format(self, client_response, topk, ranks, qid):
         candidates = await client_response.json()
         reranked = [candidates[i] for i in ranks[:topk]]
         return Response.JSON_OK(reranked)
