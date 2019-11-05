@@ -5,7 +5,7 @@ from aiohttp import web
 
 class BaseModel(Base):
     def __init__(self, lr: float = 10e-3, data_dir: str = '/.cache', **kwargs):
-        super().__init__(**kwargs)
+        super().__init__()
         self.lr = lr
         self.data_dir = data_dir
 
