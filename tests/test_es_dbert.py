@@ -67,7 +67,7 @@ class TestESProxy(unittest.TestCase):
 
         train_res = requests.post(
                 'http://%s:%s/%s/train' % (self.proxy.host, self.proxy.port, ES_INDEX),
-                data={'qid': 'description:light'}
+                params={'qid': 0, 'cid': 0}
             )
 
         # time.sleep(30)
