@@ -1,7 +1,7 @@
 from ..base import *
 from .handler import ProxyHandler
-from .. import clients
-from .. import models
+from ..clients import BaseClient
+from ..models import BaseModel
 from multiprocessing import Process, Event
 from typing import List
 import asyncio
@@ -14,8 +14,8 @@ class BaseProxy(Base, Process):
     handler = ProxyHandler()
 
     def __init__(self,
-                 client: clients.BaseClient = clients.BaseClient,
-                 model: models.BaseModel = models.BaseModel,
+                 client: BaseClient = BaseClient,
+                 model: BaseModel = BaseModel,
                  host: str = '127.0.0.1',
                  port: int = 53001,
                  read_bytes: int = 2048,
