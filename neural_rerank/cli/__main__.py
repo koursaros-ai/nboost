@@ -10,9 +10,9 @@ proxy_cls, client_cls, server_cls = BaseProxy, ESClient, DBERTRank
 if __name__ == '__main__':
     parser = set_parser()
     es = Elasticsearch()
-    class MyProxy(proxy_cls, client_cls, server_cls):
-        pass
     args = parser.parse_args()
-    proxy = MyProxy(**vars(args))
+    client = ESClient(**vars(args))
+    model = DBERTRank(**vars(args))
+    proxy = BaseProxy(client, model, **vars(args))
     proxy.start()
     proxy.is_ready.wait()
