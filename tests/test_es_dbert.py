@@ -46,17 +46,17 @@ class TestESProxy(unittest.TestCase):
             self.skipTest('ES not available on port %s' % ES_PORT)
             raise SystemExit
 
-        if es_res.json()['_all']['primaries']['docs']['count'] < INDEX_SIZE:
-            self.es.indices.create(index=ES_INDEX, ignore=400)
+        # if es_res.json()['_all']['primaries']['docs']['count'] < INDEX_SIZE:
+        self.es.indices.create(index=ES_INDEX, ignore=400)
 
-            # id, query, product_title, product_description, median_relevance, relevance_variance
-            with RESOURCES.joinpath('train.csv').open() as fh:
-                sample_data = csv.reader(fh)
-                print('Dumping train.csv...')
-                for row in list(sample_data)[:INDEX_SIZE]:
-                    self.es.index(
-                        index=ES_INDEX, id=row[0],
-                        body=dict(title=row[2], description=row[3]))
+        # id, query, product_title, product_description, median_relevance, relevance_variance
+        with RESOURCES.joinpath('train.csv').open() as fh:
+            sample_data = csv.reader(fh)
+            print('Dumping train.csv...')
+            for row in list(sample_data)[:INDEX_SIZE]:
+                self.es.index(
+                    index=ES_INDEX, id=row[0],
+                    body=dict(title=row[2], description=row[3]))
 
         proxy_res = requests.get(
                 'http://%s:%s/%s/_search' % (self.proxy.host, self.proxy.port, ES_INDEX),
