@@ -56,8 +56,6 @@ class TestBaseProxy(unittest.TestCase):
             'http://%s:%s/search' % (self.server.host, self.server.port),
             params=params
         )
-        import pdb
-        pdb.set_trace()
 
         self.assertTrue(proxy_res.ok)
         self.assertTrue(server_res.ok)
