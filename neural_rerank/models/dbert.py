@@ -1,19 +1,20 @@
 from .base import BaseModel
+import torch, torch.nn
+import numpy as np
+
 
 class DBERTRank(BaseModel):
     model_name = 'distilbert-base-uncased'
     max_grad_norm = 1.0
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def post_start(self):
         from transformers import (AutoConfig,
                                   AutoModelForSequenceClassification,
                                   AutoTokenizer,
                                   AdamW,
                                   ConstantLRSchedule)
-        import torch.nn
+
+        super().__init__(*args, **kwargs)
         model_config = AutoConfig.from_pretrained(self.model_name)
         model_config.num_labels = 1  # set up for regression
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -29,7 +30,6 @@ class DBERTRank(BaseModel):
         self.scheduler = ConstantLRSchedule(self.optimizer)
 
     async def train(self, query, candidates, labels):
-        import torch.nn
         input_ids, attention_mask = await self.encode(query, candidates)
 
         labels = torch.tensor(labels, dtype=torch.float).to(self.device, non_blocking=True)
@@ -41,8 +41,6 @@ class DBERTRank(BaseModel):
         self.rerank_model.zero_grad()
 
     async def rank(self, query, candidates):
-        import torch
-        import numpy as np
         input_ids, attention_mask = await self.encode(query, candidates)
 
         with torch.no_grad():
@@ -53,7 +51,6 @@ class DBERTRank(BaseModel):
             return list(np.argsort(scores)[::-1])
 
     async def encode(self, query, candidates):
-        import torch
         inputs = [self.tokenizer.encode_plus(
             query, candidate, add_special_tokens=True
         ) for candidate in candidates]
