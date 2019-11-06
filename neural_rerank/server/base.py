@@ -38,12 +38,12 @@ class BaseServer(BaseLogger, Process):
         return self.read_bytes
 
     @handler.add_state
-    def ready(self):
+    def _is_ready(self):
         return self.is_ready.is_set()
 
     @property
     def state(self):
-        return {self.__name__: self.handler.bind_states(self)}
+        return {self.__class__.__name__: self.handler.bind_states(self)}
 
     async def status(self, request: web.BaseRequest):
         return self.handler.json_ok(self.state)
@@ -62,18 +62,17 @@ class BaseServer(BaseLogger, Process):
     async def middleware(self,
                          request: web.BaseRequest,
                          handler: Callable) -> web.Response:
-        self.logger.error(request)
-        self.logger.error(handler)
+
         try:
             response = await handler(request)
         except web_exceptions.HTTPNotFound:
             response = await self.handle_not_found(request)
         except Exception as ex:
-            response = self.handle_error(ex)
+            response = await self.handle_error(ex)
 
         if 'pretty' in request.query:
             response.body = pformat(response.body)
-        self.logger.error(response)
+
         return response
 
     async def handle_not_found(self, request: web.BaseRequest):
