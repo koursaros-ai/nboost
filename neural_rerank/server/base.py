@@ -1,7 +1,6 @@
 from ..base import BaseLogger, pfmt, pfmt_obj
 from pprint import pformat
 from multiprocessing import Process, Event
-# import multiprocessing as mp
 from aiohttp import web_exceptions, web_routedef, web
 from typing import List, Callable
 from .handler import ServerHandler
@@ -11,9 +10,6 @@ import time
 
 def running_avg(avg: float, new: float, n: int):
     return (avg * n + new) / n
-
-
-# ctx = mp.get_context('spawn')
 
 
 class BaseServer(BaseLogger, Process):
