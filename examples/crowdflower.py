@@ -8,7 +8,7 @@ def main():
     with RESOURCES.joinpath('train.csv').open() as fh:
         sample_data = csv.reader(fh)
         print('Dumping train.csv...')
-        es = Elasticsearch()
+        es = Elasticsearch(hosts=[{"host": "localhost", "port": 53001}])
         for row in list(sample_data):
             es.index(
                 index=INDEX,
