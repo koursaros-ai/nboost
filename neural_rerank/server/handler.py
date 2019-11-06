@@ -1,6 +1,8 @@
+
+from collections import defaultdict
+from aiohttp import web_routedef
 from ..base import BaseHandler
 from typing import Callable
-from aiohttp import web_routedef
 from typing import List
 from aiohttp import web
 import copy
@@ -9,19 +11,15 @@ import copy
 class ServerHandler(BaseHandler):
     def __init__(self, *handlers: 'ServerHandler'):
         super().__init__(*handlers)
-        self.routes = {}
+        self.routes = defaultdict(lambda: dict(method=str(), func=str(), lat=float(), reqs=int()))
 
         for handler in handlers:
             self.routes.update(copy.deepcopy(handler.routes))
 
     def add_route(self, method: str, path: str):
         def wrap(f: Callable):
-            self.routes[path] = dict(
-                method=method,
-                func=f.__name__,
-                lat=float(),
-                reqs=int()
-            )
+            self.routes[path]['method'] = method
+            self.routes[path]['func'] = f.__name__
             return f
         return wrap
 

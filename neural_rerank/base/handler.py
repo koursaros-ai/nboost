@@ -32,7 +32,7 @@ class BaseHandler:
     def internal_error(body):
         return web.json_response(dict(error=str(body), type=type(body).__name__), status=500)
 
-    def add_state(self, f: Callable):
+    def add_state(self, f: Callable) -> None:
         self.states.add(f)
 
     def bind_states(self, s: 'BaseLogger') -> dict:

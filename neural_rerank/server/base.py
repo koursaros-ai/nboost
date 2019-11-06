@@ -1,4 +1,4 @@
-from ..base import BaseLogger, pfmt
+from ..base import BaseLogger, pfmt, pfmt_obj
 from pprint import pformat
 from multiprocessing import Process, Event
 from aiohttp import web_exceptions, web_routedef, web
@@ -22,8 +22,7 @@ class BaseServer(BaseLogger, Process):
                  status_path: str = '/status',
                  status_method: str = '*',
                  **kwargs):
-        BaseLogger.__init__(self)
-        Process.__init__(self)
+        super().__init__()
         self.host = host
         self.port = port
         self.read_bytes = read_bytes
@@ -31,19 +30,19 @@ class BaseServer(BaseLogger, Process):
         self.handler.add_route(status_method, status_path)(self.status)
 
     @handler.add_state
-    def _host(self):
+    def host(self):
         return self.host
 
     @handler.add_state
-    def _port(self):
+    def port(self):
         return self.port
 
     @handler.add_state
-    def _read_bytes(self):
+    def read_bytes(self):
         return self.read_bytes
 
     @handler.add_state
-    def _is_ready(self):
+    def is_ready(self):
         return self.is_ready.is_set()
 
     @property
@@ -57,7 +56,6 @@ class BaseServer(BaseLogger, Process):
                          loop: asyncio.AbstractEventLoop,
                          routes: List[web_routedef.RouteDef]) -> None:
         app = web.Application(middlewares=[self.middleware])
-        print(routes)
         app.add_routes(routes)
         runner = web.AppRunner(app)
         await runner.setup()
@@ -71,19 +69,20 @@ class BaseServer(BaseLogger, Process):
 
         self.logger.info('RECV: %s' % request)
         self.logger.debug(pfmt(request))
-        self.handler.routes.setdefault(request.path, 0)
         self.handler.routes[request.path]['reqs'] += 1
         start = time.time()
 
         try:
             response = await handler(request)
         except web_exceptions.HTTPNotFound:
+            self.logger.info('NOT FOUND: %s' % request)
             response = await self.handle_not_found(request)
-        except Exception as ex:
-            response = await self.handle_error(ex)
+        except Exception as e:
+            self.logger.error(e, exc_info=True)
+            response = await self.handle_error(e)
 
         if 'pretty' in request.query:
-            response.body = pformat(response.body)
+            response.body = pfmt_obj(response.body)
 
         self.handler.routes[request.path]['lat'] = running_avg(
             self.handler.routes[request.path]['lat'],
@@ -99,7 +98,6 @@ class BaseServer(BaseLogger, Process):
         raise web.HTTPNotFound
 
     async def handle_error(self, e: Exception):
-        self.logger.error(e, exc_info=True)
         return self.handler.internal_error(e)
 
     def run(self):

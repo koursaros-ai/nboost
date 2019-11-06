@@ -1,60 +1,54 @@
-from neural_rerank.base import BaseServer, Handler, Response
+
+from neural_rerank.cli import create_proxy, create_server
 from neural_rerank.clients import ESClient
 from neural_rerank.models import TestModel
-from neural_rerank.proxies import BaseProxy
-from neural_rerank.cli import set_parser
+from neural_rerank.server import BaseServer, ServerHandler
 import unittest
 import requests
 import copy
 import time
 
-
-class ESProxy(BaseProxy, ESClient, TestModel):
-    _search_path = '/{index}/_search'
+TOPK = 5
+ES_INDEX = 'test_index'
 
 
 class MockESServer(BaseServer):
-    handler = Handler(BaseServer.handler)
+    handler = ServerHandler(BaseServer.handler)
 
     @handler.add_route('GET', '/{index}/_search')
     async def search(self, request):
         response = copy.deepcopy(MOCK_ES_DATA)
         response['hits']['hits'] = [MOCK_ES_HIT] * int(request.query['size'])
-        return Response.JSON_OK(response)
+        return self.handler.json_ok(response)
 
 
 class TestESProxy(unittest.TestCase):
 
     def setUp(self):
-        self.topk = 5
-        self.es_index = 'test_index'
-        parser = set_parser()
-
-        self.server = MockESServer(**vars(parser.parse_args([
-            '--port', '9500',
-            '--verbose'
-        ])))
-        self.proxy = ESProxy(**vars(parser.parse_args([
+        self.proxy = create_proxy(model_cls=TestModel, client_cls=ESClient, argv=[
             '--ext_port', '9500',
             '--field', 'message',
             '--verbose'
-        ])))
-
-        self.server.start()
+        ])
         self.proxy.start()
+        self.server = create_server(cls=MockESServer, argv=[
+            '--port', '9500',
+            '--verbose'
+        ])
+        self.server.start()
         self.server.is_ready.wait()
         self.proxy.is_ready.wait()
 
     def test_search_and_train(self):
         # search
-        params = dict(size=self.topk, q='message:test query')
+        params = dict(size=TOPK, q='message:test query')
 
         proxy_res = requests.get(
-            'http://%s:%s/%s/_search' % (self.proxy.host, self.proxy.port, self.es_index),
+            'http://%s:%s/%s/_search' % (self.proxy.host, self.proxy.port, ES_INDEX),
             params=params
         )
         server_res = requests.get(
-            'http://%s:%s/%s/_search' % (self.server.host, self.server.port, self.es_index),
+            'http://%s:%s/%s/_search' % (self.server.host, self.server.port, ES_INDEX),
             params=params
         )
 
@@ -66,13 +60,12 @@ class TestESProxy(unittest.TestCase):
         )
 
         # train
-        headers = dict(qid=proxy_res.headers['qid'], cid=str(self.topk - 1))
+        headers = dict(qid=proxy_res.headers['qid'], cid=str(TOPK - 1))
         train_res = requests.get(
             'http://%s:%s/train' % (self.proxy.host, self.proxy.port),
             headers=headers
         )
         # time.sleep(30)
-        print(train_res)
         self.assertTrue(train_res.ok)
 
     def tearDown(self):
