@@ -30,13 +30,13 @@ class TestBaseProxy(unittest.TestCase):
         self.proxy = create_proxy(model_cls=TestModel, client_cls=TestClient, argv=[
             '--multiplier', '6',
             '--ext_port', '54001',
-            '--verbose'
+            # '--verbose'
         ])
 
         self.proxy.start()
         self.server = create_server(cls=TestServer, argv=[
             '--port', '54001',
-            '--verbose'
+            # '--verbose'
         ])
 
         self.server.start()
@@ -99,3 +99,5 @@ class TestBaseProxy(unittest.TestCase):
     def tearDown(self):
         self.server.close()
         self.proxy.close()
+        self.assertFalse(self.server.is_ready.is_set())
+        self.assertFalse(self.proxy.is_ready.is_set())
