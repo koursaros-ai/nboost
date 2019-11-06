@@ -75,5 +75,3 @@ class BaseLogger:
         return super().__new__(cls)
 
 
-
-
