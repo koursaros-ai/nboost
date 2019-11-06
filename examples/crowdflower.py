@@ -5,13 +5,13 @@ import csv
 INDEX = 'crowdflower'
 
 
-def main():
+def dump():
     with RESOURCES.joinpath('train.csv').open() as fh:
         sample_data = csv.reader(fh)
         print('Dumping train.csv...')
         es = Elasticsearch(
             hosts=[{"host": "localhost", "port": 53001}],
-            connection_class=RequestsHttpConnection
+            # connection_class=RequestsHttpConnection
         )
         for row in list(sample_data):
             es.index(
@@ -21,5 +21,10 @@ def main():
             )
 
 
+def main():
+    pass
+
+
 if __name__ == '__main__':
+    # dump()
     main()
