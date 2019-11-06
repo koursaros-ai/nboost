@@ -87,7 +87,7 @@ class TestBaseProxy(unittest.TestCase):
         )
         self.assertTrue(status_res.ok)
         print(json.dumps(status_res.json(), indent=4))
-        self.assertEqual(status_res.json()['ext_host'], self.proxy.client.ext_host)
+        self.assertEqual(status_res.json()['TestClient']['ext_host'], self.proxy.client.ext_host)
         # self.assertEqual(status_res.json()['ext_port'], 54001)
         # self.assertIn('TestModel', status_res.json()['spec'])
         # self.assertEqual(status_res.json()['multiplier'], 6)
