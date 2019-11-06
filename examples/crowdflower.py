@@ -22,7 +22,15 @@ def dump():
 
 
 def main():
-    pass
+    es = Elasticsearch(hosts=[{"host": "localhost", "port": 53001}])
+    res = es.search(index=INDEX, body={
+        "match": {
+            "description": {
+                "query": "test"
+            }
+        }
+    })
+    print(res)
 
 
 if __name__ == '__main__':
