@@ -3,6 +3,7 @@ from typing import Callable
 from aiohttp import web_routedef
 from typing import List
 from aiohttp import web
+import copy
 
 
 class ServerHandler(BaseHandler):
@@ -11,7 +12,7 @@ class ServerHandler(BaseHandler):
         self.routes = {}
 
         for handler in handlers:
-            self.routes.update(handler.routes)
+            self.routes.update(copy.deepcopy(handler.routes))
 
     def add_route(self, method: str, path: str):
         def wrap(f: Callable):
@@ -21,10 +22,12 @@ class ServerHandler(BaseHandler):
                 lat=float(),
                 reqs=int()
             )
+            return f
         return wrap
 
     def bind_routes(self, proxy) -> List[web_routedef.RouteDef]:
-        print(proxy.__class__.__name__, json.dumps(self.routes, indent=4))
+        # import json
+        # print(proxy.__class__.__name__, json.dumps(self.routes, indent=4))
         return [web.route(
             self.routes[path]['method'],
             path,
