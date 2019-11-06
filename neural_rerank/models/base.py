@@ -1,4 +1,4 @@
-from ..base import Base
+from neural_rerank.base import Base
 from .handler import ModelHandler
 from typing import List, Union
 from aiohttp import web
