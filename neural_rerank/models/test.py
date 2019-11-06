@@ -1,4 +1,4 @@
-from ..models.base import BaseModel
+from .base import BaseModel
 import random
 
 

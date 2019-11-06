@@ -4,44 +4,48 @@ import termcolor
 from .. import models, clients, proxy, server
 
 
-def create_server(argv: list = sys.argv) -> server.BaseServer:
+def create_server(cls: server.BaseServer.__class__ = server.BaseServer,
+                  argv: list = sys.argv) -> server.BaseServer:
     parser = set_parser()
     args = parser.parse_args(argv)
-    return server.BaseServer(
+    return cls(
         host=args.host,
         port=args.port,
         verbose=args.verbose
     )
 
 
-def create_client(argv: list = sys.argv) -> clients.BaseClient:
+def create_client(cls: clients.BaseClient.__class__ = clients.BaseClient,
+                  argv: list = sys.argv) -> clients.BaseClient:
     parser = set_parser()
     args = parser.parse_args(argv)
-    return getattr(clients, args.client)(
+    return cls(
         multiplier=args.multiplier,
         field=args.field,
         verbose=args.verbose
     )
 
 
-def create_model(argv: list = sys.argv) -> models.BaseModel:
+def create_model(cls: models.BaseModel.__class__ = models.BaseModel,
+                 argv: list = sys.argv) -> models.BaseModel:
     parser = set_parser()
     args = parser.parse_args(argv)
-    return getattr(models, args.model)(
+    return cls(
         lr=args.lr,
         data_dir=args.data_dir,
         verbose=args.verbose
     )
 
 
-def create_proxy(argv: list = sys.argv) -> proxy.BaseProxy:
+def create_proxy(cls: proxy.BaseProxy.__class__ = proxy.BaseProxy,
+                 client_cls: clients.BaseClient.__class__ = clients.BaseClient,
+                 model_cls: models.BaseModel.__class__ = models.BaseModel,
+                 argv: list = sys.argv) -> proxy.BaseProxy:
     parser = set_parser()
     args = parser.parse_args(argv)
-    client = create_client(argv)
-    model = create_model(argv)
-    return proxy.BaseProxy(
-        model=model,
-        client=client,
+    return cls(
+        model=create_model(model_cls, argv),
+        client=create_client(client_cls, argv),
         host=args.host,
         port=args.port,
         ext_host=args.ext_host,

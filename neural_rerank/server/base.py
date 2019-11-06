@@ -57,6 +57,7 @@ class BaseServer(BaseLogger, Process):
                          loop: asyncio.AbstractEventLoop,
                          routes: List[web_routedef.RouteDef]) -> None:
         app = web.Application(middlewares=[self.middleware])
+        print(routes)
         app.add_routes(routes)
         runner = web.AppRunner(app)
         await runner.setup()

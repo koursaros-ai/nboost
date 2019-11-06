@@ -2,6 +2,7 @@
 from aiohttp import web
 from typing import Union
 from typing import Callable
+import copy
 
 
 class BaseHandler:
@@ -9,7 +10,7 @@ class BaseHandler:
         self.states = set()
 
         for handler in handlers:
-            self.states |= handler.states
+            self.states |= copy.deepcopy(handler.states)
 
     @staticmethod
     def plain_ok(body: bytes):

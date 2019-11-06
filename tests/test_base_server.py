@@ -9,7 +9,7 @@ TOPK = 5
 class TestBaseServer(unittest.TestCase):
 
     def setUp(self):
-        self.server = create_server(['--verbose'])
+        self.server = create_server(argv=['--verbose'])
         self.server.start()
         self.server.is_ready.wait()
 
