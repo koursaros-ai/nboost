@@ -62,7 +62,7 @@ class TestBaseProxy(unittest.TestCase):
 
         # num candidates should be equal
         self.assertEqual(len(proxy_res.json()), len(server_res.json()))
-
+        
         # train
         data = json.dumps({
             'qid': proxy_res.headers['qid'],

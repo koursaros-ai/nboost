@@ -14,6 +14,10 @@ class BaseModel(BaseLogger):
         self._lr = lr
         self._data_dir = data_dir
 
+    def post_start(self):
+        """ Executes after the process forks """
+        pass
+
     @handler.add_state
     def lr(self):
         return self._lr

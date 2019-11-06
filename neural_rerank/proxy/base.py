@@ -90,3 +90,6 @@ class BaseProxy(BaseServer):
 
             return response
 
+    def run(self):
+        self.model.post_start()
+        super().run()
