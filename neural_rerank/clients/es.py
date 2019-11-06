@@ -34,6 +34,8 @@ class ESClient(BaseClient):
         except:
             self.logger.error(parsed)
             raise NotImplementedError
+        if not self.field:
+            self.logger.error('Please set --field which you would like to rank on')
         candidates = [hit['_source'][self.field] for hit in hits]
         return query, candidates
 
