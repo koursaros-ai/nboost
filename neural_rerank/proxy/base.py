@@ -91,10 +91,12 @@ class BaseProxy(BaseServer):
 
     async def search(self, request: web.BaseRequest) -> web.Response:
         topk, method, ext_url, data = await self.client.magnify_request(request)
+        headers = dict(request.headers)
+        headers['Content-Type'] = 'application/json'
         self.logger.info('PROXY: <Request %s %s >' % (method, ext_url))
         self.logger.debug(pfmt_obj(data))
 
-        async with aiohttp.request(method, ext_url, data=data) as client_response:
+        async with aiohttp.request(method, ext_url, data=data,headers=headers) as client_response:
             self.logger.info('RECV: ' + repr(client_response).split('\n')[0])
             query, candidates = await self.client.parse_query_candidates(request, client_response)
 
