@@ -24,9 +24,11 @@ def dump():
 def main():
     es = Elasticsearch(hosts=[{"host": "localhost", "port": 9200}])
     res = es.search(index=INDEX, body={
-        "match": {
-            "description": {
-                "query": "test"
+        "query": {
+            "match": {
+                "description": {
+                    "query": "test"
+                }
             }
         }
     })
