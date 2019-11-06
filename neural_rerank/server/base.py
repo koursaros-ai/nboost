@@ -52,16 +52,6 @@ class BaseServer(BaseLogger, Process):
     async def status(self, request: web.BaseRequest):
         return self.handler.json_ok(self.state)
 
-    async def create_app(self,
-                         loop: asyncio.AbstractEventLoop,
-                         routes: List[web_routedef.RouteDef]) -> None:
-        app = web.Application(middlewares=[self.middleware])
-        app.add_routes(routes)
-        runner = web.AppRunner(app)
-        await runner.setup()
-        site = web.TCPSite(runner, self.host, self.port)
-        await site.start()
-
     @web.middleware
     async def middleware(self,
                          request: web.BaseRequest,
@@ -100,6 +90,16 @@ class BaseServer(BaseLogger, Process):
     async def handle_error(self, e: Exception):
         return self.handler.internal_error(e)
 
+    async def create_app(self,
+                         loop: asyncio.AbstractEventLoop,
+                         routes: List[web_routedef.RouteDef]) -> None:
+        app = web.Application(middlewares=[self.middleware])
+        app.add_routes(routes)
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, self.host, self.port)
+        await site.start()
+
     def run(self):
         try:
             loop = asyncio.get_event_loop()
@@ -115,3 +115,4 @@ class BaseServer(BaseLogger, Process):
 
     def close(self):
         self.terminate()
+        self.join()
