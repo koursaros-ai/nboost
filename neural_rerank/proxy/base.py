@@ -52,10 +52,9 @@ class BaseProxy(BaseServer):
             remote_reader, remote_writer = await asyncio.open_connection(
                 request.host, 9200)
             local_reader = request.content
-            version = str(request.version[0]).encode() + b'.' + str(request.version[1]).encode()
+            # version = b' HTTP/' + str(request.version[0]).encode() + b'.' + str(request.version[1]).encode()
             start_line = request.method.encode() + \
-                         b' ' + request.raw_path.encode() + \
-                         b' HTTP/' + version + b'\n'
+                         b' ' + request.raw_path.encode() + b'\n'
             remote_writer.write(start_line)
             remote_writer.write(b''.join([header[0] + b':' + header[1] + b'\n'
                                 for header in request.raw_headers]))
