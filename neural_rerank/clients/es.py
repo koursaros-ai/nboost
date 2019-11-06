@@ -4,6 +4,13 @@ import json
 
 DEFAULT_TOPK = 10
 
+def _finditem(obj, key):
+    if key in obj: return obj[key]
+    for k, v in obj.items():
+        if isinstance(v,dict):
+            item = _finditem(v, key)
+            if item is not None:
+                return item
 
 class ESClient(BaseClient):
     search_path = '/{index}/_search'
@@ -17,7 +24,10 @@ class ESClient(BaseClient):
         return topk, request.method, ext_url, await request.read()
 
     async def parse_query_candidates(self, request, client_response):
-        query = request.query['q']
+        if 'q' in request.query:
+            query = request.query['q']
+        else:
+            query = _finditem(await request.json(), 'query')
         parsed = await client_response.json()
         hits = parsed['hits']['hits']
         candidates = [hit['_source'][self.field] for hit in hits]
