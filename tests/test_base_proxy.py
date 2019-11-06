@@ -4,6 +4,7 @@ from neural_rerank.clients import TestClient
 from neural_rerank.models import TestModel
 import unittest
 import requests
+import json
 import time
 
 TOPK = 5
@@ -51,11 +52,11 @@ class TestBaseProxy(unittest.TestCase):
             params=params
         )
 
-        # server_res = requests.get(
-        #     'http://%s:%s/search' % (self.server.host, self.server.port),
-        #     params=params
-        # )
-        self.skipTest()
+        server_res = requests.get(
+            'http://%s:%s/search' % (self.server.host, self.server.port),
+            params=params
+        )
+
         self.assertTrue(proxy_res.ok)
         self.assertTrue(server_res.ok)
 
@@ -63,27 +64,30 @@ class TestBaseProxy(unittest.TestCase):
         self.assertEqual(len(proxy_res.json()), len(server_res.json()))
 
         # train
-        print(proxy_res.headers)
-        headers = {
+        data = json.dumps({
             'qid': proxy_res.headers['qid'],
             'cid': str(TOPK - 1)
-        }
+        })
 
-        train_res = requests.get(
-            'http://%s:%s/_train' % (self.proxy.host, self.proxy.port),
-            headers=headers
+        train_res = requests.post(
+            'http://%s:%s/train' % (self.proxy.host, self.proxy.port),
+            data=data
         )
         self.assertEqual(train_res.status_code, 204)
+
+        # test fallback
+        fallback_res = requests.get(
+            'http://%s:%s/hello' % (self.proxy.host, self.proxy.port)
+        )
+        self.assertEqual(fallback_res.status_code, 404)
 
         # test status
         status_res = requests.get(
             'http://%s:%s/status' % (self.proxy.host, self.proxy.port)
         )
         self.assertTrue(status_res.ok)
-        import json
         print(json.dumps(status_res.json(), indent=4))
-        # self.assertTrue(status_res.json()['is_ready'])
-        # self.assertEqual(status_res.json()['ext_host'], '127.0.0.1')
+        self.assertEqual(status_res.json()['ext_host'], self.proxy.client.ext_host)
         # self.assertEqual(status_res.json()['ext_port'], 54001)
         # self.assertIn('TestModel', status_res.json()['spec'])
         # self.assertEqual(status_res.json()['multiplier'], 6)

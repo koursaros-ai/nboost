@@ -22,6 +22,8 @@ def create_client(cls: clients.BaseClient.__class__ = clients.BaseClient,
     return cls(
         multiplier=args.multiplier,
         field=args.field,
+        ext_host=args.ext_host,
+        ext_port=args.ext_port,
         verbose=args.verbose
     )
 
@@ -48,8 +50,6 @@ def create_proxy(cls: proxy.BaseProxy.__class__ = proxy.BaseProxy,
         client=create_client(client_cls, argv),
         host=args.host,
         port=args.port,
-        ext_host=args.ext_host,
-        ext_port=args.ext_port,
         read_bytes=args.read_bytes,
         verbose=args.verbose
     )

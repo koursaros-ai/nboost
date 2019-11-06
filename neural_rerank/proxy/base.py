@@ -13,14 +13,10 @@ class BaseProxy(BaseServer):
     def __init__(self,
                  client: BaseClient = BaseClient,
                  model: BaseModel = BaseModel,
-                 ext_host: str = '127.0.0.1',
-                 ext_port: int = 54001,
                  **kwargs):
         super().__init__(status_method=client.search_method, status_path=client.status_path, **kwargs)
         self.client = client
         self.model = model
-        self.ext_host = ext_host
-        self.ext_port = ext_port
         self.queries = {}
         self.counter = itertools.count()
         self.handler.add_route(self.client.search_method, self.client.search_path)(self.search)
@@ -29,9 +25,9 @@ class BaseProxy(BaseServer):
     @property
     def state(self):
         return {
-            self.__name__: self.handler.bind_states(self),
-            self.model.__name__: self.model.handler.bind_states(self.model),
-            self.client.__name__: self.client.handler.bind_states(self.client)
+            self.__class__.__name__: self.handler.bind_states(self),
+            self.model.__class__.__name__: self.model.handler.bind_states(self.model),
+            self.client.__class__.__name__: self.client.handler.bind_states(self.client)
         }
 
     @handler.add_state
@@ -41,12 +37,12 @@ class BaseProxy(BaseServer):
     async def pipe(self, reader, writer):
         try:
             while not reader.at_eof():
-                writer.write(await reader.read(self._read_bytes))
+                writer.write(await reader.read(self.read_bytes))
         finally:
             writer.close()
 
     async def handle_not_found(self, request):
-        self.handler.redirect(request.url)
+        self.handler.redirect(self.client.ext_url(request))
         # try:
         #     remote_reader, remote_writer = await asyncio.open_connection(
         #         '127.0.0.1', 9200)

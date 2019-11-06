@@ -6,7 +6,7 @@ DEFAULT_TOPK = 10
 
 
 class ESClient(BaseClient):
-    _search_path = '/{index}/_search'
+    search_path = '/{index}/_search'
 
     async def magnify_request(self, request):
         topk = int(request.query['size']) if 'size' in request.query else DEFAULT_TOPK
