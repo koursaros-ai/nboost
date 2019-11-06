@@ -42,7 +42,7 @@ def create_model(cls: models.BaseModel.__class__ = models.BaseModel,
 def create_proxy(cls: proxy.BaseProxy.__class__ = proxy.BaseProxy,
                  client_cls: clients.BaseClient.__class__ = clients.BaseClient,
                  model_cls: models.BaseModel.__class__ = models.BaseModel,
-                 argv: list = sys.argv) -> proxy.BaseProxy:
+                 argv: list = sys.argv[1:]) -> proxy.BaseProxy:
     parser = set_parser()
     args = parser.parse_args(argv)
     return cls(
