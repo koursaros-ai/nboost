@@ -19,23 +19,23 @@ class BaseServer(BaseLogger, Process):
                  **kwargs):
         BaseLogger.__init__(self, **kwargs)
         Process.__init__(self)
-        self._host = host
-        self._port = port
-        self._read_bytes = read_bytes
+        self.host = host
+        self.port = port
+        self.read_bytes = read_bytes
         self.is_ready = Event()
         self.handler.add_route(status_method, status_path)(self.status)
 
     @handler.add_state
-    def host(self):
-        return self._host
+    def _host(self):
+        return self.host
 
     @handler.add_state
-    def port(self):
-        return self._port
+    def _port(self):
+        return self.port
 
     @handler.add_state
-    def read_bytes(self):
-        return self._read_bytes
+    def _read_bytes(self):
+        return self.read_bytes
 
     @handler.add_state
     def ready(self):
@@ -50,19 +50,20 @@ class BaseServer(BaseLogger, Process):
 
     async def create_app(self,
                          loop: asyncio.AbstractEventLoop,
-                         routes: List[web_routedef.RouteDef],
-                         middlewares=List[Coroutine]) -> None:
-        app = web.Application(middlewares=[middlewares])
+                         routes: List[web_routedef.RouteDef]) -> None:
+        app = web.Application(middlewares=[self.middleware])
         app.add_routes(routes)
         runner = web.AppRunner(app)
         await runner.setup()
-        site = web.TCPSite(runner, self._host, self._port)
+        site = web.TCPSite(runner, self.host, self.port)
         await site.start()
 
     @web.middleware
     async def middleware(self,
                          request: web.BaseRequest,
                          handler: Callable) -> web.Response:
+        self.logger.error(request)
+        self.logger.error(handler)
         try:
             response = await handler(request)
         except web_exceptions.HTTPNotFound:
@@ -72,7 +73,7 @@ class BaseServer(BaseLogger, Process):
 
         if 'pretty' in request.query:
             response.body = pformat(response.body)
-
+        self.logger.error(response)
         return response
 
     async def handle_not_found(self, request: web.BaseRequest):
@@ -89,8 +90,8 @@ class BaseServer(BaseLogger, Process):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
         routes = self.handler.bind_routes(self)
-        loop.run_until_complete(self.create_app(loop, routes, [self.middleware]))
-        self.logger.critical('LISTENING: %s:%d' % (self._host, self._port))
+        loop.run_until_complete(self.create_app(loop, routes))
+        self.logger.critical('LISTENING: %s:%d' % (self.host, self.port))
         self.logger.critical('ROUTES: %s' % pformat(self.handler.routes))
         self.is_ready.set()
         loop.run_forever()
