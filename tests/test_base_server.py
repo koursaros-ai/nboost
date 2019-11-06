@@ -18,10 +18,10 @@ class TestBaseServer(unittest.TestCase):
         self.assertTrue(status_res.ok)
 
         json = status_res.json()[self.server.__class__.__name__]
-        self.assertTrue(json['_is_ready'])
-        self.assertEqual(json['_host'], self.server.host)
-        self.assertEqual(json['_port'], self.server.port)
-        self.assertEqual(json['_read_bytes'], self.server.read_bytes)
+        self.assertTrue(json['is_ready'])
+        self.assertEqual(json['host'], self.server.host)
+        self.assertEqual(json['port'], self.server.port)
+        self.assertEqual(json['read_bytes'], self.server.read_bytes)
 
     def tearDown(self):
         self.server.close()
