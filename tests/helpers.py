@@ -13,7 +13,8 @@ def check_es_index(host, port, index):
         es_res = requests.get('http://%s:%s/%s/_stats' % (host, port, index))
     except requests.exceptions.ConnectionError:
         raise SkipTest('ES not available on port %s' % port)
-
+    import pdb
+    pdb.set_trace()
     if es_res.json()['_all']['primaries']['docs']['count'] < INDEX_SIZE:
         es.indices.create(index=index, ignore=400)
 
