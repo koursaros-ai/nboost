@@ -22,7 +22,6 @@ class TestESDBERTProxy(unittest.TestCase):
             '--multiplier', '2',
             '--verbose'
         ])
-        mp.set_start_method('spawn')
         self.proxy.start()
         self.proxy.is_ready.wait()
 
