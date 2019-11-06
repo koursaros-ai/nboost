@@ -22,7 +22,7 @@ def dump():
 
 
 def main():
-    es = Elasticsearch(hosts=[{"host": "localhost", "port": 9200}])
+    es = Elasticsearch(hosts=[{"host": "localhost", "port": 53001}])
     res = es.search(index=INDEX, body={
         "query": {
             "match": {
