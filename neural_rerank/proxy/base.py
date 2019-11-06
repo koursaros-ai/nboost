@@ -34,18 +34,19 @@ class BaseProxy(BaseServer):
     def backlog(self):
         return len(self.queries)
 
-    async def pipe(self, reader, writer, force_close):
+    async def pipe(self, reader, writer, http):
         try:
             while not reader.at_eof():
                 writer.write(await reader.read(self.read_bytes))
         finally:
-            if force_close:
-                writer.force_close()
+            if http:
+                await writer.write_eof()
             else:
-                writer.close()
+                await writer.close()
 
     async def handle_not_found(self, request):
         local_writer = aiohttp.web.StreamResponse()
+        await local_writer.prepare(request)
         try:
             remote_reader, remote_writer = await asyncio.open_connection(
                 '127.0.0.1', 9200)
@@ -54,7 +55,6 @@ class BaseProxy(BaseServer):
             pipe2 = self.pipe(remote_reader, local_writer, True)
             await asyncio.gather(pipe1, pipe2)
         finally:
-            # local_writer.force_close()
             return local_writer
 
     async def train(self, request: web.BaseRequest) -> web.Response:
