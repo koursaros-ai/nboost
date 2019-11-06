@@ -42,23 +42,39 @@ class BaseProxy(BaseServer):
             if http:
                 await writer.write_eof()
             else:
+                await writer.drain()
                 await writer.close()
+                # await local_writer.prepare(request)
+                # remote_reader, remote_writer = await asyncio.open_connection(
+                #     self.client.ext_host, self.client.ext_port)
+                #
+                # method_path = request.method.encode() + b' ' + request.raw_path.encode()
+                # version = b'http/' + str(request.version[0]).encode() + b'.' + str(request.version[1]).encode()
+                #
+                # headers = [header[0] + b':' + header[1] for header in request.raw_headers]
+                # lines = [method_path + b' ' + version] + headers
+                # remote_writer.writelines(lines)
+                # remote_writer.write(b'\n')
+                # data = await request.content.read()
+                # remote_writer.write(data)
+                # remote_writer.write_eof()
+                # await remote_writer.drain()
+                # await local_writer.write(await remote_reader.read())
+                # await local_writer.write_eof()
 
     async def handle_not_found(self, request):
-        self.handler.redirect(self.client.ext_url(request))
-        # local_writer = aiohttp.web.StreamResponse()
-        # await local_writer.prepare(request)
-        # try:
-        #     remote_reader, remote_writer = await asyncio.open_connection(
-        #         request.raw_path, 9200)
-        #     local_reader = request.content
-        #     remote_writer.write(b''.join([header[0] + b':' + header[1] + b'\n'
-        #                         for header in request.raw_headers]))
-        #     pipe1 = self.pipe(local_reader, remote_writer, False)
-        #     pipe2 = self.pipe(remote_reader, local_writer, True)
-        #     await asyncio.gather(pipe1, pipe2)
-        # finally:
-        #     return local_writer
+        # self.handler.redirect(self.client.ext_url(request))
+        data = request.content.read() if request.can_read_body else None
+        async with aiohttp.ClientSession() as session:
+            path = request.url.with_host(self.client.ext_host).with_port(self.client.ext_port).human_repr()
+            async with getattr(session, request.method.lower())(
+                    path,
+                    headers=request.headers,
+                    data=data,
+                    params=request.query) as resp:
+                return aiohttp.web.Response(status=resp.status,
+                                            headers=resp.headers,
+                                            body=await resp.content.read())
 
     async def train(self, request: web.BaseRequest) -> web.Response:
         qid, cid = await self.client.parse_qid_cid(request)
