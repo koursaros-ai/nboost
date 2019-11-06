@@ -33,7 +33,7 @@ class ESClient(BaseClient):
             hits = parsed['hits']['hits']
         except:
             self.logger.error(parsed)
-            raise SystemError
+            raise NotImplementedError
         candidates = [hit['_source'][self.field] for hit in hits]
         return query, candidates
 
