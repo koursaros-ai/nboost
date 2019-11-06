@@ -1,4 +1,4 @@
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, RequestsHttpConnection
 from tests.paths import RESOURCES
 import csv
 
@@ -8,7 +8,10 @@ def main():
     with RESOURCES.joinpath('train.csv').open() as fh:
         sample_data = csv.reader(fh)
         print('Dumping train.csv...')
-        es = Elasticsearch(hosts=[{"host": "localhost", "port": 53001}])
+        es = Elasticsearch(
+            hosts=[{"host": "localhost", "port": 53001}],
+            connection_class=RequestsHttpConnection
+        )
         for row in list(sample_data):
             es.index(
                 index=INDEX,
