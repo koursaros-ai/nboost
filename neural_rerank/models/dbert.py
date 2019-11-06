@@ -41,7 +41,8 @@ class DBERTRank(BaseModel):
         self.rerank_model.zero_grad()
 
     async def rank(self, query, candidates):
-        self.logger.error((query, candidates))
+        import pdb
+        pdb.set_trace()
         input_ids, attention_mask = await self.encode(query, candidates)
 
         with torch.no_grad():
