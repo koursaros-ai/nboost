@@ -76,6 +76,12 @@ class TestBaseProxy(unittest.TestCase):
         self.assertEqual(train_res.status_code, 204)
 
         # test fallback
+        stream_proxy_res = requests.get(
+            'http://%s:%s/weather' % (self.proxy.host, self.proxy.port)
+        )
+        self.assertEqual(stream_proxy_res.json()['temp'], '92F')
+
+        # test fallback
         fallback_res = requests.get(
             'http://%s:%s/hello' % (self.proxy.host, self.proxy.port)
         )
