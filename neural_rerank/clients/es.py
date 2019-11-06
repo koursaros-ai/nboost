@@ -27,7 +27,8 @@ class ESClient(BaseClient):
         if 'q' in request.query:
             query = request.query['q']
         else:
-            query = _finditem(await request.json(), 'query')
+            body = await request.json()
+            query = _finditem(body['query'], 'query')
         parsed = await client_response.json()
         try:
             hits = parsed['hits']['hits']
