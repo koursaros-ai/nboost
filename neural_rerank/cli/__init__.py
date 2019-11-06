@@ -65,7 +65,7 @@ def set_parser():
     parser.add_argument('--host', type=str, default='127.0.0.1', help='host of the proxy')
     parser.add_argument('--port', type=int, default=53001, help='port of the proxy')
     parser.add_argument('--ext_host', type=str, default='127.0.0.1', help='host of the server')
-    parser.add_argument('--ext_port', type=int, default=54001, help='port of the server')
+    parser.add_argument('--ext_port', type=int, default=9200, help='port of the server')
     parser.add_argument('--multiplier', type=int, default=10, help='factor to increase results by')
     parser.add_argument('--field', type=str, help='specified meta field to train on')
     parser.add_argument('--lr', type=float, default=10e-3, help='learning rate of the model')
