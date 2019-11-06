@@ -29,9 +29,10 @@ class ESClient(BaseClient):
         else:
             query = _finditem(await request.json(), 'query')
         parsed = await client_response.json()
-        import pdb
-        pdb.set_trace()
-        hits = parsed['hits']['hits']
+        try:
+            hits = parsed['hits']['hits']
+        except:
+            raise Exception(parsed)
         candidates = [hit['_source'][self.field] for hit in hits]
         return query, candidates
 
