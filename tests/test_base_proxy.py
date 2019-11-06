@@ -97,5 +97,5 @@ class TestBaseProxy(unittest.TestCase):
         # time.sleep(30)
 
     def tearDown(self):
-        self.server.terminate()
-        self.proxy.terminate()
+        self.server.close()
+        self.proxy.close()

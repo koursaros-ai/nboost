@@ -69,8 +69,8 @@ class TestESProxy(unittest.TestCase):
         self.assertTrue(train_res.ok)
 
     def tearDown(self):
-        self.server.terminate()
-        self.proxy.terminate()
+        self.server.close()
+        self.proxy.close()
 
 
 MOCK_ES_DATA = {
