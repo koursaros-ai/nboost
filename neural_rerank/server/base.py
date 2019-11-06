@@ -1,7 +1,6 @@
 from ..base import BaseLogger, pfmt, pfmt_obj
 from pprint import pformat
-# from multiprocessing import Process, Event
-import multiprocessing as mp
+from multiprocessing import Process, Event
 from aiohttp import web_exceptions, web_routedef, web
 from typing import List, Callable
 from .handler import ServerHandler
@@ -13,10 +12,7 @@ def running_avg(avg: float, new: float, n: int):
     return (avg * n + new) / n
 
 
-ctx = mp.get_context('forkserver')
-
-
-class BaseServer(BaseLogger, ctx.Process):
+class BaseServer(BaseLogger, Process):
     handler = ServerHandler()
 
     def __init__(self,
@@ -30,7 +26,7 @@ class BaseServer(BaseLogger, ctx.Process):
         self.host = host
         self.port = port
         self.read_bytes = read_bytes
-        self.is_ready = ctx.Event()
+        self.is_ready = Event()
         self.handler.add_route(status_method, status_path)(self.status)
 
     @handler.add_state
