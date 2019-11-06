@@ -19,7 +19,7 @@ class ESClient(BaseClient):
     async def parse_query_candidates(self, request, client_response):
         query = request.query['q']
         parsed = await client_response.json()
-        hits = parsed['hits']['hits'] if 'hits' in parsed else []
+        hits = parsed['hits']['hits']
         candidates = [hit['_source'][self.field] for hit in hits]
         return query, candidates
 

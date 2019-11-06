@@ -2,7 +2,7 @@ from ..base import *
 from ..server import BaseServer, ServerHandler
 from ..clients import BaseClient
 from ..models import BaseModel
-import aiohttp
+import aiohttp, asyncio
 from aiohttp import web
 import itertools
 
@@ -34,23 +34,28 @@ class BaseProxy(BaseServer):
     def backlog(self):
         return len(self.queries)
 
-    async def pipe(self, reader, writer):
+    async def pipe(self, reader, writer, force_close):
         try:
             while not reader.at_eof():
                 writer.write(await reader.read(self.read_bytes))
         finally:
-            writer.close()
+            if force_close:
+                writer.force_close()
+            else:
+                writer.close()
 
     async def handle_not_found(self, request):
-        self.handler.redirect(self.client.ext_url(request))
-        # try:
-        #     remote_reader, remote_writer = await asyncio.open_connection(
-        #         '127.0.0.1', 9200)
-        #     pipe1 = self.pipe(local_reader, remote_writer)
-        #     pipe2 = self.pipe(remote_reader, local_writer)
-        #     await asyncio.gather(pipe1, pipe2)
-        # finally:
-        #     local_writer.close()
+        local_writer = aiohttp.web.StreamResponse()
+        try:
+            remote_reader, remote_writer = await asyncio.open_connection(
+                '127.0.0.1', 9200)
+            local_reader = request.content
+            pipe1 = self.pipe(local_reader, remote_writer, False)
+            pipe2 = self.pipe(remote_reader, local_writer, True)
+            await asyncio.gather(pipe1, pipe2)
+        finally:
+            # local_writer.force_close()
+            return local_writer
 
     async def train(self, request: web.BaseRequest) -> web.Response:
         qid, cid = await self.client.parse_qid_cid(request)
