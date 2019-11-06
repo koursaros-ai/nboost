@@ -4,7 +4,7 @@ import termcolor
 from .. import models, clients, proxy, server
 
 
-def create_server(argv: list = sys.argv):
+def create_server(argv: list = sys.argv) -> server.BaseServer:
     parser = set_parser()
     args = parser.parse_args(argv)
     return server.BaseServer(
@@ -14,7 +14,7 @@ def create_server(argv: list = sys.argv):
     )
 
 
-def create_client(argv: list = sys.argv):
+def create_client(argv: list = sys.argv) -> clients.BaseClient:
     parser = set_parser()
     args = parser.parse_args(argv)
     return getattr(clients, args.client)(
@@ -23,7 +23,7 @@ def create_client(argv: list = sys.argv):
     )
 
 
-def create_model(argv: list = sys.argv):
+def create_model(argv: list = sys.argv) -> models.BaseModel:
     parser = set_parser()
     args = parser.parse_args(argv)
     return getattr(models, args.model)(
@@ -33,7 +33,7 @@ def create_model(argv: list = sys.argv):
     )
 
 
-def create_proxy(argv: list = sys.argv):
+def create_proxy(argv: list = sys.argv) -> proxy.BaseProxy:
     parser = set_parser()
     args = parser.parse_args(argv)
     client = create_client(argv)

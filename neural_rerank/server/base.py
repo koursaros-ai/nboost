@@ -1,10 +1,15 @@
-from ..base import BaseLogger
+from ..base import BaseLogger, pfmt
 from pprint import pformat
 from multiprocessing import Process, Event
 from aiohttp import web_exceptions, web_routedef, web
-from typing import List, Coroutine, Callable
+from typing import List, Callable
 from .handler import ServerHandler
 import asyncio
+import time
+
+
+def running_avg(avg: float, new: float, n: int):
+    return (avg * n + new) / n
 
 
 class BaseServer(BaseLogger, Process):
@@ -63,6 +68,12 @@ class BaseServer(BaseLogger, Process):
                          request: web.BaseRequest,
                          handler: Callable) -> web.Response:
 
+        self.logger.info('RECV: %s' % request)
+        self.logger.debug(pfmt(request))
+        self.handler.routes.setdefault(request.path, 0)
+        self.handler.routes[request.path]['reqs'] += 1
+        start = time.time()
+
         try:
             response = await handler(request)
         except web_exceptions.HTTPNotFound:
@@ -72,6 +83,14 @@ class BaseServer(BaseLogger, Process):
 
         if 'pretty' in request.query:
             response.body = pformat(response.body)
+
+        self.handler.routes[request.path]['lat'] = running_avg(
+            self.handler.routes[request.path]['lat'],
+            time.time() - start,
+            self.handler.routes[request.path]['reqs']
+        )
+        self.logger.info('SEND: %s' % response)
+        self.logger.debug(pfmt(response))
 
         return response
 

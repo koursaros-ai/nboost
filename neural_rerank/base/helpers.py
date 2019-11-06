@@ -1,11 +1,11 @@
 
 from typing import Iterable
 from pprint import pformat
-from aiohttp import web
+from aiohttp import web, web_request
 import json
 
 DEBUG_TYPES = {
-    web.BaseRequest: ['host', 'path', 'remote', 'headers', 'query', 'method'],
+    web_request.Request: ['host', 'path', 'remote', 'headers', 'query', 'method'],
     web.Response: ['body', 'reason', 'status', 'headers']
 }
 
@@ -34,11 +34,11 @@ def pfmt_attrs(obj: object, attrs: Iterable) -> str:
         ATTR2: VALUE2
         ...
     """
-    return pfmt_obj({a: pfmt_obj(getattr(obj, a)) for a in dir(obj) if a in attrs})
+    return '\n' + pfmt_obj({a: pfmt_obj(getattr(obj, a)) for a in dir(obj) if a in attrs})
 
 
 def pfmt(obj: object):
     attrs = DEBUG_TYPES.get(obj.__class__, None)
-    return pfmt_attrs(obj, attrs) if attrs else 'Type "%s" not registered with handler'
+    return pfmt_attrs(obj, attrs) if attrs else 'Type "%s" not registered with handler' % type(obj)
 
 
