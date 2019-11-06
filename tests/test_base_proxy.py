@@ -1,7 +1,4 @@
 from neural_rerank.server import BaseServer, ServerHandler
-from neural_rerank.proxy import BaseProxy
-from neural_rerank.clients import BaseClient
-from neural_rerank.models import BaseModel
 from neural_rerank.cli import create_server, create_proxy
 import unittest
 import requests
@@ -33,7 +30,6 @@ class TestBaseProxy(unittest.TestCase):
         self.proxy = create_proxy(argv=[
             '--ext_port', '54001',
             '--multiplier', '6',
-            '--search_path', '/search_library',
             '--verbose'
         ])
         self.server.start()
@@ -46,12 +42,12 @@ class TestBaseProxy(unittest.TestCase):
         params = dict(topk=TOPK, q='test query')
 
         proxy_res = requests.get(
-            'http://%s:%s/_search' % (self.proxy.host, self.proxy.port),
+            'http://%s:%s/search' % (self.proxy.host, self.proxy.port),
             params=params
         )
 
         server_res = requests.get(
-            'http://%s:%s/_search' % (self.server.host, self.server.port),
+            'http://%s:%s/search' % (self.server.host, self.server.port),
             params=params
         )
 
