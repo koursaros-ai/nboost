@@ -1,5 +1,4 @@
 from .base import BaseClient
-from ..base import Response
 from .helpers import parse_json_request_qid_cid
 import json
 
@@ -27,7 +26,7 @@ class ESClient(BaseClient):
         res = await client_response.json()
         res['hits']['hits'] = [res['hits']['hits'][i] for i in ranks[:topk]]
         res['qid'] = qid
-        response = Response.JSON_OK(res)
+        response = self.handler.json_ok(res)
         response.headers['qid'] = str(qid)
         return response
 

@@ -1,11 +1,19 @@
-from ..base import *
-from aiohttp import web_routedef
-from typing import List, Union
+from ..base import BaseHandler, pfmt
 import time
+import json
+from typing import Callable
+import functools
+from aiohttp import web_routedef
+from typing import List
+from aiohttp import web
 
 
-class ProxyHandler(BaseHandler):
-    def __init__(self, *handlers: 'ProxyHandler'):
+def running_avg(avg: float, new: float, n: int):
+    return (avg * n + new) / n
+
+
+class ServerHandler(BaseHandler):
+    def __init__(self, *handlers: 'ServerHandler'):
         super().__init__(*handlers)
         self.routes = {}
 
@@ -16,12 +24,11 @@ class ProxyHandler(BaseHandler):
         def wrap(f: Callable):
             self.routes[path] = dict(
                 method=method,
-                path=path,
                 func=f.__name__,
                 lat=float(),
                 reqs=int()
             )
-
+            @functools.wraps(f)
             async def decorator(proxy, req):
                 proxy.logger.info('RECV: %s' % req)
                 proxy.logger.debug(pfmt(req))
@@ -36,34 +43,14 @@ class ProxyHandler(BaseHandler):
                 proxy.logger.info('SEND: %s' % res)
                 proxy.logger.debug(pfmt(req))
                 return res
-
             return decorator
-
         return wrap
 
     def bind_routes(self, proxy) -> List[web_routedef.RouteDef]:
+        print(proxy.__class__.__name__, json.dumps(self.routes, indent=4))
         return [web.route(
             self.routes[path]['method'],
             path,
             getattr(proxy, self.routes[path]['func'])
         ) for path in self.routes]
 
-    @staticmethod
-    def plain_ok(body: bytes):
-        return web.Response(body=body, status=200)
-
-    @staticmethod
-    def json_ok(body: Union[dict, list]):
-        return web.json_response(body, status=200)
-
-    @staticmethod
-    def no_content():
-        return web.Response(status=204)
-
-    @staticmethod
-    def redirect(url):
-        raise web.HTTPTemporaryRedirect(url)
-
-    @staticmethod
-    def internal_error(body):
-        return web.json_response(dict(error=str(body), type=type(body).__name__), status=500)

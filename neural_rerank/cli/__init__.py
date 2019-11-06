@@ -3,84 +3,50 @@ import termcolor
 import argparse
 import os
 import copy
-import pprint
-import requests
-from typing import Iterable
-import shutil
-import json
-from aiohttp import web
+import sys
+from .. import models, clients, proxy, server
 
 
-def format_pyobj(obj: object) -> str:
-    try:
-        obj = dict(obj)
-    except (TypeError, ValueError, RuntimeError):
-        pass
-
-    try:
-        obj = json.loads(obj)
-    except (TypeError, json.decoder.JSONDecodeError):
-        pass
-
-    return pprint.pformat(obj)
+def create_server(argv: list = sys.argv):
+    parser = set_parser()
+    args = parser.parse_args(argv)
+    return server.BaseServer(
+        verbose=args.verbose,
+        host=args.host,
+        port=args.port
+    )
 
 
-def format_attrs(obj, attrs: Iterable = None) -> str:
-    """
-
-    :param obj: any python obj
-    :param attrs: list of attrs you want to print (default prints all)
-    :return:
-        ATTR1: VALUE1
-        ATTR2: VALUE2
-        ...
-    """
-    fmt = ''
-    fmt_dir = dict()
-    size = shutil.get_terminal_size((80, 20))
-    max_height = round(size.lines / 8)
-    max_width = round(size.columns / 3 * 2)
-
-    for key in dir(obj):
-        if not attrs or key in attrs:
-            try:
-                attr = getattr(obj, key)
-            except AssertionError:
-                continue
-
-            fmt_dir[key] = format_pyobj(attr).split('\n')
-
-    for attr in fmt_dir:
-        lines = fmt_dir[attr]
-        lines = lines[:max_height] + ['...'] if len(lines) >= max_height else lines
-        lines = [attr + ': ' + lines[0]] + [' ' * len(attr) + line for line in lines[1:]]
-        lines = [line[:max_width] + '...' if len(line) > max_width else line for line in lines]
-
-        fmt += '\n' + '\n'.join(lines)
-
-    return fmt
-
-
-def format_response(response: requests.models.Response):
-    attrs = ['url', 'status_code', 'reason', 'headers', 'content']
-    return format_attrs(response, attrs=attrs)
-
-
-async def format_async_response(response: web.Response):
-    attrs = ['body', 'reason', 'status', 'headers']
-    return format_attrs(response, attrs=attrs)
-
-
-async def format_async_request(response: web.BaseRequest):
-    attrs = ['host', 'path', 'remote', 'headers', 'query', 'method']
-    return format_attrs(response, attrs=attrs)
+def create_proxy(argv: list = sys.argv):
+    parser = set_parser()
+    args = parser.parse_args(argv)
+    client = getattr(clients, args.client)(
+        verbose=args.verbose,
+        multiplier=args.multiplier
+    )
+    model = getattr(models, args.model)(
+        verbose=args.verbose,
+        lr=args.lr,
+        data_dir=args.data_dir
+    )
+    return proxy.BaseProxy(
+        verbose=args.verbose,
+        model=model,
+        client=client,
+        host=args.host,
+        port=args.port,
+        ext_host=args.ext_host,
+        ext_port=args.ext_port,
+        field=args.field,
+        read_bytes=args.read_bytes
+    )
 
 
 def set_parser():
     # create the top-level parser
     parser = argparse.ArgumentParser(
         description='%s: Neural semantic search ranking for Elasticsearch.' % (
-                        termcolor.colored('Koursaros AI', 'cyan', attrs=['underline'])),
+            termcolor.colored('Koursaros AI', 'cyan', attrs=['underline'])),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--verbose', action='store_true', default=False, help='turn on detailed logging')
     parser.add_argument('--ext_host', type=str, default='127.0.0.1', help='host of the server')
