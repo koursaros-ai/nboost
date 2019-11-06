@@ -4,8 +4,8 @@ from typing import List, Union
 from aiohttp import web
 
 
-class BaseModel(Base):
-    handler = ModelHandler()
+class BaseModel(BaseLogger):
+    handler = BaseHandler()
 
     def __init__(self,
                  lr: float = 10e-3,
