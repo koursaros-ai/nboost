@@ -69,9 +69,11 @@ class ColoredFormatter(logging.Formatter):
 
 
 class BaseLogger:
-    def __init__(self, verbose=False, **kwargs):
-        self.logger = set_logger(self.__class__.__name__, verbose=verbose)
-        self.logger.info(pformat({**kwargs, 'verbose': verbose}))
+    def __new__(cls, verbose=True, **kwargs):
+        cls.logger = set_logger(cls.__name__, verbose=verbose)
+        cls.logger.info('\nARGV:\n' + pformat({**kwargs, 'verbose': verbose}, width=1))
+        return super().__new__(cls)
+
 
 
 

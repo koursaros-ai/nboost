@@ -1,4 +1,5 @@
-from neural_rerank.server import BaseServer
+
+from neural_rerank.cli import create_server
 import unittest
 import requests
 
@@ -8,7 +9,7 @@ TOPK = 5
 class TestBaseServer(unittest.TestCase):
 
     def setUp(self):
-        self.server = BaseServer(verbose=True)
+        self.server = create_server(['--verbose'])
         self.server.start()
         self.server.is_ready.wait()
 

@@ -1,5 +1,4 @@
 from neural_rerank.base import BaseLogger, BaseHandler
-from .handler import ModelHandler
 from typing import List, Union
 from aiohttp import web
 
@@ -11,7 +10,7 @@ class BaseModel(BaseLogger):
                  lr: float = 10e-3,
                  data_dir: str = '/.cache',
                  **kwargs):
-        super().__init__(**kwargs)
+        super().__init__()
         self._lr = lr
         self._data_dir = data_dir
 

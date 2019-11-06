@@ -13,10 +13,14 @@ class BaseProxy(BaseServer):
     def __init__(self,
                  client: BaseClient = BaseClient,
                  model: BaseModel = BaseModel,
+                 ext_host: str = '127.0.0.1',
+                 ext_port: int = 54001,
                  **kwargs):
         super().__init__(status_method=client.search_method, status_path=client.status_path, **kwargs)
         self.client = client
         self.model = model
+        self.ext_host = ext_host
+        self.ext_port = ext_port
         self.queries = {}
         self.counter = itertools.count()
         self.handler.add_route(self.client.search_method, self.client.search_path)(self.search)

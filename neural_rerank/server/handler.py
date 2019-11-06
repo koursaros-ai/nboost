@@ -24,6 +24,7 @@ class ServerHandler(BaseHandler):
         return wrap
 
     def bind_routes(self, proxy) -> List[web_routedef.RouteDef]:
+        print(proxy.__class__.__name__, json.dumps(self.routes, indent=4))
         return [web.route(
             self.routes[path]['method'],
             path,

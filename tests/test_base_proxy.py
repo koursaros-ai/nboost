@@ -1,5 +1,5 @@
 from neural_rerank.server import BaseServer, ServerHandler
-from neural_rerank.cli import create_server, create_proxy
+from neural_rerank.cli import create_proxy, set_parser
 import unittest
 import requests
 import time
@@ -23,17 +23,22 @@ class TestServer(BaseServer):
 class TestBaseProxy(unittest.TestCase):
 
     def setUp(self):
-        self.server = create_server(argv=[
+
+        self.proxy = create_proxy([
+            '--client', 'BaseClient',
+            '--model', 'BaseModel',
+            '--multiplier', '6',
+            '--port', '54001',
+            '--ext_port', '54001',
+            '--verbose'
+        ])
+
+        self.proxy.start()
+        self.server = TestServer(**vars(set_parser().parse_args([
             '--port', '54001',
             '--verbose'
-        ])
-        self.proxy = create_proxy(argv=[
-            '--ext_port', '54001',
-            '--multiplier', '6',
-            '--verbose'
-        ])
+        ])))
         self.server.start()
-        self.proxy.start()
         self.server.is_ready.wait()
         self.proxy.is_ready.wait()
 
