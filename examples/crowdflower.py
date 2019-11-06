@@ -4,6 +4,7 @@ import csv
 
 INDEX = 'crowdflower'
 
+
 def main():
     with RESOURCES.joinpath('train.csv').open() as fh:
         sample_data = csv.reader(fh)
@@ -18,6 +19,7 @@ def main():
                 id=row[0],
                 body=dict(title=row[2], description=row[3])
             )
+
 
 if __name__ == '__main__':
     main()
