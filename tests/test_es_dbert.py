@@ -4,10 +4,8 @@ from neural_rerank.models import DBERTRank
 from tests.helpers import check_es_index
 import requests
 import unittest
-import multiprocessing as mp
-import time
 
-ES_HOST = '127.0.01'
+ES_HOST = '127.0.0.1'
 ES_PORT = '9200'
 ES_INDEX = 'test_index'
 
