@@ -32,7 +32,7 @@ class ESClient(BaseClient):
         try:
             hits = parsed['hits']['hits']
         except:
-            print(parsed)
+            self.logger.error(parsed)
             raise SystemError
         candidates = [hit['_source'][self.field] for hit in hits]
         return query, candidates
