@@ -22,7 +22,7 @@ class BaseServer(BaseLogger, Process):
                  status_path: str = '/status',
                  status_method: str = '*',
                  **kwargs):
-        BaseLogger.__init__(self, **kwargs)
+        BaseLogger.__init__(self)
         Process.__init__(self)
         self.host = host
         self.port = port
@@ -110,7 +110,7 @@ class BaseServer(BaseLogger, Process):
         routes = self.handler.bind_routes(self)
         loop.run_until_complete(self.create_app(loop, routes))
         self.logger.critical('LISTENING: %s:%d' % (self.host, self.port))
-        self.logger.critical('ROUTES: %s' % pformat(self.handler.routes))
+        self.logger.info('\nROUTES:\n%s' % pformat(self.handler.routes, width=1))
         self.is_ready.set()
         loop.run_forever()
 
