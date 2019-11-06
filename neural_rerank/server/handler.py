@@ -1,15 +1,8 @@
-from ..base import BaseHandler, pfmt
-import time
-import json
+from ..base import BaseHandler
 from typing import Callable
-import functools
 from aiohttp import web_routedef
 from typing import List
 from aiohttp import web
-
-
-def running_avg(avg: float, new: float, n: int):
-    return (avg * n + new) / n
 
 
 class ServerHandler(BaseHandler):
@@ -28,26 +21,9 @@ class ServerHandler(BaseHandler):
                 lat=float(),
                 reqs=int()
             )
-            @functools.wraps(f)
-            async def decorator(proxy, req):
-                proxy.logger.info('RECV: %s' % req)
-                proxy.logger.debug(pfmt(req))
-                self.routes[path]['reqs'] += 1
-                start = time.time()
-                res = await f(proxy, req)
-                self.routes['lat'] = running_avg(
-                    self.routes['lat'],
-                    time.time() - start,
-                    self.routes['reqs']
-                )
-                proxy.logger.info('SEND: %s' % res)
-                proxy.logger.debug(pfmt(req))
-                return res
-            return decorator
         return wrap
 
     def bind_routes(self, proxy) -> List[web_routedef.RouteDef]:
-        print(proxy.__class__.__name__, json.dumps(self.routes, indent=4))
         return [web.route(
             self.routes[path]['method'],
             path,
