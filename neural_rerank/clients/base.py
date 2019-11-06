@@ -1,12 +1,17 @@
-import aiohttp
-from ..base import Base
-from .handler import ClientHandler
+
+from ..base import BaseLogger, BaseHandler
 from aiohttp import web, client
 from typing import Tuple, List
 
 
-class BaseClient(Base):
-    handler = ClientHandler()
+class BaseClient(BaseLogger):
+    handler = BaseHandler()
+    status_method = '*'
+    search_method = '*'
+    train_method = '*'
+    status_path = '/status'
+    search_path = '/search'
+    train_path = '/train'
 
     def __init__(self,
                  ext_host: str = '127.0.0.1',
@@ -14,7 +19,7 @@ class BaseClient(Base):
                  multiplier: int = 10,
                  field: str = None,
                  **kwargs):
-        super().__init__()
+        super().__init__(**kwargs)
         self.ext_host = ext_host
         self.ext_port = ext_port
         self.multiplier = multiplier
