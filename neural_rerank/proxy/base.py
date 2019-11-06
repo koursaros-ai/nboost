@@ -45,20 +45,21 @@ class BaseProxy(BaseServer):
                 await writer.close()
 
     async def handle_not_found(self, request):
-        self.handler.redirect(self.client.ext_url(request))
-        # local_writer = aiohttp.web.StreamResponse()
-        # await local_writer.prepare(request)
-        # try:
-        #     remote_reader, remote_writer = await asyncio.open_connection(
-        #         request.raw_path, 9200)
-        #     local_reader = request.content
-        #     remote_writer.write(b''.join([header[0] + b':' + header[1] + b'\n'
-        #                         for header in request.raw_headers]))
-        #     pipe1 = self.pipe(local_reader, remote_writer, False)
-        #     pipe2 = self.pipe(remote_reader, local_writer, True)
-        #     await asyncio.gather(pipe1, pipe2)
-        # finally:
-        #     return local_writer
+        # self.handler.redirect(self.client.ext_url(request))
+        local_writer = aiohttp.web.StreamResponse()
+        await local_writer.prepare(request)
+        try:
+            remote_reader, remote_writer = await asyncio.open_connection(
+                request.host, 9200)
+            local_reader = request.content
+            remote_writer.write(request.raw_path.encode() + b'\n')
+            remote_writer.write(b''.join([header[0] + b':' + header[1] + b'\n'
+                                for header in request.raw_headers]))
+            pipe1 = self.pipe(local_reader, remote_writer, False)
+            pipe2 = self.pipe(remote_reader, local_writer, True)
+            await asyncio.gather(pipe1, pipe2)
+        finally:
+            return local_writer
 
     async def train(self, request: web.BaseRequest) -> web.Response:
         qid, cid = await self.client.parse_qid_cid(request)
