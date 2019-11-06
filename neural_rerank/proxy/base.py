@@ -70,8 +70,7 @@ class BaseProxy(BaseServer):
             async with getattr(session, request.method.lower())(
                     path,
                     headers=request.headers,
-                    data=data,
-                    params=request.query) as resp:
+                    data=data) as resp:
                 return aiohttp.web.Response(status=resp.status,
                                             headers=resp.headers,
                                             body=await resp.content.read())
