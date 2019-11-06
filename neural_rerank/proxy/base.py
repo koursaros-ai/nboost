@@ -65,10 +65,12 @@ class BaseProxy(BaseServer):
     async def handle_not_found(self, request):
         # self.handler.redirect(self.client.ext_url(request))
         async with aiohttp.ClientSession() as session:
+            headers = dict(request.headers)
+            headers['Content-Type'] = 'application/json'
             path = request.url.with_host(self.client.ext_host).with_port(self.client.ext_port).human_repr()
             async with getattr(session, request.method.lower())(
                     path,
-                    headers=request.headers,
+                    headers=headers,
                     data=request.content) as resp:
                 return aiohttp.web.Response(status=resp.status,
                                             headers=resp.headers,
