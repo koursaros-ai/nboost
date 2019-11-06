@@ -1,5 +1,4 @@
 
-from ..base import Response
 from .base import BaseClient
 from .helpers import parse_json_request_qid_cid
 
@@ -23,7 +22,7 @@ class TestClient(BaseClient):
     async def format_response(self, client_response, topk, ranks, qid):
         candidates = await client_response.json()
         reranked = [candidates[i] for i in ranks[:topk]]
-        response = Response.JSON_OK(reranked)
+        response = self.handler.json_ok(reranked)
         response.headers['qid'] = str(qid)
         return response
 

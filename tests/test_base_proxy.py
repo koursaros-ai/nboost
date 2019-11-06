@@ -1,5 +1,8 @@
-from neural_rerank.proxies import BaseProxy, ProxyHandler
-from neural_rerank.cli import set_parser
+from neural_rerank.server import BaseServer, ServerHandler
+from neural_rerank.proxy import BaseProxy
+from neural_rerank.clients import BaseClient
+from neural_rerank.models import BaseModel
+from neural_rerank.cli import create_server, create_proxy
 import unittest
 import requests
 import time
@@ -7,14 +10,14 @@ import time
 TOPK = 5
 
 
-class TestServer(BaseProxy):
-    handler = ProxyHandler(BaseProxy.handler)
+class TestServer(BaseServer):
+    handler = ServerHandler(BaseServer.handler)
 
     @handler.add_route('GET', '/weather')
     def weather(self, request):
         return self.handler.json_ok({'temp': '92F'})
 
-    @handler.add_route('GET', '/_search')
+    @handler.add_route('GET', '/search')
     async def search(self, request):
         candidates = ['candidate %s' % x for x in range(int(request.query['topk']))]
         return self.handler.json_ok(candidates)
@@ -23,18 +26,16 @@ class TestServer(BaseProxy):
 class TestBaseProxy(unittest.TestCase):
 
     def setUp(self):
-        parser = set_parser()
-        self.server = TestServer(**vars(parser.parse_args([
+        self.server = create_server(argv=[
             '--port', '54001',
             '--verbose'
-        ])))
-        self.proxy = BaseProxy(**vars(parser.parse_args([
+        ])
+        self.proxy = create_proxy(argv=[
             '--ext_port', '54001',
             '--multiplier', '6',
-            '--search_path', '_search',
+            '--search_path', '/search_library',
             '--verbose'
-        ])))
-
+        ])
         self.server.start()
         self.proxy.start()
         self.server.is_ready.wait()
