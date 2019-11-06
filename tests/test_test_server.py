@@ -2,7 +2,7 @@
 import unittest
 from multiprocessing import Process, Event
 from flask import Flask, request
-# from flask_compress import Compress
+from flask_compress import Compress
 from flask_cors import CORS
 from flask_json import FlaskJSON, as_json, JsonError
 from neural_rerank.base import set_logger
@@ -42,7 +42,7 @@ class TestServer(Process):
 
         CORS(app, origins='*')
         FlaskJSON(app)
-        # Compress().init_app(app)
+        Compress().init_app(app)
         return app
 
     def run(self):
@@ -58,15 +58,13 @@ class TestTestServer(unittest.TestCase):
         self.server.is_ready.wait()
 
     def test_get(self):
-        import time
-        time.sleep(1)
-        # res = request.get('http://%s:%s/get_stuff' % (HOST, PORT))
-        # print(res.content)
-        # self.assertTrue(res.ok)
-        #
-        # res = request.post('http://%s:%s/send_stuff' % (HOST, PORT))
-        # print(res.content)
-        # self.assertTrue(res.ok)
+        res = requests.get('http://%s:%s/get_stuff' % (HOST, PORT))
+        print(res.content)
+        self.assertTrue(res.ok)
+
+        res = requests.post('http://%s:%s/send_stuff' % (HOST, PORT))
+        print(res.content)
+        self.assertTrue(res.ok)
 
     def tearDown(self):
         self.server.terminate()

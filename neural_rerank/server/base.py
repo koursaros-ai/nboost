@@ -1,6 +1,6 @@
 from ..base import BaseLogger, pfmt, pfmt_obj
 from pprint import pformat
-from multiprocessing import Process, Event
+from threading import Thread, Event
 from aiohttp import web_exceptions, web_routedef, web
 from typing import List, Callable
 from .handler import ServerHandler
@@ -12,7 +12,7 @@ def running_avg(avg: float, new: float, n: int):
     return (avg * n + new) / n
 
 
-class BaseServer(BaseLogger, Process):
+class BaseServer(BaseLogger, Thread):
     handler = ServerHandler()
 
     def __init__(self,
@@ -25,6 +25,7 @@ class BaseServer(BaseLogger, Process):
         super().__init__()
         self.host = host
         self.port = port
+        self.loop = None
         self.read_bytes = read_bytes
         self.is_ready = Event()
         self.handler.add_route(status_method, status_path)(self.status)
@@ -90,29 +91,38 @@ class BaseServer(BaseLogger, Process):
     async def handle_error(self, e: Exception):
         return self.handler.internal_error(e)
 
-    async def create_app(self,
-                         loop: asyncio.AbstractEventLoop,
-                         routes: List[web_routedef.RouteDef]) -> None:
+    async def create_app(self, routes: List[web_routedef.RouteDef]) -> web.AppRunner:
         app = web.Application(middlewares=[self.middleware])
         app.add_routes(routes)
         runner = web.AppRunner(app)
         await runner.setup()
         site = web.TCPSite(runner, self.host, self.port)
         await site.start()
+        return runner
 
     def run(self):
         try:
-            loop = asyncio.get_event_loop()
+            self.loop = asyncio.get_event_loop()
         except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
+
         routes = self.handler.bind_routes(self)
-        loop.run_until_complete(self.create_app(loop, routes))
+        print('creating')
+        self.runner = self.loop.run_until_complete(self.create_app(routes))
         self.logger.critical('LISTENING: %s:%d' % (self.host, self.port))
         self.logger.info('\nROUTES:\n%s' % pformat(self.handler.routes, width=1))
         self.is_ready.set()
-        loop.run_forever()
+        self.loop.run_forever()
+        self.is_ready.clear()
+
+    async def stop(self):
+        await self.runner.cleanup()
 
     def close(self):
-        self.terminate()
+        self.loop.create_task(self.stop())
+        self.loop.call_soon_threadsafe(self.loop.stop)
         self.join()
+        print('aaaa')
+
+

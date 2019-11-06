@@ -4,8 +4,6 @@ from neural_rerank.models import DBERTRank
 from tests.helpers import check_es_index
 import requests
 import unittest
-import multiprocessing as mp
-import time
 
 ES_HOST = '127.0.01'
 ES_PORT = '9200'
@@ -15,6 +13,7 @@ ES_INDEX = 'test_index'
 class TestESDBERTProxy(unittest.TestCase):
 
     def setUp(self):
+
         self.proxy = create_proxy(model_cls=DBERTRank, client_cls=ESClient, argv=[
             '--ext_host', ES_HOST,
             '--ext_port', ES_PORT,
