@@ -49,8 +49,10 @@ class BaseProxy(BaseServer):
         await local_writer.prepare(request)
         try:
             remote_reader, remote_writer = await asyncio.open_connection(
-                '127.0.0.1', 9200)
+                request.raw_path, 9200)
             local_reader = request.content
+            remote_writer.write(
+                bytes(b''.join([header[0] + b':' + header[1] + b'\n' for header in request.raw_headers])))
             pipe1 = self.pipe(local_reader, remote_writer, False)
             pipe2 = self.pipe(remote_reader, local_writer, True)
             await asyncio.gather(pipe1, pipe2)
