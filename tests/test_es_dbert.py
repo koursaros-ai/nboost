@@ -38,9 +38,6 @@ class TestESDBERTProxy(unittest.TestCase):
                 params={'q': 'description:light'}
             )
 
-        import pdb
-        pdb.set_trace()
-
         self.assertTrue(proxy_res.ok)
         total = proxy_res.json()['hits']['total']
         num_hits = len(proxy_res.json()['hits']['hits'])
