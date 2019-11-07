@@ -14,7 +14,7 @@ class TestDBERTRank(unittest.TestCase):
         with RESOURCES.joinpath('sonnets_small.txt').open() as fh:
             for line in fh:
                 if not line == '':
-                    self.candidates.append(line*100)
+                    self.candidates.append(line*5)
 
     def test_train(self):
         labels = [float(i % 2) for i in range(len(self.candidates))]
@@ -26,6 +26,6 @@ class TestDBERTRank(unittest.TestCase):
     def test_rank(self):
         res = (
             asyncio.get_event_loop()
-            .run_until_complete(self.model.rank(self.query*100, self.candidates))
+            .run_until_complete(self.model.rank(self.query*10, self.candidates))
         )
         self.assertIsInstance(res, list)
