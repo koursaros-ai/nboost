@@ -89,6 +89,11 @@ class BaseProxy(BaseServer):
         await self.model.train(query, candidates, labels)
         return self.handler.no_content()
 
+    async def bulk_train(self, request: web.BaseRequest) -> web.Response:
+        examples = await request.json()
+        await self.model.train(examples['query'], examples['candidates'], examples['labels'])
+        return self.handler.no_content()
+
     async def search(self, request: web.BaseRequest) -> web.Response:
         topk, method, ext_url, data = await self.client.magnify_request(request)
         headers = dict(request.headers)
