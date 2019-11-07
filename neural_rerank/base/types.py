@@ -37,10 +37,6 @@ class Cid(int):
     pass
 
 
-class Topk(int):
-    pass
-
-
 class Query(str):
     pass
 

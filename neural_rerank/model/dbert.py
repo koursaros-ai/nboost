@@ -27,7 +27,7 @@ class DBERTModel(BaseModel):
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.rerank_model.to(self.device, non_blocking=True)
 
-        self.optimizer = AdamW(self.rerank_model.parameters(), lr=self._lr, correct_bias=False)
+        self.optimizer = AdamW(self.rerank_model.parameters(), lr=self.lr, correct_bias=False)
         self.scheduler = ConstantLRSchedule(self.optimizer)
 
     async def train(self, query, choices, labels):

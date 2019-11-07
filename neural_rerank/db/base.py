@@ -1,4 +1,3 @@
-
 from ..base import StatefulBase
 from ..base.types import *
 from typing import Tuple
