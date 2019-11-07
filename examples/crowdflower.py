@@ -41,7 +41,7 @@ def train():
         )
         for row in sample_data:
             query, title, description, label = row[1:5]
-            requests.request('POST', 'localhost:53001/bulk', data={
+            requests.request('POST', 'http://localhost:53001/bulk', data={
                 "query" : query,
                 "candidates" : [(title + ' ' + description)[:500]],
                 "label" : label
