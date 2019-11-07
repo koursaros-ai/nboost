@@ -41,10 +41,12 @@ def train():
                 for hit in res['hits']['hits']:
                     candidates.append(hit['_source']['passage'])
                     labels.append(1.0 if doc_id == hit['_id'] else 0.0)
+                candidates.append(passage)
+                labels.append(1.0)
                 requests.request('POST', 'http://localhost:53001/bulk', json={
                     "query": query,
-                    "candidates": [passage[:500]],
-                    "labels": [float(label)]
+                    "candidates": labels,
+                    "labels": labels
                 })
 
 def evaluate():
