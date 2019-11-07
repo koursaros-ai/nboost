@@ -1,3 +1,7 @@
+INDEX = 'ms_marco'
+
+def dump():
+    pass
 
 def main():
     pass
