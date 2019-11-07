@@ -1,9 +1,23 @@
 from collections import ChainMap
-from pprint import pformat
 import termcolor
 import logging
 import copy
 import os
+
+
+class StatefulBase:
+    def __init__(self, verbose=True, **kwargs):
+        self.logger = set_logger(self.__class__.__name__, verbose=verbose)
+
+        if kwargs:
+            self.logger.critical('Unused arguments: %s' % kwargs)
+
+    @property
+    def _state(self) -> dict:
+        return dict(ChainMap(*[getattr(cls, 'state', lambda _: {})(self) for cls in self.__class__.mro()]))
+
+    def chain_state(self, other_state: dict) -> dict:
+        return {**self._state, **other_state}
 
 
 def set_logger(context, verbose=False):
@@ -69,25 +83,5 @@ class ColoredFormatter(logging.Formatter):
         return super().format(cr)
 
 
-class StatefulBase:
-    def __init__(self, verbose=True, **kwargs):
-        self.logger = set_logger(self.__class__.__name__, verbose=verbose)
-
-        if kwargs:
-            self.logger.critical('Unused arguments: %s' % kwargs)
-
-    @property
-    def _state(self) -> dict:
-        return dict(ChainMap(*[getattr(cls, 'state', lambda _: {})(self) for cls in self.__class__.mro()]))
-
-    def chain_state(self, other_state: dict) -> dict:
-        return {**self._state, **other_state}
-
-
-class BaseLogger:
-    def __new__(cls, verbose=True, **kwargs):
-        cls.logger = set_logger(cls.__name__, verbose=verbose)
-        cls.logger.info('\nARGV:\n' + pformat({**kwargs, 'verbose': verbose}, width=1))
-        return super().__new__(cls)
 
 

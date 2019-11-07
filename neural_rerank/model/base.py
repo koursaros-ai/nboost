@@ -6,15 +6,15 @@ from ..base.types import *
 class BaseModel(StatefulBase):
     def __init__(self, lr: float = 10e-3, data_dir: str = '/.cache', **kwargs):
         super().__init__()
-        self._lr = lr
-        self._data_dir = data_dir
+        self.lr = lr
+        self.data_dir = data_dir
 
     def post_start(self):
         """ Executes after the process forks """
         pass
 
     def state(self):
-        return dict(lr=self._lr, data_dir=self._data_dir)
+        return dict(lr=self.lr, data_dir=self.data_dir)
 
     def train(self, query: Query, choices: List[Choice], labels: Labels) -> None:
         """ train """

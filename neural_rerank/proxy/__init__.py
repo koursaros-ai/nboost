@@ -1,4 +1,3 @@
-from .base import BaseProxy
 from ..base import StatefulBase
 from ..codex import BaseCodex
 from ..model import BaseModel
@@ -6,8 +5,8 @@ from ..server import BaseServer
 from ..db import BaseDb
 from ..base.types import *
 from typing import Type, Tuple, Dict, List, Any
-import json as JSON
 from inspect import isawaitable
+import json as JSON
 
 
 class Proxy(StatefulBase):
@@ -104,7 +103,7 @@ class Proxy(StatefulBase):
 
     def exit(self):
         self.logger.critical('Stopping proxy...')
-        self.server.close()
+        self.server.exit()
 
     def __enter__(self):
         self.enter()
