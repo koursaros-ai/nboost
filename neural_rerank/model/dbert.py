@@ -1,9 +1,10 @@
 from .base import BaseModel
 import torch, torch.nn
 import numpy as np
+from ..base.types import *
 
 
-class DBERTRank(BaseModel):
+class DBERTModel(BaseModel):
     model_name = 'distilbert-base-uncased'
     max_grad_norm = 1.0
 
@@ -29,8 +30,8 @@ class DBERTRank(BaseModel):
         self.optimizer = AdamW(self.rerank_model.parameters(), lr=self._lr, correct_bias=False)
         self.scheduler = ConstantLRSchedule(self.optimizer)
 
-    async def train(self, query, candidates, labels):
-        input_ids, attention_mask = await self.encode(query, candidates)
+    async def train(self, query, choices, labels):
+        input_ids, attention_mask = await self.encode(query, choices)
 
         labels = torch.tensor(labels, dtype=torch.float).to(self.device, non_blocking=True)
         loss = self.rerank_model(input_ids, labels=labels, attention_mask=attention_mask)[0]
@@ -40,20 +41,20 @@ class DBERTRank(BaseModel):
         self.scheduler.step()
         self.rerank_model.zero_grad()
 
-    async def rank(self, query, candidates):
-        input_ids, attention_mask = await self.encode(query, candidates)
+    async def rank(self, query, choices):
+        input_ids, attention_mask = await self.encode(query, choices)
 
         with torch.no_grad():
             logits = self.rerank_model(input_ids, attention_mask=attention_mask)[0]
             scores = np.squeeze(logits.detach().cpu().numpy())
             if len(logits) == 1:
                 scores = [scores]
-            return list(np.argsort(scores)[::-1])
+            return Ranks(np.argsort(scores)[::-1])
 
-    async def encode(self, query, candidates):
+    async def encode(self, query, choices):
         inputs = [self.tokenizer.encode_plus(
             query, candidate, add_special_tokens=True
-        ) for candidate in candidates]
+        ) for candidate in choices]
 
         max_len = max(len(t['input_ids']) for t in inputs)
         input_ids = [t['input_ids'] + [0] * (max_len - len(t['input_ids'])) for t in inputs]

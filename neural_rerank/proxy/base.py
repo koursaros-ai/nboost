@@ -1,10 +1,19 @@
 from ..base import *
 from ..server import BaseServer, ServerHandler
 from ..clients import BaseClient
-from ..models import BaseModel
-import aiohttp, asyncio
+from ..model import BaseModel
+import aiohttp
 from aiohttp import web
 import itertools
+from enum import Enum
+
+
+class Route(Enum):
+    SEARCH = 0
+    TRAIN = 1
+    STATUS = 2
+    NOT_FOUND = 3
+    ERROR = 4
 
 
 class BaseProxy(BaseServer):
@@ -24,15 +33,7 @@ class BaseProxy(BaseServer):
 
     @property
     def state(self):
-        return {
-            self.__class__.__name__: self.handler.bind_states(self),
-            self.model.__class__.__name__: self.model.handler.bind_states(self.model),
-            self.client.__class__.__name__: self.client.handler.bind_states(self.client)
-        }
-
-    @handler.add_state
-    def backlog(self):
-        return len(self.queries)
+        return {}
 
     async def pipe(self, reader, writer, http):
         try:
