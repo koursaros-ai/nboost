@@ -84,4 +84,6 @@ class DBERTRank(BaseModel):
 
     async def save(self):
         self.logger.info('Saving model')
+        os.makedirs(self.model_path, exist_ok=True)
         self.rerank_model.save_pretrained(self.model_path)
+        self.tokenizer.save_pretrained(self.model_path)
