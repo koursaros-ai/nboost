@@ -19,6 +19,8 @@ class DBERTModel(BaseModel):
         model_config = AutoConfig.from_pretrained(self.model_name)
         model_config.num_labels = 1  # set up for regression
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        torch.cuda.synchronize(self.device )
+
         if self.device == "cpu":
             self.logger.info("RUNNING ON CPU")
         self.rerank_model = AutoModelForSequenceClassification.from_pretrained(
