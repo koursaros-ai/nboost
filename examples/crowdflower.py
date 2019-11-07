@@ -8,10 +8,8 @@ INDEX = 'crowdflower'
 def dump():
     with RESOURCES.joinpath('train.csv').open() as fh:
         sample_data = csv.reader(fh)
-        print('Dumping train.csv...')
         es = Elasticsearch(
             hosts=[{"host": "localhost", "port": 53001}],
-            # connection_class=RequestsHttpConnection
         )
         for row in list(sample_data):
             es.index(
@@ -21,21 +19,31 @@ def dump():
             )
 
 
-def main():
+def query():
     es = Elasticsearch(hosts=[{"host": "localhost", "port": 53001}])
-    for i in range(0, 1000):
-        res = es.search(index=INDEX, body={
-            "query": {
-                "match": {
-                    "description": {
-                        "query": "test"
-                    }
+    res = es.search(index=INDEX, body={
+        "query": {
+            "match": {
+                "description": {
+                    "query": "test"
                 }
             }
-        })
-        qid = res['qid']
+        }
+    })
+    qid = res['qid']
+
+def train():
+    with RESOURCES.joinpath('train.csv').open() as fh:
+        sample_data = csv.reader(fh)
+        es = Elasticsearch(
+            hosts=[{"host": "localhost", "port": 53001}],
+        )
+        for row in sample_data:
+            title, description, label = row[2:5]
+            print(title, description, label)
 
 
 if __name__ == '__main__':
     # dump()
-    main()
+    # query()
+    train()
