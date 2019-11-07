@@ -1,3 +1,4 @@
+from collections import ChainMap
 from pprint import pformat
 import termcolor
 import logging
@@ -66,6 +67,21 @@ class ColoredFormatter(logging.Formatter):
         seq = self.MAPPING.get(cr.levelname, self.MAPPING['INFO'])  # default white
         cr.msg = termcolor.colored(cr.msg, **seq)
         return super().format(cr)
+
+
+class StatefulBase:
+    def __init__(self, verbose=True, **kwargs):
+        self.logger = set_logger(self.__class__.__name__, verbose=verbose)
+
+        if kwargs:
+            self.logger.critical('Unused arguments: %s' % kwargs)
+
+    @property
+    def _state(self) -> dict:
+        return dict(ChainMap(*[getattr(cls, 'state', lambda _: {})(self) for cls in self.__class__.mro()]))
+
+    def chain_state(self, other_state: dict) -> dict:
+        return {**self._state, **other_state}
 
 
 class BaseLogger:

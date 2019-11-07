@@ -1,7 +1,7 @@
 
 from neural_rerank.cli import create_proxy, create_server
 from neural_rerank.clients import ESClient
-from neural_rerank.models import TestModel
+from neural_rerank.model import TestModel
 from neural_rerank.server import BaseServer, ServerHandler
 import unittest
 import requests

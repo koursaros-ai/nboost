@@ -1,6 +1,6 @@
 from neural_rerank.cli import create_proxy
 from neural_rerank.clients import ESClient
-from neural_rerank.models import DBERTRank
+from neural_rerank.model import DBERTRank
 from tests.helpers import check_es_index
 import requests
 import unittest

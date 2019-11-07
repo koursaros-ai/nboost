@@ -2,61 +2,64 @@ from ..base import BaseLogger, pfmt, pfmt_obj
 from pprint import pformat
 from threading import Thread, Event
 from aiohttp import web_exceptions, web_routedef, web
-from typing import List, Callable
 from .handler import ServerHandler
 import asyncio
 import time
+from typing import Dict, Tuple, Callable
+from ..base.types import *
+from ..base import StatefulBase
 
 
 def running_avg(avg: float, new: float, n: int):
     return (avg * n + new) / n
 
 
-class BaseServer(BaseLogger, Thread):
+class BaseServer(StatefulBase, Thread):
     handler = ServerHandler()
 
     def __init__(self,
                  host: str = '127.0.0.1',
                  port: int = 53001,
+                 ext_host: str = '127.0.0.1',
+                 ext_port: int = 54001,
                  read_bytes: int = 2048,
                  status_path: str = '/status',
                  status_method: str = '*',
                  **kwargs):
-        super().__init__()
+        StatefulBase.__init__(self, **kwargs)
+        Thread.__init__(self)
         self.host = host
         self.port = port
+        self.ext_host = ext_host
+        self.ext_port = ext_port
         self.loop = None
         self.read_bytes = read_bytes
         self.is_ready = Event()
         self.handler.add_route(status_method, status_path)(self.status)
 
-    @handler.add_state
-    def host(self):
-        return self.host
+    def create_app(self, routes: Dict[Route, Tuple[str, str, Callable]]):
+        """
+        function to run a web server given a dictionary of routes
 
-    @handler.add_state
-    def port(self):
-        return self.port
+        :param routes: {Route => (method, path, function}
+        :return:
+        """
+        raise NotImplementedError
 
-    @handler.add_state
-    def read_bytes(self):
-        return self.read_bytes
-
-    @handler.add_state
-    def is_ready(self):
-        return self.is_ready.is_set()
-
-    @property
     def state(self):
-        return {self.__class__.__name__: self.handler.bind_states(self)}
+        return dict(
+            host=self.host,
+            port=self.port,
+            ext_host=self.ext_port,
+            ext_port=self.ext_port,
+            read_bytes=self.read_bytes,
+            is_ready=self.is_ready.is_set())
 
     async def status(self, request: web.BaseRequest):
-        return self.handler.json_ok(self.state)
+        return self.handler.json_ok(self.state())
 
     @web.middleware
-    async def middleware(self,
-                         request: web.BaseRequest,
-                         handler: Callable) -> web.Response:
+    async def middleware(self, request: web.BaseRequest, handler: Callable) -> web.Response:
 
         self.logger.info('RECV: %s' % request)
         self.logger.debug(pfmt(request))
@@ -85,13 +88,21 @@ class BaseServer(BaseLogger, Thread):
 
         return response
 
+    async def ask(self, req: Request) -> Response:
+        """ makes a request to the external host """
+        raise NotImplementedError
+
+    async def forward(self, req: Request):
+        """ forward a request to the external host """
+        raise NotImplementedError
+
     async def handle_not_found(self, request: web.BaseRequest):
         raise web.HTTPNotFound
 
     async def handle_error(self, e: Exception):
         return self.handler.internal_error(e)
 
-    async def create_app(self, routes: List[web_routedef.RouteDef]) -> None:
+    async def run_app(self, routes: List[web_routedef.RouteDef]) -> None:
         app = web.Application(middlewares=[self.middleware])
         app.add_routes(routes)
         runner = web.AppRunner(app)
@@ -107,7 +118,7 @@ class BaseServer(BaseLogger, Thread):
             asyncio.set_event_loop(self.loop)
 
         routes = self.handler.bind_routes(self)
-        self.loop.run_until_complete(self.create_app(routes))
+        self.loop.run_until_complete(self.run_app(routes))
         self.logger.critical('LISTENING: %s:%d' % (self.host, self.port))
         self.logger.info('\nROUTES:\n%s' % pformat(self.handler.routes, width=1))
         self.is_ready.set()
