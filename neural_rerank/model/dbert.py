@@ -60,9 +60,10 @@ class DBERTModel(BaseModel):
         ) for candidate in choices]
         )[:self.max_seq_len] for candidate in candidates]
 
-        max_len = max(len(t['input_ids']) for t in inputs)
-        input_ids = [t['input_ids'] + [0] * (max_len - len(t['input_ids'])) for t in inputs]
-        attention_mask = [[1] * len(t['input_ids']) + [0] * (max_len - len(t['input_ids'])) for t in inputs]
+        max_len = min(max(len(t['input_ids']) for t in inputs), self.max_seq_len)
+        input_ids = [t['input_ids'][:max_len] + [0] * (max_len - len(t['input_ids'][:max_len])) for t in inputs]
+        attention_mask = [[1] * len(t['input_ids'][:max_len]) +
+                          [0] * (max_len - len(t['input_ids'][:max_len])) for t in inputs]
 
         input_ids = torch.tensor(input_ids).to(self.device, non_blocking=True)
         attention_mask = torch.tensor(attention_mask).to(self.device, non_blocking=True)
