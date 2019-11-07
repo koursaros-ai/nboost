@@ -6,7 +6,7 @@ import numpy as np
 class DBERTRank(BaseModel):
     model_name = 'distilbert-base-uncased'
     max_grad_norm = 1.0
-    max_seq_len = 256
+    max_seq_len = 128
 
     def __init__(self, *args, **kwargs):
         from transformers import (AutoConfig,
