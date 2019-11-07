@@ -7,6 +7,7 @@ from ..base.types import *
 class DBERTModel(BaseModel):
     model_name = 'distilbert-base-uncased'
     max_grad_norm = 1.0
+    max_seq_len = 256
 
     def __init__(self, *args, **kwargs):
         from transformers import (AutoConfig,
@@ -57,6 +58,7 @@ class DBERTModel(BaseModel):
         inputs = [self.tokenizer.encode_plus(
             query, candidate, add_special_tokens=True
         ) for candidate in choices]
+        )[:self.max_seq_len] for candidate in candidates]
 
         max_len = max(len(t['input_ids']) for t in inputs)
         input_ids = [t['input_ids'] + [0] * (max_len - len(t['input_ids'])) for t in inputs]
