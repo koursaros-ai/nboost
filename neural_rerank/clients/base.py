@@ -11,6 +11,7 @@ class BaseClient(BaseLogger):
     train_method = '*'
     status_path = '/status'
     search_path = '/search'
+    bulk_train_path = '/bulk'
     train_path = '/train'
 
     def __init__(self,
