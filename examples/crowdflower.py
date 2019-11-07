@@ -42,7 +42,7 @@ def benchmark():
                 }
             }, filter_path=['hits.hits._*'])
             print(res)
-            print(f'avg {(time.time() - start)/i} s/ it')
+            print(f'avg {(time.time() - start)/(i+1)} s/ it')
 
 
 def train():
