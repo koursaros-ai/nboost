@@ -2,6 +2,7 @@ from elasticsearch import Elasticsearch, RequestsHttpConnection
 from tests.paths import RESOURCES
 import csv
 import requests
+import time
 
 INDEX = 'crowdflower'
 
@@ -20,18 +21,29 @@ def dump():
             )
 
 
-def query():
+def benchmark():
     es = Elasticsearch(hosts=[{"host": "localhost", "port": 53001}])
-    res = es.search(index=INDEX, body={
-        "query": {
-            "match": {
-                "description": {
-                    "query": "test"
+    with RESOURCES.joinpath('train.csv').open() as fh:
+        sample_data = csv.reader(fh)
+        headers = next(sample_data, None)
+        es = Elasticsearch(
+            hosts=[{"host": "localhost", "port": 53001}],
+        )
+        start = time.time()
+        for i, row in enumerate(sample_data):
+            query, title, description, label = row[1:5]
+            res = es.search(index=INDEX, body={
+                "query": {
+                    "match": {
+                        "description": {
+                            "query": query
+                        }
+                    }
                 }
-            }
-        }
-    })
-    qid = res['qid']
+            }, filter_path=['hits.hits._*'])
+            print(res)
+            print(f'avg {(time.time() - start)/i} s/ it')
+
 
 def train():
     with RESOURCES.joinpath('train.csv').open() as fh:
@@ -51,5 +63,5 @@ def train():
 
 if __name__ == '__main__':
     # dump()
-    # query()
-    train()
+    benchmark()
+    # train()
