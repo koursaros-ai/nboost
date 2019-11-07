@@ -40,10 +40,10 @@ def train():
             hosts=[{"host": "localhost", "port": 53001}],
         )
         for row in sample_data:
-            title, description, label = row[2:5]
+            query, title, description, label = row[1:5]
             requests.request('POST', 'localhost:53001/bulk', data={
-                "title" : title,
-                "description" : description,
+                "query" : query,
+                "candidates" : [(title + ' ' + description)[:500]],
                 "label" : label
             })
 
