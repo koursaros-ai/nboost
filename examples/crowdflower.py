@@ -30,7 +30,12 @@ def benchmark():
             hosts=[{"host": "localhost", "port": 53001}],
         )
         start = time.time()
+        total = len(list(sample_data))
+        relevant_res = 0
+        total_res = 0
         for i, row in enumerate(sample_data):
+            if i < 0.8 * total:
+                continue
             query, title, description, label = row[1:5]
             res = es.search(index=INDEX, body={
                 "query": {
@@ -49,10 +54,10 @@ def train():
     with RESOURCES.joinpath('train.csv').open() as fh:
         sample_data = csv.reader(fh)
         headers = next(sample_data, None)
-        es = Elasticsearch(
-            hosts=[{"host": "localhost", "port": 53001}],
-        )
-        for row in sample_data:
+        total = len(list(sample_data))
+        for i, row in enumerate(sample_data):
+            if i > 0.8 * total:
+                continue
             query, title, description, label = row[1:5]
             requests.request('POST', 'http://localhost:53001/bulk', json={
                 "query" : query,
