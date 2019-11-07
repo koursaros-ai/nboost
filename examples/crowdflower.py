@@ -23,16 +23,17 @@ def dump():
 
 def main():
     es = Elasticsearch(hosts=[{"host": "localhost", "port": 53001}])
-    res = es.search(index=INDEX, body={
-        "query": {
-            "match": {
-                "description": {
-                    "query": "test"
+    for i in range(0, 1000):
+        res = es.search(index=INDEX, body={
+            "query": {
+                "match": {
+                    "description": {
+                        "query": "test"
+                    }
                 }
             }
-        }
-    })
-    print(res)
+        })
+        qid = res['qid']
 
 
 if __name__ == '__main__':
