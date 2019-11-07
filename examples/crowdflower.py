@@ -35,7 +35,7 @@ def query():
 
 def train():
     with RESOURCES.joinpath('train.csv').open() as fh:
-        sample_data = csv.reader(fh,header=True)
+        sample_data = csv.reader(fh)
         headers = next(sample_data, None)
         es = Elasticsearch(
             hosts=[{"host": "localhost", "port": 53001}],
