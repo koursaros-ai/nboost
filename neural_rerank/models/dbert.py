@@ -1,6 +1,7 @@
 from .base import BaseModel
 import torch, torch.nn
 import numpy as np
+import os
 
 
 class DBERTRank(BaseModel):
@@ -19,13 +20,20 @@ class DBERTRank(BaseModel):
         self.model_path = '.distilbert/'
         self.train_steps = 0
         self.checkpoint_steps = 500
+
+        if os.path.exists(os.path.join(self.model_path, 'config.json')):
+            self.model_name = self.model_path
+
         model_config = AutoConfig.from_pretrained(self.model_name)
         model_config.num_labels = 1  # set up for regression
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        torch.cuda.synchronize(self.device)
 
-        if self.device == "cpu":
+        if self.device == torch.device("cpu"):
             self.logger.info("RUNNING ON CPU")
+        else:
+            self.logger.info("RUNNING ON CUDA")
+            torch.cuda.synchronize(self.device)
+
         self.rerank_model = AutoModelForSequenceClassification.from_pretrained(
             self.model_name,
             config=model_config)
