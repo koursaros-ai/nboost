@@ -29,3 +29,11 @@ class TestDBERTRank(unittest.TestCase):
             .run_until_complete(self.model.rank(self.query*5, self.candidates))
         )
         self.assertIsInstance(res, list)
+
+    def test_save_load(self):
+        res = (
+            asyncio.get_event_loop()
+                .run_until_complete(self.model.save())
+        )
+        loaded_dbert = DBERTRank()
+        self.assertEqual(loaded_dbert.model_path, loaded_dbert.model_name)
