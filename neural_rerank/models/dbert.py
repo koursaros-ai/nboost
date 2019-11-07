@@ -75,4 +75,5 @@ class DBERTRank(BaseModel):
         return input_ids, attention_mask
 
     async def save(self):
+        self.logger.info('Saving model')
         self.rerank_model.save_pretrained(self.model_path)
