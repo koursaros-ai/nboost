@@ -17,6 +17,9 @@ class DBERTModel(BaseModel):
                                   ConstantLRSchedule)
 
         super().__init__(*args, **kwargs)
+        self.model_path = '.distilbert/'
+        self.train_steps = 0
+        self.checkpoint_steps = 500
         model_config = AutoConfig.from_pretrained(self.model_name)
         model_config.num_labels = 1  # set up for regression
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -43,6 +46,9 @@ class DBERTModel(BaseModel):
         self.optimizer.step()
         self.scheduler.step()
         self.rerank_model.zero_grad()
+        self.train_steps += 1
+        if self.train_steps % self.checkpoint_steps == 0:
+            await self.save()
 
     async def rank(self, query, choices):
         input_ids, attention_mask = await self.encode(query, choices)
@@ -69,3 +75,6 @@ class DBERTModel(BaseModel):
         attention_mask = torch.tensor(attention_mask).to(self.device, non_blocking=True)
 
         return input_ids, attention_mask
+
+    async def save(self):
+        self.rerank_model.save_pretrained(self.model_path)
