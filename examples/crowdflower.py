@@ -44,7 +44,7 @@ def train():
             requests.request('POST', 'http://localhost:53001/bulk', json={
                 "query" : query,
                 "candidates" : [(title + ' ' + description)[:500]],
-                "labels" : [label]
+                "labels" : [float(label)]
             })
 
 
