@@ -1,6 +1,7 @@
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from tests.paths import RESOURCES
 import csv
+import requests
 
 INDEX = 'crowdflower'
 
@@ -40,7 +41,11 @@ def train():
         )
         for row in sample_data:
             title, description, label = row[2:5]
-            print(title, description, label)
+            requests.request('POST', 'localhost:53001/bulk', data={
+                "title" : title,
+                "description" : description,
+                "label" : label
+            })
 
 
 if __name__ == '__main__':
