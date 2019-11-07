@@ -29,7 +29,7 @@ MAPPINGS = {
 
 
 def stream_bodies():
-    with open(os.path.join('collectionandqueries','collection.tsv')) as fh:
+    with open(os.path.join('collection.tsv')) as fh:
         data = csv.reader(fh)
         for id, passage in data:
             body = {
