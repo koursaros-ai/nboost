@@ -6,6 +6,7 @@ import numpy as np
 class DBERTRank(BaseModel):
     model_name = 'distilbert-base-uncased'
     max_grad_norm = 1.0
+    max_seq_len = 256
 
     def __init__(self, *args, **kwargs):
         from transformers import (AutoConfig,
@@ -55,7 +56,7 @@ class DBERTRank(BaseModel):
     async def encode(self, query, candidates):
         inputs = [self.tokenizer.encode_plus(
             query, candidate, add_special_tokens=True
-        ) for candidate in candidates]
+        )[:self.max_seq_len] for candidate in candidates]
 
         max_len = max(len(t['input_ids']) for t in inputs)
         input_ids = [t['input_ids'] + [0] * (max_len - len(t['input_ids'])) for t in inputs]
