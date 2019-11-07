@@ -30,7 +30,7 @@ MAPPINGS = {
 
 def stream_bodies():
     with open(os.path.join('collection.tsv')) as fh:
-        data = csv.reader(fh,delimiter='\t')
+        data = csv.reader(fh, delimiter='\t')
         for id, passage in data:
             body = {
                 "_index": INDEX,
@@ -39,7 +39,7 @@ def stream_bodies():
                     "passage": passage,
                 }
             }
-            print(f'Sent {id}: {passage}.')
+            # print(f'Sent {id}: {passage}.')
             yield body
 
 
