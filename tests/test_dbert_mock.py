@@ -26,6 +26,6 @@ class TestDBERTRank(unittest.TestCase):
     def test_rank(self):
         res = (
             asyncio.get_event_loop()
-            .run_until_complete(self.model.rank(self.query*10, self.candidates))
+            .run_until_complete(self.model.rank(self.query*5, self.candidates))
         )
         self.assertIsInstance(res, list)
