@@ -25,6 +25,7 @@ def train():
         data = csv.reader(fh, delimiter='\t')
         for qid, query in data:
             res = es.search(index=INDEX, body={
+                "size" : 1000,
                 "query": {
                     "match": {
                         "passage": {
