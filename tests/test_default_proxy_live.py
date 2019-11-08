@@ -39,7 +39,8 @@ class TestESProxy(unittest.TestCase):
             params = {'q': 'description:%s' % q}
             proxy_res = requests.get('http://localhost:53001/test_index/_search', params=params)
             self.assertTrue(proxy_res.ok)
-            json = {'cid': proxy_res.json()['hits']['hits'][0]['cid']}
+            first_hit = proxy_res.json()['hits']['hits'][0]
+            json = {'cid': first_hit['cid'], 'qid': first_hit['qid']}
             train_res = requests.post('http://localhost:53001/train', json=json)
             self.assertTrue(train_res.ok)
 

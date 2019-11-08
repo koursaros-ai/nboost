@@ -39,31 +39,40 @@ class ESCodex(BaseCodex):
             query = _finditem(body['query'], 'query')
 
         hits = JSON.loads(res.body)['hits']['hits']
-        choices = [Choice(
-            int(hit['_id']), hit['_source'][self.field]
-        ) for hit in hits]
+        choices = [hit['_source'][self.field].encode() for hit in hits]
 
-        return query, choices
+        return Query(query), Choices(choices)
 
-    def pack(self, req, res, query, choices, ranks):
+    def pack(self, req, res, query, choices, ranks, qid, cids):
         body = JSON.loads(res.body)
-        for choice, hit in zip(choices, body['hits']['hits']):
-            hit['cid'] = choice.id
+        for choice, cid, hit in zip(choices, cids, body['hits']['hits']):
+            hit['qid'] = qid
+            hit['cid'] = cid
+
         body['hits']['hits'] = [body['hits']['hits'][i] for i in ranks[:self.get_topk(req)]]
         res.headers.pop('Content-Length', None)
         return Response(res.headers, JSON.dumps(body).encode(), 200)
 
     def pluck(self, req):
         body = JSON.loads(req.body)
-        cid = body['cid'] if 'cid' in body else req.params['cid'] if 'cid' in req.params else None
+        if 'qid' in body:
+            qid = body['qid']
+        elif 'qid' in req.params:
+            qid = req.params['qid']
+        else:
+            raise ValueError('qid not found')
 
-        if cid is None:
+        if 'cid' in body:
+            cid = body['cid']
+        elif 'cid' in req.params:
+            cid = req.params['cid']
+        else:
             raise ValueError('cid not found')
 
-        return Cid(cid)
+        return Qid(qid), Cid(cid)
 
-    def ack(self, cid):
-        return Response({}, JSON.dumps(dict(cid=cid)).encode(), 200)
+    def ack(self, qid, cid):
+        return Response({}, JSON.dumps(dict(qid=qid,cid=cid)).encode(), 200)
 
     def catch(self, e):
         body = JSON.dumps(dict(error=str(e), type=type(e).__name__))

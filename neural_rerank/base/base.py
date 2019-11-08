@@ -1,5 +1,6 @@
 from collections import ChainMap
 import termcolor
+import itertools
 import logging
 import copy
 import os
@@ -8,6 +9,8 @@ import os
 class StatefulBase:
     def __init__(self, verbose=True, **kwargs):
         self.logger = set_logger(self.__class__.__name__, verbose=verbose)
+        # useful counter that you can call next() on
+        self.counter = itertools.count()
 
         if kwargs:
             self.logger.critical('Unused arguments: %s' % kwargs)

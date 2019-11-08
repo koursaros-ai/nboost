@@ -29,7 +29,7 @@ class BaseCodex(StatefulBase):
         """ Magnify the size of the request by the multiplier """
         raise NotImplementedError
 
-    def parse(self, req: Request, res: Response) -> Tuple[Query, List[Choice]]:
+    def parse(self, req: Request, res: Response) -> Tuple[Query, Choices]:
         """ Parse out the query and choices """
         raise NotImplementedError
 
@@ -37,19 +37,21 @@ class BaseCodex(StatefulBase):
              req: Request,
              res: Response,
              query: Query,
-             choices: List[Choice],
-             ranks: Ranks) -> Response:
+             choices: Choices,
+             ranks: Ranks,
+             qid: Qid,
+             cids: List[Cid]) -> Response:
         """
         Reformat the proxy response according to the reranked candidates
         mreq is the magnified request.
         """
         raise NotImplementedError
 
-    def pluck(self, req: Request) -> Cid:
+    def pluck(self, req: Request) -> Tuple[Qid, Cid]:
         """ Train path retrieves choice id """
         raise NotImplementedError
 
-    def ack(self, cid: Cid) -> Response:
+    def ack(self, qid: Qid, cid: Cid) -> Response:
         """ acknowledge that train was scheduled """
         raise NotImplementedError
 
