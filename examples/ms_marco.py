@@ -44,7 +44,8 @@ def train():
                     qid_hits[qid] = (count + 1, min(min_rank, rank))
             hits += qid_hits[qid][0]
             total += qid_count[qid]
-            mrr += (1/qid_hits[qid][1])
+            if qid_hits[qid][1] > 0:
+                mrr += (1/qid_hits[qid][1])
             if total > 0:
                 print("recall @ top %s: %s ." % (TOPK, hits/total), "MRR: %s " % (mrr/total))
             # print("hits: %s, avg rank: %s " % qid_hits[qid], " total: %s" % qid_count[qid])
