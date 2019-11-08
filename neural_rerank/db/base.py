@@ -4,11 +4,11 @@ from typing import Tuple
 
 
 class BaseDb(StatefulBase):
-    def save(self, query: Query, choices: List[Choice]) -> None:
+    def save(self, query: Query, choices: Choices) -> None:
         """ Save the choices during search for using during train """
         raise NotImplementedError
 
-    def get(self, pick: Cid) -> Tuple[Query, List[Choice], Labels]:
+    def get(self, qid: Qid, cid: Cid) -> Tuple[Query, Choices, Labels]:
         """ Return the choice for training """
         raise NotImplementedError
 

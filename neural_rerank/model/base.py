@@ -16,11 +16,11 @@ class BaseModel(StatefulBase):
     def state(self):
         return dict(lr=self.lr, data_dir=self.data_dir)
 
-    def train(self, query: Query, choices: List[Choice], labels: Labels) -> None:
+    def train(self, query: Query, choices: Choices, labels: Labels) -> None:
         """ train """
         raise web.HTTPNotImplemented
 
-    def rank(self, query: Query, choices: List[Choice]) -> Ranks:
+    def rank(self, query: Query, choices: Choices) -> Ranks:
         """
         sort list of indices of topk candidates
         """

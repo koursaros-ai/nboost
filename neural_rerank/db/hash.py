@@ -1,4 +1,6 @@
 from .base import BaseDb
+from ..base.types import Qid, Cid
+import hashlib
 
 
 class HashDb(BaseDb):
@@ -8,19 +10,33 @@ class HashDb(BaseDb):
         self.choices = dict()
         self.laps = dict()
 
+        # maps query ids => [choice ids]
+        self.map = dict()
+
     def save(self, query, choices):
-        qid = hash(query)
-        cids = [choice.id for choice in choices]
-        self.queries[qid] = query, cids
+        qid = next(self.counter)
+        cids = []
 
         for choice in choices:
-            self.choices[choice.id] = qid, choice
+            cid = int(hashlib.sha1(choice).hexdigest(), 16) % (10 ** 8)
+            cids.append(cid)
+            self.choices[cid] = choice
 
-    def get(self, pick):
-        qid, _ = self.choices[pick]
-        query, cids = self.queries[qid]
-        choices = [self.choices[cid][1] for cid in cids]
-        labels = [1.0 if cid == pick else 0.0 for cid in cids]
+        self.queries[qid] = query
+        self.map[qid] = cids
+
+        return Qid(qid), [Cid(cid) for cid in cids]
+
+    def get(self, qid, cid):
+        query = self.queries[qid]
+        choices = []
+        labels = []
+
+        cids = self.map[qid]
+        for _cid in cids:
+            choices.append(self.choices[_cid])
+            labels.append(1.0 if _cid == cid else 0.0)
+
         return query, choices, labels
 
     def lap(self, ms, cls, func):
