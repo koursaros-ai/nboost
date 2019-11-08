@@ -77,7 +77,7 @@ class AioHttpServer(BaseServer):
             res = await self.error_handler(e)
 
         self.logger.info('STATUS %s' % res.status)
-        return web.Response(body=res.body, status=res.status)
+        return web.Response(headers=res.headers, body=res.body, status=res.status)
 
     async def ask(self, req):
         url = 'http://%s:%s%s?%s' % (self.ext_host, self.ext_port, req.path, urlencode(req.params))
