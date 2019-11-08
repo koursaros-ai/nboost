@@ -21,6 +21,7 @@ def timeit(fn, *args, **kwargs):
     return res
 
 def es_latency():
+    es = Elasticsearch(host=ES_HOST)
     with open(os.path.join(DATA_PATH, 'queries.train.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
         for qid, query in data:
