@@ -38,15 +38,16 @@ class Proxy(StatefulBase):
         db = db()
 
         def track(f: Any):
+            cls = f.__self__.__class__.__name__ if hasattr(f, '__self__') else self.__class__.__name__
+            ident = (cls, f.__name__)
+
             async def decorator(*args):
                 start = time.perf_counter()
                 res = f(*args)
-                ms = (time.perf_counter() - start) * 10 ** 6
-                db.lap(
-                    ms,
-                    f.__self__.__class__.__name__ if hasattr(f, '__self__') else self.__class__.__name__,
-                    f.__name__)
-                return await res if isawaitable(res) else res
+                ret = await res if isawaitable(res) else res
+                ms = (time.perf_counter() - start) * 1000
+                db.lap(ms, *ident)
+                return ret
             return decorator
 
         @track
