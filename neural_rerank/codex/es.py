@@ -12,6 +12,7 @@ def _finditem(obj, key):
             if item is not None:
                 return item
 
+
 class ESCodex(BaseCodex):
     DEFAULT_TOPK = 10
     SEARCH_PATH = '/{index}/_search'
