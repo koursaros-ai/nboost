@@ -1,10 +1,8 @@
-
 from neural_rerank.cli import create_proxy
 from tests.test_test_server import TestServer
 import unittest
 import requests
 import json as JSON
-import time
 
 
 class TestProxy(unittest.TestCase):
