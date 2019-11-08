@@ -51,8 +51,6 @@ class AioHttpServer(BaseServer):
     async def format_response(response: client.ClientResponse) -> Response:
         headers = dict(response.headers)
         headers['Content-Type'] = 'application/json'
-        import pdb
-        pdb.set_trace()
         return Response(headers, await response.read(), response.status)
 
     @staticmethod
