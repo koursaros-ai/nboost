@@ -5,13 +5,15 @@ from collections import defaultdict
 
 INDEX = 'ms_marco'
 DATA_PATH = '.'
+TOPK = 500
 
 es = Elasticsearch()
 
 
 def train():
     qrels = set()
-    train_set = []
+    hits = 0
+    total = 0
     qid_count = defaultdict(int)
 
     with open(os.path.join(DATA_PATH, 'qrels.train.tsv')) as fh:
@@ -25,7 +27,7 @@ def train():
         data = csv.reader(fh, delimiter='\t')
         for qid, query in data:
             res = es.search(index=INDEX, body={
-                "size" : 100,
+                "size" : TOPK,
                 "query": {
                     "match": {
                         "passage": {
@@ -39,7 +41,11 @@ def train():
                 if (qid, hit['_id']) in qrels:
                     count, rank_sum = qid_hits[qid]
                     qid_hits[qid] = (count + 1, rank_sum + rank)
-            print("hits: %s, avg rank: %s " % qid_hits[qid], " total: %s" % qid_count[qid])
+            hits += qid_hits[qid]
+            total += qid_count[qid]
+            if total != 0:
+                print("recall @ top %s: %s" % (TOPK, hits / total))
+            # print("hits: %s, avg rank: %s " % qid_hits[qid], " total: %s" % qid_count[qid])
 
             # candidates = []
             # labels = []
