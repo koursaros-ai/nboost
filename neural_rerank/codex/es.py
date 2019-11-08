@@ -1,6 +1,7 @@
 from .base import BaseCodex
 import json as JSON
 from ..base.types import *
+from pprint import pformat
 
 
 class ESCodex(BaseCodex):
@@ -49,4 +50,4 @@ class ESCodex(BaseCodex):
         return Response({}, body, 500)
 
     def pulse(self, state):
-        return Response({}, JSON.dumps(state).encode(), 200)
+        return Response({}, pformat(state), 200)
