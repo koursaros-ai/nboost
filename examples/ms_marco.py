@@ -39,30 +39,27 @@ def train():
                 }
             }, filter_path=['hits.hits._*'])
             qid_hits = defaultdict(lambda: (0, TOPK+1))
+            candidates = []
+            labels = []
             for rank, hit in enumerate(res['hits']['hits']):
                 if (qid, hit['_id']) in qrels:
                     count, min_rank = qid_hits[qid]
                     qid_hits[qid] = (count + 1, min(min_rank, rank+1))
+                    candidates.append(hit['_source']['passage'])
+                    labels.append(1.0 if doc_id == hit['_id'] else 0.0)
             hits += qid_hits[qid][0]
             total += qid_count[qid]
+            if qid_hits[qid][0] > 0:
+                requests.request('POST', 'http://localhost:53001/bulk', json={
+                    "query": query,
+                    "candidates": labels,
+                    "labels": labels
+                })
             if qid_hits[qid][1] < TOPK + 1:
                 mrr += (1/qid_hits[qid][1])
             if total > 0:
                 print("recall @ top %s: %s ." % (TOPK, hits/total), "MRR: %s " % (mrr/total))
             # print("hits: %s, avg rank: %s " % qid_hits[qid], " total: %s" % qid_count[qid])
-
-            candidates = []
-            labels = []
-            for hit in res['hits']['hits']:
-                if doc_id != hit['_id']:
-                    candidates.append(hit['_source']['passage'])
-                    labels.append(1.0 if doc_id == hit['_id'] else 0.0)
-
-            requests.request('POST', 'http://localhost:53001/bulk', json={
-                "query": query,
-                "candidates": labels,
-                "labels": labels
-            })
 
 
 # with open(os.path.join(DATA_PATH, 'collection.tsv')) as fh:
