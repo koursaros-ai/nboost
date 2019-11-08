@@ -16,7 +16,6 @@ def create_proxy(argv: List[str] = sys.argv):
     parser.add_argument('--port', type=int, default=53001, help='port of the proxy')
     parser.add_argument('--ext_host', type=str, default='127.0.0.1', help='host of the server')
     parser.add_argument('--ext_port', type=int, default=9200, help='port of the server')
-    parser.add_argument('--read_bytes', type=int, default=2048, help='chunk size to read/write')
     parser.add_argument('--lr', type=float, default=10e-3, help='learning rate of the model')
     parser.add_argument('--data_dir', type=str, default='/.cache', help='dir for model binary')
     parser.add_argument('--multiplier', type=int, default=10, help='factor to increase results by')

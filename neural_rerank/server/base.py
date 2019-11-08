@@ -16,7 +16,6 @@ class BaseServer(StatefulBase, Thread):
                  port: int = 53001,
                  ext_host: str = '127.0.0.1',
                  ext_port: int = 54001,
-                 read_bytes: int = 2048,
                  **kwargs):
         StatefulBase.__init__(self, **kwargs)
         Thread.__init__(self)
@@ -25,17 +24,10 @@ class BaseServer(StatefulBase, Thread):
         self.ext_host = ext_host
         self.ext_port = ext_port
         self.loop = None
-        self.read_bytes = read_bytes
         self.is_ready = Event()
 
     def state(self):
-        return dict(
-            host=self.host,
-            port=self.port,
-            ext_host=self.ext_port,
-            ext_port=self.ext_port,
-            read_bytes=self.read_bytes,
-            is_ready=self.is_ready.is_set())
+        return dict(ext_host=self.ext_host, ext_port=self.ext_port)
 
     def create_app(self, routes: Dict[Route, Tuple[str, str, Callable]]):
         """
