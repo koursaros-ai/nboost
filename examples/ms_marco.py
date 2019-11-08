@@ -28,6 +28,7 @@ def train():
     with open(os.path.join(DATA_PATH, 'queries.train.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
         for qid, query in data:
+            if qid < 3000000: continue
             res = es.search(index=INDEX, body={
                 "size" : TOPK,
                 "query": {
