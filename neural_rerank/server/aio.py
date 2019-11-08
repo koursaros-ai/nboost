@@ -48,7 +48,7 @@ class AioHttpServer(BaseServer):
         self.is_ready.clear()
 
     @staticmethod
-    async def format_response(response: client.ClientResponse) -> Response:
+    async def format_client_response(response: client.ClientResponse) -> Response:
         headers = dict(response.headers)
         headers['Content-Type'] = 'application/json'
         return Response(headers, await response.read(), response.status)
@@ -85,7 +85,7 @@ class AioHttpServer(BaseServer):
         headers['Content-Type'] = 'application/json'
 
         async with aiohttp.request(req.method, url, data=req.body, headers=headers) as response:
-            return await self.format_response(response)
+            return await self.format_client_response(response)
 
     async def forward(self, req):
         path = 'http://%s:%s%s?%s' % (self.ext_host, self.ext_port, req.path, req.params)
