@@ -14,6 +14,7 @@ def train():
     qrels = set()
     hits = 0
     total = 0
+    mrr = 0
     qid_count = defaultdict(int)
 
     with open(os.path.join(DATA_PATH, 'qrels.train.tsv')) as fh:
@@ -39,12 +40,13 @@ def train():
             qid_hits = defaultdict(lambda: (0,0))
             for rank, hit in enumerate(res['hits']['hits']):
                 if (qid, hit['_id']) in qrels:
-                    count, rank_sum = qid_hits[qid]
-                    qid_hits[qid] = (count + 1, rank_sum + rank)
-            hits += qid_hits[qid]
+                    count, min_rank = qid_hits[qid]
+                    qid_hits[qid] = (count + 1, min(min_rank, rank))
+            hits += qid_hits[qid][0]
             total += qid_count[qid]
-            if total != 0:
-                print("recall @ top %s: %s" % (TOPK, hits / total))
+            mrr += (1/qid_hits[qid][1])
+            if total > 0:
+                print("recall @ top %s: %s ." % (TOPK, hits/total), "MRR: %s " % (mrr/total))
             # print("hits: %s, avg rank: %s " % qid_hits[qid], " total: %s" % qid_count[qid])
 
             # candidates = []
