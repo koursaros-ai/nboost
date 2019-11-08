@@ -60,9 +60,9 @@ def train():
                 continue
             query, title, description, label = row[1:5]
             requests.request('POST', 'http://localhost:53001/bulk', json={
-                "query" : query,
-                "candidates" : [(title + ' ' + description)[:500]],
-                "labels" : [float(label)]
+                "query": query,
+                "candidates": [(title + ' ' + description)[:500]],
+                "labels": [float(label)]
             })
 
 

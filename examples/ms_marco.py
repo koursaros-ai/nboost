@@ -7,6 +7,11 @@ DATA_PATH = '.'
 
 es = Elasticsearch()
 
+class defaultdict(dict):
+
+    def __init__(self, cls):
+        super().__init__()
+
 
 def train():
     qrels = dict()
