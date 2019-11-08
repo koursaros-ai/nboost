@@ -6,7 +6,7 @@ from ..proxy import Proxy
 from typing import List
 
 
-def create_proxy(argv: List[str] = sys.argv):
+def create_proxy(argv: List[str] = sys.argv[1:]):
     parser = argparse.ArgumentParser(
         description='%s: Neural semantic search ranking for Elasticsearch.' % (
             termcolor.colored('Koursaros AI', 'cyan', attrs=['underline'])),
