@@ -17,11 +17,11 @@ class ESCodex(BaseCodex):
     DEFAULT_TOPK = 10
     SEARCH_PATH = '/{index}/_search'
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         if not self.field:
             self.logger.error('Please set --field which you would like to rank on')
             raise NotImplementedError
-        super().__init__()
 
     def get_topk(self, req: Request) -> int:
         return int(req.params['size'] if 'size' in req.params else self.DEFAULT_TOPK)
