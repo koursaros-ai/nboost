@@ -88,31 +88,6 @@ def train():
                 print("recall @ top %s: %s ." % (TOPK, hits/total), "MRR: %s " % (mrr/total))
             # print("hits: %s, avg rank: %s " % qid_hits[qid], " total: %s" % qid_count[qid])
 
-
-# with open(os.path.join(DATA_PATH, 'collection.tsv')) as fh:
-#     data = csv.reader(fh, delimiter='\t')
-#     for doc_id, passage in data:
-#         if doc_id in qrels:
-#             query = queries[qrels[doc_id]]
-#             res = es.search(index=INDEX, body={
-#                 "query": {
-#                     "match": {
-#                         "passage": {
-#                             "query": query
-#                         }
-#                     }
-#                 }
-#             }, filter_path=['hits.hits._*'])
-#             candidates = []
-#             labels = []
-#             for hit in res['hits']['hits']:
-#                 if doc_id != hit['_id']:
-#                     candidates.append(hit['_source']['passage'])
-#                     labels.append(1.0 if doc_id == hit['_id'] else 0.0)
-#             candidates.append(passage)
-#             labels.append(1.0)
-
-
 def evaluate():
     pass
 
