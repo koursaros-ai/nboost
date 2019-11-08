@@ -2,6 +2,7 @@ from .base import BaseCodex
 import json as JSON
 from ..base.types import *
 from pprint import pformat
+import gzip
 
 
 def _finditem(obj, key):
@@ -54,7 +55,10 @@ class ESCodex(BaseCodex):
 
         body['hits']['hits'] = [body['hits']['hits'][i] for i in ranks[:self.get_topk(req)]]
         res.headers.pop('Content-Length', None)
-        return Response(res.headers, JSON.dumps(body).encode(), 200)
+        body = JSON.dumps(body).encode()
+        if res.headers.get('Content-Encoding', None) == 'gzip':
+            body = gzip.compress(body)
+        return Response(res.headers, body, 200)
 
     def pluck(self, req):
         body = JSON.loads(req.body)
