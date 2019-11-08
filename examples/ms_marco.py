@@ -13,11 +13,27 @@ REQUEST_TIMEOUT = 10000
 # es = Elasticsearch(host=ES_HOST)
 es = Elasticsearch(host='localhost',port=53001,timeout=REQUEST_TIMEOUT)
 
+
 def timeit(fn, *args, **kwargs):
     start = time.time()
     res = fn(*args, **kwargs)
     print("took %s seconds to run %s" % (time.time() - start, fn.__name__))
     return res
+
+def es_latency():
+    with open(os.path.join(DATA_PATH, 'queries.train.tsv')) as fh:
+        data = csv.reader(fh, delimiter='\t')
+        for qid, query in data:
+            res = timeit(es.search, index=INDEX, body={
+                "size": TOPK,
+                "query": {
+                    "match": {
+                        "passage": {
+                            "query": query
+                        }
+                    }
+                }
+            }, filter_path=['hits.hits._*'])
 
 def train():
     qrels = set()
@@ -62,7 +78,7 @@ def train():
             if qid_hits[qid][0] > 0:
                 timeit(requests.request, 'POST', 'http://localhost:53001/train', json={
                     "qid": query,
-                    "cids":
+                    "cids": cids
                 })
             if qid_hits[qid][1] < TOPK + 1:
                 mrr += (1/qid_hits[qid][1])
@@ -99,5 +115,6 @@ def evaluate():
     pass
 
 if __name__ == '__main__':
-    train()
-    evaluate()
+    es_latency()
+    # train()
+    # evaluate()
