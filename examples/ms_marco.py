@@ -17,7 +17,7 @@ def train():
     with open(os.path.join(DATA_PATH, 'qrels.train.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
         for qid, _, doc_id, _ in data:
-            qrels.add((doc_id, qid))
+            qrels.add((qid, doc_id))
             qid_count[qid] += 1
     # queries = dict()
 
