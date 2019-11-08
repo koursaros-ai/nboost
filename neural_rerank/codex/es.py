@@ -4,9 +4,23 @@ from ..base.types import *
 from pprint import pformat
 
 
+def _finditem(obj, key):
+    if key in obj: return obj[key]
+    for k, v in obj.items():
+        if isinstance(v,dict):
+            item = _finditem(v, key)
+            if item is not None:
+                return item
+
 class ESCodex(BaseCodex):
     DEFAULT_TOPK = 10
     SEARCH_PATH = '/{index}/_search'
+
+    def __init__(self):
+        if not self.field:
+            self.logger.error('Please set --field which you would like to rank on')
+            raise NotImplementedError
+        super().__init__()
 
     def get_topk(self, req: Request) -> int:
         return int(req.params['size'] if 'size' in req.params else self.DEFAULT_TOPK)
@@ -17,7 +31,12 @@ class ESCodex(BaseCodex):
         return Request(req.method, req.path, req.headers, params, req.body)
 
     def parse(self, req, res):
-        query = Query(req.params['q'] if 'q' in req.params else '')
+        if 'q' in req.params:
+            query = req.params['q']
+        else:
+            body = JSON.loads(req.body)
+            query = _finditem(body['query'], 'query')
+
         hits = JSON.loads(res.body)['hits']['hits']
         choices = [Choice(
             int(hit['_id']), hit['_source'][self.field]
