@@ -1,14 +1,12 @@
 from .base import BaseModel
+from ..base.types import *
 import torch, torch.nn
 import numpy as np
-import os
-from neural_rerank.base.types import Ranks
 
 
 class DBERTModel(BaseModel):
     model_name = 'distilbert-base-uncased'
     max_grad_norm = 1.0
-    max_seq_len = 128
 
     def __init__(self, *args, **kwargs):
         from transformers import (AutoConfig,
@@ -18,30 +16,18 @@ class DBERTModel(BaseModel):
                                   ConstantLRSchedule)
 
         super().__init__(*args, **kwargs)
-        self.model_path = '.distilbert/'
-        self.train_steps = 0
-        self.checkpoint_steps = 500
-
-        if os.path.exists(os.path.join(self.model_path, 'config.json')):
-            self.model_name = self.model_path
-
         model_config = AutoConfig.from_pretrained(self.model_name)
         model_config.num_labels = 1  # set up for regression
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-        if self.device == torch.device("cpu"):
+        if self.device == "cpu":
             self.logger.info("RUNNING ON CPU")
-        else:
-            self.logger.info("RUNNING ON CUDA")
-            torch.cuda.synchronize(self.device)
-
         self.rerank_model = AutoModelForSequenceClassification.from_pretrained(
             self.model_name,
             config=model_config)
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.rerank_model.to(self.device, non_blocking=True)
 
-        self.optimizer = AdamW(self.rerank_model.parameters(), lr=self._lr, correct_bias=False)
+        self.optimizer = AdamW(self.rerank_model.parameters(), lr=self.lr, correct_bias=False)
         self.scheduler = ConstantLRSchedule(self.optimizer)
 
     async def train(self, query, choices, labels):
@@ -54,9 +40,6 @@ class DBERTModel(BaseModel):
         self.optimizer.step()
         self.scheduler.step()
         self.rerank_model.zero_grad()
-        self.train_steps += 1
-        if self.train_steps % self.checkpoint_steps == 0:
-            await self.save()
 
     async def rank(self, query, choices):
         input_ids, attention_mask = await self.encode(query, choices)
@@ -69,22 +52,14 @@ class DBERTModel(BaseModel):
             return Ranks(np.argsort(scores)[::-1])
 
     async def encode(self, query, choices):
-        inputs = [self.tokenizer.encode_plus(
-            query, candidate, add_special_tokens=True
-        )[:self.max_seq_len] for candidate in choices]
+        inputs = [self.tokenizer.encode_plus(query, choice.body, add_special_tokens=True
+                                         ) for choice in choices]
 
-        max_len = min(max(len(t['input_ids']) for t in inputs), self.max_seq_len)
-        input_ids = [t['input_ids'][:max_len] + [0] * (max_len - len(t['input_ids'][:max_len])) for t in inputs]
-        attention_mask = [[1] * len(t['input_ids'][:max_len]) +
-                          [0] * (max_len - len(t['input_ids'][:max_len])) for t in inputs]
+        max_len = max(len(t['input_ids']) for t in inputs)
+        input_ids = [t['input_ids'] + [0] * (max_len - len(t['input_ids'])) for t in inputs]
+        attention_mask = [[1] * len(t['input_ids']) + [0] * (max_len - len(t['input_ids'])) for t in inputs]
 
         input_ids = torch.tensor(input_ids).to(self.device, non_blocking=True)
         attention_mask = torch.tensor(attention_mask).to(self.device, non_blocking=True)
 
         return input_ids, attention_mask
-
-    async def save(self):
-        self.logger.info('Saving model')
-        os.makedirs(self.model_path, exist_ok=True)
-        self.rerank_model.save_pretrained(self.model_path)
-        self.tokenizer.save_pretrained(self.model_path)
