@@ -8,7 +8,8 @@ ES_HOST = '35.238.60.182'
 DATA_PATH = '.'
 TOPK = 10
 
-es = Elasticsearch(host=ES_HOST)
+# es = Elasticsearch(host=ES_HOST)
+es = Elasticsearch(host='localhost',port=53001)
 
 
 def train():
