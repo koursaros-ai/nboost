@@ -70,16 +70,20 @@ class ESCodex(BaseCodex):
             raise ValueError('qid not found')
 
         if 'cid' in body:
-            cid = body['cid']
+            cids = [Cid(body['cid'])]
         elif 'cid' in req.params:
-            cid = req.params['cid']
+            cids = [Cid(req.params['cid'])]
+        elif 'cids' in body:
+            cids = [Cid(cid) for cid in body['cids']]
+        elif 'cids' in req.params:
+            cids = [Cid(cid) for cid in req.params['cids']]
         else:
             raise ValueError('cid not found')
 
-        return Qid(qid), Cid(cid)
+        return Qid(qid), cids
 
-    def ack(self, qid, cid):
-        return Response({}, JSON.dumps(dict(qid=qid,cid=cid)).encode(), 200)
+    def ack(self, qid, cids):
+        return Response({}, JSON.dumps(dict(qid=qid, cid=cids)).encode(), 200)
 
     def catch(self, e):
         body = JSON.dumps(dict(error=str(e), type=type(e).__name__))

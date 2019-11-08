@@ -61,7 +61,7 @@ class Proxy(StatefulBase):
 
         @track
         async def train(_1: Request) -> Response:
-            _2: Tuple[Qid, Cid] = await track(codex.pluck)(_1)
+            _2: Tuple[Qid, List[Cid]] = await track(codex.pluck)(_1)
             _3: Tuple[Query, Choices, Labels] = await track(db.get)(*_2)
             await track(model.train)(*_3)
             _4: Response = await track(codex.ack)(*_2)
