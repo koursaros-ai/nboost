@@ -94,8 +94,6 @@ class AioHttpServer(BaseServer):
         async with aiohttp.ClientSession() as session:
             headers = dict(req.headers)
             headers['Content-Type'] = 'application/json'
-            import pdb
-            pdb.set_trace()
             async with getattr(session, req.method.lower())(
                     path,
                     headers=headers,
