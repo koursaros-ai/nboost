@@ -38,7 +38,9 @@ class ESCodex(BaseCodex):
             body = JSON.loads(req.body)
             query = _finditem(body['query'], 'query')
 
-        hits = JSON.loads(res.body)['hits']['hits']
+        body = JSON.loads(res.body)
+        self.logger.error(body)
+        hits = body['hits']['hits']
         choices = [Choice(
             int(hit['_id']), hit['_source'][self.field]
         ) for hit in hits]
