@@ -6,7 +6,7 @@ class HashDb(BaseDb):
         super().__init__(**kwargs)
         self.queries = dict()
         self.choices = dict()
-        self.times = dict()
+        self.laps = dict()
 
     def save(self, query, choices):
         qid = hash(query)
@@ -24,11 +24,17 @@ class HashDb(BaseDb):
         return query, choices, labels
 
     def lap(self, ms, cls, func):
-        ident = (cls, func)
-        avg_time, laps = self.times[ident] if ident in self.times else 0, 0
-        avg_time, laps = (avg_time * laps + ms) / (laps + 1), laps + 1
-        self.times[ident] = avg_time, laps
-        self.logger.info('%s.%s() avg time is %s ms (pass %s)' % (cls, func, avg_time, laps))
+
+        if cls not in self.laps:
+            self.laps[cls] = {func: dict(avg_ms=ms, laps=1)}
+        elif func not in self.laps[cls]:
+            self.laps[cls][func] = dict(avg_ms=ms, laps=1)
+        else:
+            ident = self.laps[cls][func]
+            ident['laps'] += 1
+            ident['avg_ms'] = (ident['avg_ms'] * (ident['laps'] - 1) + ms) / ident['laps']
+
+        self.logger.info('%s.%s() took %s ms' % (cls, func, ms))
 
     def state(self):
-        return {'times': {'%s.%s' % (cls, func): self.times[(cls, func)] for cls, func in self.times}}
+        return {'laps': self.laps}
