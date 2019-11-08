@@ -20,6 +20,7 @@ def timeit(fn, *args, **kwargs):
     print("took %s seconds to run %s" % (time.time() - start, fn.__name__))
     return res
 
+
 def es_latency():
     es = Elasticsearch(host=ES_HOST)
     with open(os.path.join(DATA_PATH, 'queries.train.tsv')) as fh:
@@ -35,7 +36,7 @@ def es_latency():
                     }
                 }
             })
-            print(res['took'])
+
 
 def train():
     qrels = set()
@@ -64,7 +65,6 @@ def train():
                     }
                 }
             }, filter_path=['hits.hits._*'])
-            print(res)
             qid_hits = defaultdict(lambda: (0, TOPK+1))
             candidates = []
             labels = []
