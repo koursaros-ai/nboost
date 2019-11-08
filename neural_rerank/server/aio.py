@@ -49,7 +49,9 @@ class AioHttpServer(BaseServer):
 
     @staticmethod
     async def format_response(response: client.ClientResponse) -> Response:
-        return Response(dict(response.headers), await response.read(), response.status)
+        headers = dict(response.headers)
+        headers['Content-Type'] = 'application/json'
+        return Response(headers, await response.read(), response.status)
 
     @staticmethod
     async def format_request(request: web.BaseRequest) -> Request:
