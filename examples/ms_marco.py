@@ -117,6 +117,6 @@ def evaluate():
     pass
 
 if __name__ == '__main__':
-    es_latency()
-    # train()
+    # es_latency()
+    train()
     # evaluate()
