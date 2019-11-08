@@ -7,6 +7,7 @@ from ..base.types import *
 from typing import Type, Tuple, Dict, List, Any
 from inspect import isawaitable
 import json as JSON
+import time
 
 
 class Proxy(StatefulBase):
@@ -32,49 +33,57 @@ class Proxy(StatefulBase):
             ext_host=ext_host,
             ext_port=ext_port,
             read_bytes=read_bytes)
-        model = model(
-            lr=lr,
-            data_dir=data_dir)
-        codex = codex(
-            multiplier=multiplier,
-            field=field)
+        model = model(lr=lr, data_dir=data_dir)
+        codex = codex(multiplier=multiplier, field=field)
         db = db()
 
-        async def track(f: Any, *args):
-            self.logger.info('RUN: %s.%s()' % (f.__self__.__class__.__name__, f.__name__))
-            x = f(*args)
-            return await x if isawaitable(x) else x
+        def track(f: Any):
+            async def decorator(*args):
+                start = time.perf_counter()
+                res = f(*args)
+                ms = (time.perf_counter() - start) * 10 ** 6
+                db.lap(
+                    ms,
+                    f.__self__.__class__.__name__ if hasattr(f, '__self__') else self.__class__.__name__,
+                    f.__name__)
+                return await res if isawaitable(res) else res
+            return decorator
 
+        @track
         async def search(_1: Request) -> Response:
-            _2: Request = await track(codex.magnify, _1)
-            _3: Response = await track(server.ask, _2)
-            _4: Tuple[Query, List[Choice]] = await track(codex.parse, _1, _3)
-            await track(db.save, *_4)
-            _5: Ranks = await track(model.rank, *_4)
-            _6: Response = await track(codex.pack, _1, _3, *_4, _5)
+            _2: Request = await track(codex.magnify)(_1)
+            _3: Response = await track(server.ask)(_2)
+            _4: Tuple[Query, List[Choice]] = await track(codex.parse)(_1, _3)
+            await track(db.save)(*_4)
+            _5: Ranks = await track(model.rank)(*_4)
+            _6: Response = await track(codex.pack)(_1, _3, *_4, _5)
             return _6
 
+        @track
         async def train(_1: Request) -> Response:
-            _2: Cid = await track(codex.pluck, _1)
-            _3: Tuple[Query, List[Choice], Labels] = await track(db.get, _2)
-            await track(model.train, *_3)
-            _4: Response = await track(codex.ack, _2)
+            _2: Cid = await track(codex.pluck)(_1)
+            _3: Tuple[Query, List[Choice], Labels] = await track(db.get)(_2)
+            await track(model.train)(*_3)
+            _4: Response = await track(codex.ack)(_2)
             return _4
 
+        @track
         async def status(_1: Request) -> Response:
-            _2: Dict = await track(server.chain_state, {})
-            _3: Dict = await track(codex.chain_state, _2)
-            _4: Dict = await track(model.chain_state, _3)
-            _5: Dict = await track(self.chain_state, _4)
-            _6: Response = await track(codex.pulse, _5)
+            _2: Dict = await track(server.chain_state)({})
+            _3: Dict = await track(codex.chain_state)(_2)
+            _4: Dict = await track(model.chain_state)(_3)
+            _5: Dict = await track(self.chain_state)(_4)
+            _6: Response = await track(codex.pulse)(_5)
             return _6
 
-        async def not_found(_1: Request):
-            _2: Response = await track(server.forward, _1)
+        @track
+        async def not_found(_1: Request) -> Response:
+            _2: Response = await track(server.forward)(_1)
             return _2
 
-        async def error(_1: Exception):
-            _2: Response = await track(codex.catch, _1)
+        @track
+        async def error(_1: Exception) -> Response:
+            _2: Response = await track(codex.catch)(_1)
             return _2
 
         self.routes = {

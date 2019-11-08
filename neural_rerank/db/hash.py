@@ -21,3 +21,6 @@ class HashDb(BaseDb):
         choices = [self.choices[cid][1] for cid in cids]
         labels = [1.0 if cid == pick else 0.0 for cid in cids]
         return query, choices, labels
+
+    def lap(self, ms, cls, func):
+        self.logger.info('%s.%s() took %s ms' % (cls, func, ms))

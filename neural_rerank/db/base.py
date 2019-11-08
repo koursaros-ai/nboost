@@ -11,3 +11,7 @@ class BaseDb(StatefulBase):
     def get(self, pick: Cid) -> Tuple[Query, List[Choice], Labels]:
         """ Return the choice for training """
         raise NotImplementedError
+
+    def lap(self, ms: float, cls: str, func: str) -> None:
+        """ Do something with the function lap time """
+        raise NotImplementedError
