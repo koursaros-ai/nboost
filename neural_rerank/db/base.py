@@ -8,7 +8,7 @@ class BaseDb(StatefulBase):
         """ Save the choices during search for using during train """
         raise NotImplementedError
 
-    def get(self, qid: Qid, cid: Cid) -> Tuple[Query, Choices, Labels]:
+    def get(self, qid: Qid, cid: List[Cid]) -> Tuple[Query, Choices, Labels]:
         """ Return the choice for training """
         raise NotImplementedError
 

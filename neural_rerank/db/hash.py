@@ -27,7 +27,7 @@ class HashDb(BaseDb):
 
         return Qid(qid), [Cid(cid) for cid in cids]
 
-    def get(self, qid, cid):
+    def get(self, qid, cids):
         query = self.queries[qid]
         choices = []
         labels = []
@@ -35,7 +35,7 @@ class HashDb(BaseDb):
         cids = self.map[qid]
         for _cid in cids:
             choices.append(self.choices[_cid])
-            labels.append(1.0 if _cid == cid else 0.0)
+            labels.append(1.0 if _cid in cids else 0.0)
 
         return query, choices, labels
 
