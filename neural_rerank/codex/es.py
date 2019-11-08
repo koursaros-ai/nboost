@@ -38,7 +38,10 @@ class ESCodex(BaseCodex):
             body = JSON.loads(req.body)
             query = _finditem(body['query'], 'query')
 
-        hits = JSON.loads(res.body)['hits']['hits']
+        hits = JSON.loads(res.body)['hits'].get('hits', None)
+        if not hits:
+            raise ValueError('No hits for req: %s' % query)
+
         choices = [hit['_source'][self.field].encode() for hit in hits]
 
         return Query(query), Choices(choices)
