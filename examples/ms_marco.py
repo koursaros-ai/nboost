@@ -5,7 +5,7 @@ from collections import defaultdict
 
 INDEX = 'ms_marco'
 DATA_PATH = '.'
-TOPK = 100
+TOPK = 10
 
 es = Elasticsearch()
 
