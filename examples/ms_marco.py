@@ -4,10 +4,11 @@ from elasticsearch import Elasticsearch
 from collections import defaultdict
 
 INDEX = 'ms_marco'
+ES_HOST = '35.238.60.182'
 DATA_PATH = '.'
 TOPK = 10
 
-es = Elasticsearch()
+es = Elasticsearch(host=ES_HOST)
 
 
 def train():
