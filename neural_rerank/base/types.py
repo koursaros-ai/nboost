@@ -24,12 +24,15 @@ class Response(NamedTuple):
     status: int
 
 
-class Choice(NamedTuple):
-    id: int
-    body: bytes
+class Choices(List[bytes]):
+    pass
 
 
 class Labels(List[float]):
+    pass
+
+
+class Qid(int):
     pass
 
 

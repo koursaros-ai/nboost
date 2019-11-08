@@ -24,6 +24,7 @@ class Proxy(StatefulBase):
                  model: Type[BaseModel] = BaseModel,
                  codex: Type[BaseCodex] = BaseCodex,
                  db: Type[BaseDb] = BaseDb, **kwargs):
+        """ The proxy object """
         super().__init__(**kwargs)
 
         server = server(
@@ -52,18 +53,18 @@ class Proxy(StatefulBase):
         async def search(_1: Request) -> Response:
             _2: Request = await track(codex.magnify)(_1)
             _3: Response = await track(server.ask)(_2)
-            _4: Tuple[Query, List[Choice]] = await track(codex.parse)(_1, _3)
-            await track(db.save)(*_4)
+            _4: Tuple[Query, Choices] = await track(codex.parse)(_1, _3)
             _5: Ranks = await track(model.rank)(*_4)
-            _6: Response = await track(codex.pack)(_1, _3, *_4, _5)
-            return _6
+            _6: Tuple[Qid, List[Cid]] = await track(db.save)(*_4)
+            _7: Response = await track(codex.pack)(_1, _3, *_4, _5, *_6)
+            return _7
 
         @track
         async def train(_1: Request) -> Response:
-            _2: Cid = await track(codex.pluck)(_1)
-            _3: Tuple[Query, List[Choice], Labels] = await track(db.get)(_2)
+            _2: Tuple[Qid, Cid] = await track(codex.pluck)(_1)
+            _3: Tuple[Query, Choices, Labels] = await track(db.get)(*_2)
             await track(model.train)(*_3)
-            _4: Response = await track(codex.ack)(_2)
+            _4: Response = await track(codex.ack)(*_2)
             return _4
 
         @track
