@@ -53,6 +53,7 @@ class ESCodex(BaseCodex):
             hit['cid'] = choice.id
         body['hits']['hits'] = [body['hits']['hits'][i] for i in ranks[:self.get_topk(req)]]
         res.headers.pop('Content-Length', None)
+        res.headers['Content-Type'] = 'application/json'
         return Response(res.headers, JSON.dumps(body).encode(), 200)
 
     def pluck(self, req):
