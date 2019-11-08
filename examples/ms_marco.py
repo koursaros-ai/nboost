@@ -34,7 +34,7 @@ def es_latency():
                     }
                 }
             }, filter_path=['hits.hits._*'])
-        print(res['took'])
+            print(res)
 
 def train():
     qrels = set()
