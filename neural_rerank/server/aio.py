@@ -1,12 +1,11 @@
 
 from aiohttp import web, web_exceptions, client
+from urllib.parse import urlencode
+from typing import Callable
+from ..base.types import *
 from . import BaseServer
 import aiohttp
-from ..base import pformat
-from ..base.types import *
-from typing import Callable
 import asyncio
-from urllib.parse import urlencode
 
 
 class AioHttpServer(BaseServer):
@@ -15,6 +14,7 @@ class AioHttpServer(BaseServer):
         super().__init__(**kwargs)
         self.error_handler = None
         self.not_found_handler = None
+        self.app = None
 
     def create_app(self, routes):
         self.app = web.Application(middlewares=[self.middleware])
@@ -42,7 +42,7 @@ class AioHttpServer(BaseServer):
 
         self.loop.run_until_complete(self.run_app())
         self.logger.critical('LISTENING: %s:%d' % (self.host, self.port))
-        self.logger.info('\nROUTES:\n%s' % pformat(self.handler.routes, width=1))
+        # self.logger.info('\nROUTES:\n%s' % pformat(self.handler.routes, width=1))
         self.is_ready.set()
         self.loop.run_forever()
         self.is_ready.clear()
@@ -89,6 +89,6 @@ class AioHttpServer(BaseServer):
 
         raise web.HTTPTemporaryRedirect(url)
 
-    def close(self):
+    def exit(self):
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.join()

@@ -1,5 +1,4 @@
 from .base import BaseModel
-from ..base.types import *
 import random
 
 
