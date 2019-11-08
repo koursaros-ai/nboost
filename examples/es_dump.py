@@ -32,6 +32,7 @@ def stream_bodies():
     with open(os.path.join('collection.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
         for id, passage in data:
+            if id < 3000000: continue
             body = {
                 "_index": INDEX,
                 "_id": id,
