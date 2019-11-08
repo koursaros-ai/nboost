@@ -29,7 +29,7 @@ def train():
         data = csv.reader(fh, delimiter='\t')
         for qid, query in data:
             res = es.search(index=INDEX, body={
-                "size" : TOPK,
+                "size": TOPK,
                 "query": {
                     "match": {
                         "passage": {
@@ -38,7 +38,7 @@ def train():
                     }
                 }
             }, filter_path=['hits.hits._*'])
-            qid_hits = defaultdict(lambda: (0,TOPK+1))
+            qid_hits = defaultdict(lambda: (0, TOPK+1))
             for rank, hit in enumerate(res['hits']['hits']):
                 if (qid, hit['_id']) in qrels:
                     count, min_rank = qid_hits[qid]
@@ -51,12 +51,18 @@ def train():
                 print("recall @ top %s: %s ." % (TOPK, hits/total), "MRR: %s " % (mrr/total))
             # print("hits: %s, avg rank: %s " % qid_hits[qid], " total: %s" % qid_count[qid])
 
-            # candidates = []
-            # labels = []
-            # for hit in res['hits']['hits']:
-            #     if doc_id != hit['_id']:
-            #         candidates.append(hit['_source']['passage'])
-            #         labels.append(1.0 if doc_id == hit['_id'] else 0.0)
+            candidates = []
+            labels = []
+            for hit in res['hits']['hits']:
+                if doc_id != hit['_id']:
+                    candidates.append(hit['_source']['passage'])
+                    labels.append(1.0 if doc_id == hit['_id'] else 0.0)
+
+            requests.request('POST', 'http://localhost:53001/bulk', json={
+                "query": query,
+                "candidates": labels,
+                "labels": labels
+            })
 
 
 # with open(os.path.join(DATA_PATH, 'collection.tsv')) as fh:
@@ -81,11 +87,6 @@ def train():
 #                     labels.append(1.0 if doc_id == hit['_id'] else 0.0)
 #             candidates.append(passage)
 #             labels.append(1.0)
-#             requests.request('POST', 'http://localhost:53001/bulk', json={
-#                 "query": query,
-#                 "candidates": labels,
-#                 "labels": labels
-#             })
 
 
 def evaluate():
