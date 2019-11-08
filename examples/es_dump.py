@@ -39,7 +39,7 @@ def stream_bodies():
                     "passage": passage,
                 }
             }
-            if id % 10000 == 0:
+            if int(id) % 10000 == 0:
                 print(f'Sent {id}: {passage}.')
             yield body
 
