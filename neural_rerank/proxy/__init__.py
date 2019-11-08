@@ -56,8 +56,6 @@ class Proxy(StatefulBase):
             await track(db.save)(*_4)
             _5: Ranks = await track(model.rank)(*_4)
             _6: Response = await track(codex.pack)(_1, _3, *_4, _5)
-            import pdb
-            pdb.set_trace()
             return _6
 
         @track
