@@ -110,6 +110,7 @@ class Proxy(StatefulBase):
     def exit(self):
         self.logger.critical('Stopping proxy...')
         self.server.exit()
+        self.server.join()
 
     def __enter__(self):
         self.enter()

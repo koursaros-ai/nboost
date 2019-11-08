@@ -90,4 +90,3 @@ class AioHttpServer(BaseServer):
 
     def exit(self):
         self.loop.call_soon_threadsafe(self.loop.stop)
-        self.join()
