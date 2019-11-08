@@ -64,6 +64,7 @@ def train():
                     }
                 }
             }, filter_path=['hits.hits._*'])
+            print(res)
             qid_hits = defaultdict(lambda: (0, TOPK+1))
             candidates = []
             labels = []
@@ -79,7 +80,7 @@ def train():
             total += qid_count[qid]
             if qid_hits[qid][0] > 0:
                 timeit(requests.request, 'POST', 'http://localhost:53001/train', json={
-                    "qid": query,
+                    "qid": qid,
                     "cids": cids
                 })
             if qid_hits[qid][1] < TOPK + 1:
