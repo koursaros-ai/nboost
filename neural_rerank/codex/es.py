@@ -7,8 +7,8 @@ class ESCodex(BaseCodex):
     DEFAULT_TOPK = 10
     SEARCH_PATH = '/{index}/_search'
 
-    def get_topk(self, req: Request) -> Topk:
-        return Topk(req.params['size'] if 'size' in req.params else self.DEFAULT_TOPK)
+    def get_topk(self, req: Request) -> int:
+        return int(req.params['size'] if 'size' in req.params else self.DEFAULT_TOPK)
 
     def magnify(self, req):
         params = dict(req.params)
