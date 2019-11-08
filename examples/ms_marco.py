@@ -52,7 +52,7 @@ def train():
             hits += qid_hits[qid][0]
             total += qid_count[qid]
             if qid_hits[qid][0] > 0:
-                requests.request('POST', 'http://localhost:53001/bulk', json={
+                requests.request('POST', 'http://localhost:53001/train', json={
                     "query": query,
                     "candidates": labels,
                     "labels": labels
