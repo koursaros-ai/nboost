@@ -2,6 +2,7 @@ import csv, os
 import requests
 from elasticsearch import Elasticsearch
 from collections import defaultdict
+import time
 
 INDEX = 'ms_marco'
 ES_HOST = '35.238.60.182'
@@ -12,6 +13,11 @@ REQUEST_TIMEOUT = 10000
 # es = Elasticsearch(host=ES_HOST)
 es = Elasticsearch(host='localhost',port=53001,timeout=REQUEST_TIMEOUT)
 
+def timeit(fn, *args):
+    start = time.time()
+    res = fn(args)
+    print("took %s seconds to run %s" % (time.time() - start, fn.__name__))
+    return res
 
 def train():
     qrels = set()
