@@ -74,8 +74,7 @@ class AioHttpServer(BaseServer):
             self.logger.error(repr(e), exc_info=True)
             res = await self.error_handler(e)
 
-        self.logger.info(res.status)
-        self.logger.debug(res)
+        self.logger.info('STATUS %s' % res.status)
         return web.Response(body=res.body, status=res.status)
 
     async def ask(self, req):

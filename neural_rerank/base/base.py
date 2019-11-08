@@ -14,7 +14,9 @@ class StatefulBase:
 
     @property
     def _state(self) -> dict:
-        return dict(ChainMap(*[getattr(cls, 'state', lambda _: {})(self) for cls in self.__class__.mro()]))
+        return {self.__class__.__name__: dict(ChainMap(
+            *[getattr(cls, 'state', lambda _: {})(self) for cls in self.__class__.mro()]
+        ))}
 
     def chain_state(self, other_state: dict) -> dict:
         return {**self._state, **other_state}
