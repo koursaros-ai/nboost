@@ -20,7 +20,6 @@ class Proxy(StatefulBase):
                  data_dir: str = '/.cache',
                  multiplier: int = 10,
                  field: str = None,
-                 read_bytes: int = 2048,
                  server: Type[BaseServer] = BaseServer,
                  model: Type[BaseModel] = BaseModel,
                  codex: Type[BaseCodex] = BaseCodex,
@@ -31,8 +30,7 @@ class Proxy(StatefulBase):
             host=host,
             port=port,
             ext_host=ext_host,
-            ext_port=ext_port,
-            read_bytes=read_bytes)
+            ext_port=ext_port)
         model = model(lr=lr, data_dir=data_dir)
         codex = codex(multiplier=multiplier, field=field)
         db = db()
@@ -70,13 +68,12 @@ class Proxy(StatefulBase):
 
         @track
         async def status(_1: Request) -> Response:
-            _2: Dict = await track(server.chain_state)({})
-            _3: Dict = await track(codex.chain_state)(_2)
-            _4: Dict = await track(model.chain_state)(_3)
-            _5: Dict = await track(db.chain_state)(_4)
-            _6: Dict = await track(self.chain_state)(_5)
-            _7: Response = await track(codex.pulse)(_6)
-            return _7
+            _2: Dict = server.chain_state({})
+            _3: Dict = codex.chain_state(_2)
+            _4: Dict = model.chain_state(_3)
+            _5: Dict = db.chain_state(_4)
+            _6: Response = codex.pulse(_5)
+            return _6
 
         @track
         async def not_found(_1: Request) -> Response:
@@ -96,10 +93,6 @@ class Proxy(StatefulBase):
             Route.ERROR: (codex.ERROR_METHOD, codex.ERROR_PATH, error)
         }
 
-        self.server = server
-        self.codex = codex
-        self.db = db
-        self.model = model
         self.is_ready = server.is_ready
         self.logger.info(JSON.dumps(dict(
             server=server.__class__.__name__,
@@ -107,6 +100,8 @@ class Proxy(StatefulBase):
             model=model.__class__.__name__,
             db=db.__class__.__name__,
         ), indent=4))
+
+        self.server = server
 
     def enter(self):
         self.server.create_app(self.routes)
@@ -122,12 +117,4 @@ class Proxy(StatefulBase):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.exit()
-
-    # def state(self):
-    #     return dict(
-    #         server=self.server,
-    #         codex=self.codex,
-    #         db=self.db,
-    #         model=self.model
-    #     )
 

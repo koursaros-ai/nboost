@@ -33,18 +33,16 @@ class TestESProxy(unittest.TestCase):
         proxy.enter()
         proxy.is_ready.wait()
 
-        params = {'q': 'description:light'}
-        proxy_res = requests.get('http://localhost:53001/test_index/_search', params=params)
-        self.assertTrue(proxy_res.ok)
-        total = proxy_res.json()['hits']['total']
-        num_hits = len(proxy_res.json()['hits']['hits'])
+        queries = ['a', 'light', 'brown', 'dog']
 
-        if isinstance(total, int):
-            self.assertLess(num_hits, total)
-        elif isinstance(total, dict):
-            self.assertLess(num_hits, total['value'])
-        else:
-            self.skipTest('Expecting total to be int or dict but found type %s "%s"' % (type(total), total))
+        for q in queries:
+            params = {'q': 'description:%s' % q}
+            proxy_res = requests.get('http://localhost:53001/test_index/_search', params=params)
+            self.assertTrue(proxy_res.ok)
+            json = {'cid': proxy_res.json()['hits']['hits'][0]['cid']}
+            train_res = requests.post('http://localhost:53001/train', json=json)
+            self.assertTrue(train_res.ok)
 
-        proxy.exit()
         # time.sleep(30)
+        proxy.exit()
+
