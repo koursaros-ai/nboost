@@ -5,7 +5,7 @@ from collections import defaultdict
 
 INDEX = 'ms_marco'
 DATA_PATH = '.'
-TOPK = 500
+TOPK = 100
 
 es = Elasticsearch()
 
@@ -37,14 +37,14 @@ def train():
                     }
                 }
             }, filter_path=['hits.hits._*'])
-            qid_hits = defaultdict(lambda: (0,0))
+            qid_hits = defaultdict(lambda: (0,TOPK+1))
             for rank, hit in enumerate(res['hits']['hits']):
                 if (qid, hit['_id']) in qrels:
                     count, min_rank = qid_hits[qid]
                     qid_hits[qid] = (count + 1, min(min_rank, rank))
             hits += qid_hits[qid][0]
             total += qid_count[qid]
-            if qid_hits[qid][1] > 0:
+            if qid_hits[qid][1] < TOPK + 1:
                 mrr += (1/qid_hits[qid][1])
             if total > 0:
                 print("recall @ top %s: %s ." % (TOPK, hits/total), "MRR: %s " % (mrr/total))
