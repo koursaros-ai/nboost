@@ -41,7 +41,7 @@ def train():
             for rank, hit in enumerate(res['hits']['hits']):
                 if (qid, hit['_id']) in qrels:
                     count, min_rank = qid_hits[qid]
-                    qid_hits[qid] = (count + 1, min(min_rank, rank))
+                    qid_hits[qid] = (count + 1, min(min_rank, rank+1))
             hits += qid_hits[qid][0]
             total += qid_count[qid]
             if qid_hits[qid][1] < TOPK + 1:
