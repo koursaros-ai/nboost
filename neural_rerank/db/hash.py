@@ -6,6 +6,7 @@ class HashDb(BaseDb):
         super().__init__(**kwargs)
         self.queries = dict()
         self.choices = dict()
+        self.times = dict()
 
     def save(self, query, choices):
         qid = hash(query)
@@ -23,4 +24,11 @@ class HashDb(BaseDb):
         return query, choices, labels
 
     def lap(self, ms, cls, func):
-        self.logger.info('%s.%s() took %s ms' % (cls, func, ms))
+        ident = (cls, func)
+        avg_time, laps = self.times[ident] if ident in self.times else 0, 0
+        avg_time, laps = (avg_time * laps + ms) / (laps + 1), laps + 1
+        self.times[ident] = avg_time, laps
+        self.logger.info('%s.%s() avg time is %s ms (pass %s)' % (cls, func, avg_time, laps))
+
+    def state(self):
+        return {'times': {'%s.%s' % (cls, func): self.times[(cls, func)] for cls, func in self.times}}

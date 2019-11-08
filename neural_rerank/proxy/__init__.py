@@ -73,9 +73,10 @@ class Proxy(StatefulBase):
             _2: Dict = await track(server.chain_state)({})
             _3: Dict = await track(codex.chain_state)(_2)
             _4: Dict = await track(model.chain_state)(_3)
-            _5: Dict = await track(self.chain_state)(_4)
-            _6: Response = await track(codex.pulse)(_5)
-            return _6
+            _5: Dict = await track(db.chain_state)(_4)
+            _6: Dict = await track(self.chain_state)(_5)
+            _7: Response = await track(codex.pulse)(_6)
+            return _7
 
         @track
         async def not_found(_1: Request) -> Response:
