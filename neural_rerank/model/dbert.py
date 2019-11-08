@@ -70,7 +70,7 @@ class DBERTModel(BaseModel):
 
     async def encode(self, query, choices):
         inputs = [self.tokenizer.encode_plus(
-            query, choice.body, add_special_tokens=True
+            query, choice.decode(), add_special_tokens=True
         ) for choice in choices]
 
         max_len = min(max(len(t['input_ids']) for t in inputs), self.max_seq_len)
