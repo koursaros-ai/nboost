@@ -1,7 +1,7 @@
 from .base import BaseModel
+from ..base.types import *
 import torch, torch.nn
 import numpy as np
-from ..base.types import *
 
 
 class DBERTModel(BaseModel):
@@ -52,9 +52,8 @@ class DBERTModel(BaseModel):
             return Ranks(np.argsort(scores)[::-1])
 
     async def encode(self, query, choices):
-        inputs = [self.tokenizer.encode_plus(
-            query, candidate, add_special_tokens=True
-        ) for candidate in choices]
+        inputs = [self.tokenizer.encode_plus(query, choice.body, add_special_tokens=True
+                                         ) for choice in choices]
 
         max_len = max(len(t['input_ids']) for t in inputs)
         input_ids = [t['input_ids'] + [0] * (max_len - len(t['input_ids'])) for t in inputs]

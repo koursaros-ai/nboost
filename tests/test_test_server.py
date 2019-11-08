@@ -1,13 +1,13 @@
-import unittest
 from multiprocessing import Process, Event
-from flask import Flask, request
-from flask_compress import Compress
-from flask_cors import CORS
 from neural_rerank.base import set_logger
-import requests
+from flask_compress import Compress
 from typing import Tuple, Callable
+from flask import Flask, request
+from flask_cors import CORS
 import json as JSON
 import functools
+import unittest
+import requests
 import logging
 
 
@@ -36,6 +36,7 @@ class TestServer(Process):
                 except Exception as e:
                     logger.error('error when handling HTTP request', exc_info=True)
                     return dict(description=str(e), type=str(type(e).__name__))
+
             log.__name__ = str(hash(method + path))
             app.add_url_rule(path, None, log, methods=[method])
             return path, None, log
@@ -54,49 +55,44 @@ class TestServer(Process):
         self.logger.critical('LISTENING: %s:%s' % (self.host, self.port))
         self.app.run(port=self.port, threaded=True, host=self.host)
 
+    def enter(self):
+        self.start()
+        self.is_ready.wait()
+
     def exit(self):
         self.logger.critical('Stopping server...')
         self.terminate()
         self.join()
+        self.is_ready.clear()
 
     def __enter__(self):
-        self.start()
-        self.is_ready.wait()
+        self.enter()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.exit()
-        self.is_ready.clear()
-        return self
 
 
 class TestTestServer(unittest.TestCase):
-    def setUp(self):
+    def test_test_server(self):
+
         def send_stuff():
             data = request.form if request.form else request.json
             return JSON.dumps(dict(got=data))
 
-        self.server = TestServer(
-            ('GET', '/get_stuff', lambda: JSON.dumps(dict(heres='some_stuff'))),
-            ('GET', '/other_lambda', lambda: JSON.dumps(dict(youre='gluttonous'))),
-            ('POST', '/send_stuff', send_stuff),
-            port=56001
-        )
-        self.server.start()
-        self.server.is_ready.wait()
+        with TestServer(
+                ('GET', '/get_stuff', lambda: JSON.dumps(dict(heres='some_stuff'))),
+                ('GET', '/other_lambda', lambda: JSON.dumps(dict(youre='gluttonous'))),
+                ('POST', '/send_stuff', send_stuff), port=56001):
 
-    def test_get(self):
-        res = requests.get('http://localhost:56001/get_stuff')
-        print(res.content)
-        self.assertTrue(res.ok)
+            res = requests.get('http://localhost:56001/get_stuff')
+            print(res.content)
+            self.assertTrue(res.ok)
 
-        res = requests.get('http://localhost:56001/other_lambda')
-        print(res.content)
-        self.assertTrue(res.ok)
+            res = requests.get('http://localhost:56001/other_lambda')
+            print(res.content)
+            self.assertTrue(res.ok)
 
-        res = requests.post('http://localhost:56001/send_stuff', data=dict(heres='an_avocado'))
-        print(res.content)
-        self.assertTrue(res.ok)
-
-    def tearDown(self):
-        self.server.stop()
+            res = requests.post('http://localhost:56001/send_stuff', data=dict(heres='an_avocado'))
+            print(res.content)
+            self.assertTrue(res.ok)
