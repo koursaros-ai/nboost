@@ -13,9 +13,9 @@ REQUEST_TIMEOUT = 10000
 # es = Elasticsearch(host=ES_HOST)
 es = Elasticsearch(host='localhost',port=53001,timeout=REQUEST_TIMEOUT)
 
-def timeit(fn, *args):
+def timeit(fn, *args, **kwargs):
     start = time.time()
-    res = fn(args)
+    res = fn(*args, **kwargs)
     print("took %s seconds to run %s" % (time.time() - start, fn.__name__))
     return res
 
@@ -36,7 +36,7 @@ def train():
     with open(os.path.join(DATA_PATH, 'queries.train.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
         for qid, query in data:
-            res = es.search(index=INDEX, body={
+            res = timeit(es.search, index=INDEX, body={
                 "size": TOPK,
                 "query": {
                     "match": {
@@ -58,7 +58,7 @@ def train():
             hits += qid_hits[qid][0]
             total += qid_count[qid]
             if qid_hits[qid][0] > 0:
-                requests.request('POST', 'http://localhost:53001/train', json={
+                timeit(requests.request, 'POST', 'http://localhost:53001/train', json={
                     "query": query,
                     "candidates": labels,
                     "labels": labels
