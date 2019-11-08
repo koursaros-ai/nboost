@@ -45,7 +45,7 @@ def stream_bodies():
 
 
 if __name__ == "__main__":
-    es = Elasticsearch(host=ES_HOST)
+    es = Elasticsearch(host=ES_HOST,timeout=REQUEST_TIMEOUT)
 
     if es.indices.exists(INDEX):
         res = es.indices.delete(index=INDEX)

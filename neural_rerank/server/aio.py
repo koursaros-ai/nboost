@@ -48,8 +48,10 @@ class AioHttpServer(BaseServer):
         self.is_ready.clear()
 
     @staticmethod
-    async def format_response(response: client.ClientResponse) -> Response:
-        return Response(dict(response.headers), await response.read(), response.status)
+    async def format_client_response(response: client.ClientResponse) -> Response:
+        headers = dict(response.headers)
+        headers['Content-Type'] = 'application/json'
+        return Response(headers, await response.read(), response.status)
 
     @staticmethod
     async def format_request(request: web.BaseRequest) -> Request:
@@ -75,18 +77,29 @@ class AioHttpServer(BaseServer):
             res = await self.error_handler(e)
 
         self.logger.info('STATUS %s' % res.status)
-        return web.Response(body=res.body, status=res.status)
+        return web.Response(headers=res.headers, body=res.body, status=res.status)
 
     async def ask(self, req):
         url = 'http://%s:%s%s?%s' % (self.ext_host, self.ext_port, req.path, urlencode(req.params))
+        headers = dict(req.headers)
+        headers['Content-Type'] = 'application/json'
 
-        async with aiohttp.request(req.method, url, data=req.body) as response:
-            return await self.format_response(response)
+        async with aiohttp.request(req.method, url, data=req.body, headers=headers) as response:
+            return await self.format_client_response(response)
 
     async def forward(self, req):
-        url = 'http://%s:%s%s?%s' % (self.ext_host, self.ext_port, req.path, req.params)
-
-        raise web.HTTPTemporaryRedirect(url)
+        path = 'http://%s:%s%s?%s' % (self.ext_host, self.ext_port, req.path, req.params)
+        async with aiohttp.ClientSession() as session:
+            headers = dict(req.headers)
+            headers['Content-Type'] = 'application/json'
+            async with getattr(session, req.method.lower())(
+                    path,
+                    headers=headers,
+                    data=req.body) as resp:
+                return aiohttp.web.Response(status=resp.status,
+                                            headers=resp.headers,
+                                            body=await resp.content.read())
+        # raise web.HTTPTemporaryRedirect(url)
 
     def exit(self):
         self.loop.call_soon_threadsafe(self.loop.stop)
