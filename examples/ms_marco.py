@@ -65,6 +65,8 @@ def train():
                     }
                 }
             }, filter_path=['hits.hits._*'])
+            import pdb
+            pdb.set_trace()
             query_id = res['qid']
             qid_hits = defaultdict(lambda: (0, TOPK+1))
             candidates = []
