@@ -89,32 +89,50 @@ class Proxy(StatefulBase):
             from the search api, then filter the larger results with the
             model to return better results. """
 
-            # Codex alters the request to make a larger one
+            # Codex alters the request to make a larger one.
             _2: Request = await track(codex.magnify)(_1)
 
-            # The server asks the search api for the larger request
+            # The server asks the search api for the larger request.
             _3: Response = await track(server.ask)(_2)
 
             # The codex takes the large response and parses out the query
-            # from the amplified request
+            # from the amplified request and response.
             _4: Tuple[Query, Choices] = await track(codex.parse)(_2, _3)
 
-            # the model ranks
+            # the model ranks the choices based on the query.
             _5: Ranks = await track(model.rank)(*_4)
+
+            # the db saves the query and choices, and returns the query id
+            # and choice ids for the client to send back during train()
             _6: Tuple[Qid, List[Cid]] = await track(db.save)(*_4)
+
+            # the codex formats the new (nboosted) response with the context
+            # from the entire search pipeline.
             _7: Response = await track(codex.pack)(_1, _3, *_4, _5, *_6)
             return _7
 
         @track
         async def train(_1: Request) -> Response:
+            """The role of the train route is to receive a query id and choice
+            id from the client and train the model to choose that one next
+            time for lack of better words."""
+
+            # Parse out the query id and choice id(s) from the client request.
             _2: Tuple[Qid, List[Cid]] = await track(codex.pluck)(_1)
+
+            # Db retrieves the content it saved during search(). It also
+            # assigns a label to each choice based on the clients request.
             _3: Tuple[Query, Choices, Labels] = await track(db.get)(*_2)
             await track(model.train)(*_3)
+
+            # acknowledge that the request was sent to the model
             _4: Response = await track(codex.ack)(*_2)
             return _4
 
         @track
         async def status(_1: Request) -> Response:
+            """Status() chains the state from each component in order to
+            return a formatted dictionary for /status"""
             _2: Dict = server.chain_state({})
             _3: Dict = codex.chain_state(_2)
             _4: Dict = model.chain_state(_3)
@@ -124,6 +142,8 @@ class Proxy(StatefulBase):
 
         @track
         async def not_found(_1: Request) -> Response:
+            """What do do when none of the paths given to the router match
+            a path requested by the client."""
             _2: Response = await track(server.forward)(_1)
             return _2
 
