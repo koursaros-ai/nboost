@@ -44,7 +44,7 @@ class DBERTModel(BaseModel):
         self.optimizer = AdamW(self.rerank_model.parameters(), lr=self.lr, correct_bias=False)
         self.scheduler = ConstantLRSchedule(self.optimizer)
 
-        self.weight = 0
+        self.weight = 0.0
 
     async def train(self, query, choices, labels):
         input_ids, attention_mask = await self.encode(query, choices)
@@ -57,7 +57,7 @@ class DBERTModel(BaseModel):
         self.scheduler.step()
         self.rerank_model.zero_grad()
         self.train_steps += 1
-        if self.weight < 1:
+        if self.weight < 1.0:
             self.weight += self.lr
         if self.train_steps % self.checkpoint_steps == 0:
             await self.save()
