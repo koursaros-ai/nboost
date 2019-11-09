@@ -1,5 +1,5 @@
-# from neural_rerank.cli import create_proxy
-# from neural_rerank.testing import TestFlaskServer
+# from nboost.cli import create_proxy
+# from nboost.testing import TestFlaskServer
 # import unittest
 # import requests
 # import json as JSON

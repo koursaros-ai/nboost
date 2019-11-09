@@ -1,4 +1,4 @@
-from neural_rerank.cli import create_proxy
+from nboost.cli import create_proxy
 from elasticsearch import Elasticsearch
 from unittest.case import SkipTest
 from tests.paths import RESOURCES

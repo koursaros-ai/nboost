@@ -1,8 +1,8 @@
+from ..base.types import Ranks
 from .base import BaseModel
 import torch, torch.nn
 import numpy as np
 import os
-from neural_rerank.base.types import Ranks
 
 
 class DBERTModel(BaseModel):
