@@ -58,7 +58,7 @@ class DBERTModel(BaseModel):
         self.rerank_model.zero_grad()
         self.train_steps += 1
         if self.weight < 1.0:
-            self.weight += self.lr
+            self.weight += self.lr*0.1
         if self.train_steps % self.checkpoint_steps == 0:
             await self.save()
 
