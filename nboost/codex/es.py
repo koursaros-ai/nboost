@@ -49,8 +49,8 @@ class ESCodex(BaseCodex):
 
     def pack(self, req, res, query, choices, ranks, qid, cids):
         body = JSON.loads(res.body)
+        body['qid'] = qid
         for choice, cid, hit in zip(choices, cids, body['hits']['hits']):
-            hit['qid'] = qid
             hit['cid'] = cid
 
         body['hits']['hits'] = [body['hits']['hits'][i] for i in ranks[:self.get_topk(req)]]
