@@ -44,6 +44,8 @@ class DBERTModel(BaseModel):
         self.optimizer = AdamW(self.rerank_model.parameters(), lr=self.lr, correct_bias=False)
         self.scheduler = ConstantLRSchedule(self.optimizer)
 
+        self.weight = 0
+
     async def train(self, query, choices, labels):
         input_ids, attention_mask = await self.encode(query, choices)
 
@@ -66,7 +68,9 @@ class DBERTModel(BaseModel):
             scores = np.squeeze(logits.detach().cpu().numpy())
             if len(logits) == 1:
                 scores = [scores]
-            return Ranks(np.argsort(scores)[::-1])
+            es_ranks = np.arange(len(scores))
+            model_ranks = np.argsort(scores)[::-1]
+            return Ranks(self.weight*model_ranks + (1-self.weight)*es_ranks)
 
     async def encode(self, query, choices):
         inputs = [self.tokenizer.encode_plus(
