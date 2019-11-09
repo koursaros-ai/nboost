@@ -15,7 +15,7 @@ class TestDBERTModel(unittest.TestCase):
         with RESOURCES.joinpath('sonnets_small.txt').open() as fh:
             for i, line in enumerate(fh):
                 if not line == '':
-                    self.choices.append(line)
+                    self.choices.append(bytes(line))
 
     def test_train(self):
         labels = Labels(float(i % 2) for i in range(len(self.choices)))
