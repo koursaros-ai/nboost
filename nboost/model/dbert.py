@@ -73,6 +73,7 @@ class DBERTModel(BaseModel):
             es_ranks = np.arange(len(scores))
             model_ranks = np.argsort(scores)[::-1]
             avg_rank = self.weight*model_ranks + (1-self.weight)*es_ranks
+            self.logger.info(self.weight)
             return Ranks(np.argsort(avg_rank))
 
     async def encode(self, query, choices):
