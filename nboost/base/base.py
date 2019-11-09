@@ -7,6 +7,9 @@ import os
 
 
 class StatefulBase:
+    """ The base of each nboost component and the proxy. The role of the
+    Stateful base is to return the internal state of each component by calling
+    the chain_state() command."""
     def __init__(self, verbose=True, **kwargs):
         self.logger = set_logger(self.__class__.__name__, verbose=verbose)
         # useful counter that you can call next() on
@@ -17,11 +20,15 @@ class StatefulBase:
 
     @property
     def _state(self) -> dict:
+        """If a component has a defined state() method, it is chained together
+        with any defined state() in it's parent classes, passing the object
+        as the argument. """
         return {self.__module__: {**dict(ChainMap(
             *[getattr(cls, 'state', lambda _: {})(self) for cls in self.__class__.mro()]
         )), 'class': self.__class__.__name__}}
 
     def chain_state(self, other_state: dict) -> dict:
+        """ Used for chaining states of multiple components together. """
         return {**self._state, **other_state}
 
 
