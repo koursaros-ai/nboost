@@ -4,10 +4,14 @@ from ..base.types import *
 
 
 class BaseModel(StatefulBase):
-    def __init__(self, lr: float = 10e-3, data_dir: str = '/.cache', **kwargs):
+    def __init__(self,
+                 lr: float = 10e-3,
+                 model_ckpt : str ='./ms_marco',
+                 data_dir: str = '/.cache', **kwargs):
         super().__init__()
         self.lr = lr
         self.data_dir = data_dir
+        self.model_ckpt = model_ckpt
 
     def post_start(self):
         """ Executes after the process forks """
