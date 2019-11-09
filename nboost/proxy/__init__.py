@@ -142,23 +142,25 @@ class Proxy(StatefulBase):
 
         @track
         async def not_found(_1: Request) -> Response:
-            """What do do when none of the paths given to the router match
-            a path requested by the client."""
+            """What to do when none of the paths given to the server match
+            the path requested by the client."""
             _2: Response = await track(server.forward)(_1)
             return _2
 
         @track
         async def error(_1: Exception) -> Response:
+            """Errors during any route"""
             _2: Response = await track(codex.catch)(_1)
             return _2
 
-        self.routes = {
-            Route.SEARCH: (codex.SEARCH_METHOD, codex.SEARCH_PATH, search),
-            Route.TRAIN: (codex.TRAIN_METHOD, codex.TRAIN_PATH, train),
-            Route.STATUS: (codex.STATUS_METHOD, codex.STATUS_PATH, status),
-            Route.NOT_FOUND: (codex.NOT_FOUND_METHOD, codex.NOT_FOUND_PATH, not_found),
-            Route.ERROR: (codex.ERROR_METHOD, codex.ERROR_PATH, error)
+        # create functional routes for the server
+        routes = {
+            Route.SEARCH: (codex.SEARCH, search),
+            Route.TRAIN: (codex.TRAIN, train),
+            Route.STATUS: (codex.STATUS, status),
+            Route.ERROR: (codex.ERROR, error)
         }
+        server.create_app(routes)
 
         self.is_ready = server.is_ready
         self.logger.info(JSON.dumps(dict(
@@ -171,7 +173,6 @@ class Proxy(StatefulBase):
         self.server = server
 
     def enter(self):
-        self.server.create_app(self.routes)
         self.server.start()
 
     def exit(self):

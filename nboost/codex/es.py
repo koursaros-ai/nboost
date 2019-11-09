@@ -1,7 +1,7 @@
 from .base import BaseCodex
-import json as JSON
 from ..base.types import *
 from pprint import pformat
+import json as JSON
 import gzip
 
 
@@ -16,7 +16,7 @@ def _finditem(obj, key):
 
 class ESCodex(BaseCodex):
     DEFAULT_TOPK = 10
-    SEARCH_PATH = '/{index}/_search'
+    SEARCH = {'/{index}/_search': ['GET']}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -51,6 +51,7 @@ class ESCodex(BaseCodex):
         body = JSON.loads(res.body)
         body['qid'] = qid
         for choice, cid, hit in zip(choices, cids, body['hits']['hits']):
+            hit['qid'] = qid
             hit['cid'] = cid
 
         body['hits']['hits'] = [body['hits']['hits'][i] for i in ranks[:self.get_topk(req)]]

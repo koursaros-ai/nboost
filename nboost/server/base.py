@@ -5,12 +5,10 @@ from ..base import StatefulBase
 from ..base.types import *
 
 
-def running_avg(avg: float, new: float, n: int):
-    return (avg * n + new) / n
-
-
 class BaseServer(StatefulBase, Thread):
-
+    """The server implements routes that route paths designated by the codex.
+    During initialization, the proxy hands the route dictionary to the server
+    to execute when it receives a request."""
     def __init__(self,
                  host: str = '127.0.0.1',
                  port: int = 53001,
@@ -29,15 +27,16 @@ class BaseServer(StatefulBase, Thread):
     def state(self):
         return dict(ext_host=self.ext_host, ext_port=self.ext_port)
 
-    def create_app(self, routes: Dict[Route, Tuple[str, str, Callable]]):
+    def create_app(self, routes: Dict[Route, Tuple[Dict[str, str], Callable]]):
         """
         function to run a web server given a dictionary of routes
 
-        :param routes: {Route => (method, path, function}
+        :param routes: {Route => ({path => [methods]}, function)
         :return:
         """
         raise NotImplementedError
 
+    # SEARCH METHOD
     async def ask(self, req: Request) -> Response:
         """ makes a request to the external host """
         raise NotImplementedError

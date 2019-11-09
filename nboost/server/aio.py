@@ -18,14 +18,10 @@ class AioHttpServer(BaseServer):
 
     def create_app(self, routes):
         self.app = web.Application(middlewares=[self.middleware])
-        self.app.add_routes([
-            web.route(*routes[Route.SEARCH]),
-            web.route(*routes[Route.TRAIN]),
-            web.route(*routes[Route.STATUS])
-        ])
-
-        self.error_handler = routes[Route.ERROR][2]
-        self.not_found_handler = routes[Route.NOT_FOUND][2]
+        for path_methods, f in routes.values():
+            for path, methods in path_methods.items():
+                for method in methods:
+                    self.app.add_routes([web.route(method, path, f)])
 
     async def run_app(self):
         runner = web.AppRunner(self.app)
