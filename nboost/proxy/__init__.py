@@ -1,16 +1,15 @@
-from ..base import StatefulBase
 from ..codex import BaseCodex
 from ..model import BaseModel
 from ..server import BaseServer
 from ..db import BaseDb
 from ..base.types import *
+from ..base import set_logger
 from typing import Type, Tuple, Dict, List, Any
 from inspect import isawaitable
-import json as JSON
 import time
 
 
-class Proxy(StatefulBase):
+class Proxy:
     def __init__(self,
                  host: str = '127.0.0.1',
                  port: int = 53001,
@@ -23,7 +22,9 @@ class Proxy(StatefulBase):
                  server: Type[BaseServer] = BaseServer,
                  model: Type[BaseModel] = BaseModel,
                  codex: Type[BaseCodex] = BaseCodex,
-                 db: Type[BaseDb] = BaseDb, **kwargs):
+                 db: Type[BaseDb] = BaseDb,
+                 verbose: bool = False,
+                 **kwargs):
         """The proxy object is the core of nboost.It has four components:
         the model, server, db, and codex.The role of the proxy is to
         construct each component and create the route callback(search,
@@ -56,10 +57,10 @@ class Proxy(StatefulBase):
 
         # pass command line arguments to instantiate each component
         server = server(host=host, port=port,
-                        ext_host=ext_host, ext_port=ext_port)
-        model = model(lr=lr, data_dir=data_dir)
-        codex = codex(multiplier=multiplier, field=field)
-        db = db()
+                        ext_host=ext_host, ext_port=ext_port, verbose=verbose)
+        model = model(lr=lr, data_dir=data_dir, verbose=verbose)
+        codex = codex(multiplier=multiplier, field=field, verbose=verbose)
+        db = db(verbose=verbose)
 
         def track(f: Any):
             """Tags and times each component for benchmarking purposes. The
@@ -154,36 +155,20 @@ class Proxy(StatefulBase):
             return _2
 
         # create functional routes for the server
-        routes = {
+        server.create_app({
             Route.SEARCH: (codex.SEARCH, search),
             Route.TRAIN: (codex.TRAIN, train),
             Route.STATUS: (codex.STATUS, status),
             Route.ERROR: (codex.ERROR, error)
-        }
-        server.create_app(routes)
-
-        self.is_ready = server.is_ready
-        self.logger.info(JSON.dumps(dict(
-            server=server.__class__.__name__,
-            codex=codex.__class__.__name__,
-            model=model.__class__.__name__,
-            db=db.__class__.__name__,
-        ), indent=4))
+        })
 
         self.server = server
+        self.logger = set_logger(self.__class__.__name__)
 
-    def enter(self):
+    def start(self):
         self.server.start()
+        self.server.is_ready.wait()
 
-    def exit(self):
-        self.logger.critical('Stopping proxy...')
-        self.server.exit()
+    def close(self):
+        self.server.stop()
         self.server.join()
-
-    def __enter__(self):
-        self.enter()
-        self.is_ready.wait()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.exit()
-

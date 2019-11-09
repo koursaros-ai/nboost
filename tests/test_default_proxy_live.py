@@ -30,10 +30,9 @@ class TestESProxy(unittest.TestCase):
             '--multiplier', '2',
             '--verbose'
         ])
-        proxy.enter()
-        proxy.is_ready.wait()
+        proxy.start()
 
-        queries = ['a', 'light', 'brown', 'dog']
+        queries = ['light', 'brown', 'dog']
 
         for q in queries:
             params = {'q': 'description:%s' % q}
@@ -45,5 +44,5 @@ class TestESProxy(unittest.TestCase):
             self.assertTrue(train_res.ok)
 
         # time.sleep(30)
-        proxy.exit()
+        proxy.close()
 
