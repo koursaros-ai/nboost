@@ -57,7 +57,8 @@ class DBERTModel(BaseModel):
         self.scheduler.step()
         self.rerank_model.zero_grad()
         self.train_steps += 1
-        self.weight += self.lr
+        if self.weight < 1:
+            self.weight += self.lr
         if self.train_steps % self.checkpoint_steps == 0:
             await self.save()
 
