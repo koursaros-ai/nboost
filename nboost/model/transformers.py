@@ -21,8 +21,8 @@ class DBERTModel(BaseModel):
         self.train_steps = 0
         self.checkpoint_steps = 500
 
-        if os.path.exists(os.path.join(self.model_path, 'config.json')):
-            self.model_name = self.model_path
+        if os.path.exists(os.path.join(self.model, 'config.json')):
+            self.model_name = self.model
 
         model_config = AutoConfig.from_pretrained(self.model_name)
         model_config.num_labels = 1  # set up for regression

@@ -16,6 +16,7 @@ class Proxy:
                  ext_host: str = '127.0.0.1',
                  ext_port: int = 54001,
                  lr: float = 10e-3,
+                 model_ckpt: str = './ms_marco',
                  data_dir: str = '/.cache',
                  multiplier: int = 10,
                  field: str = None,
@@ -40,6 +41,7 @@ class Proxy:
         :param ext_host: host of the external search api.
         :param ext_port: search api port.
         :param lr: learning rate of the model.
+        :param model_ckpt: checkpoint for loading initial model
         :param data_dir: data directory to cache the model.
         :param multiplier: the factor to multiply the search request by. For
             example, in the case of Elasticsearch if the client requests 10
@@ -58,7 +60,7 @@ class Proxy:
         # pass command line arguments to instantiate each component
         server = server(host=host, port=port,
                         ext_host=ext_host, ext_port=ext_port, verbose=verbose)
-        model = model(lr=lr, data_dir=data_dir, verbose=verbose)
+        model = model(lr=lr,model=model_ckpt,data_dir=data_dir, verbose=verbose)
         codex = codex(multiplier=multiplier, field=field, verbose=verbose)
         db = db(verbose=verbose)
 
