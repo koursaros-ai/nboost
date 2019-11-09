@@ -10,7 +10,7 @@ class StatefulBase:
     """ The base of each nboost component and the proxy. The role of the
     Stateful base is to return the internal state of each component by calling
     the chain_state() command."""
-    def __init__(self, verbose=True, **kwargs):
+    def __init__(self, verbose=False, **kwargs):
         self.logger = set_logger(self.__class__.__name__, verbose=verbose)
         # useful counter that you can call next() on
         self.counter = itertools.count()
