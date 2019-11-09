@@ -1,5 +1,5 @@
-from neural_rerank.model import DBERTModel
-from neural_rerank.base.types import *
+from nboost.model import DBERTModel
+from nboost.base.types import *
 from tests.paths import RESOURCES
 import unittest
 import asyncio
@@ -10,12 +10,12 @@ class TestDBERTModel(unittest.TestCase):
     def setUp(self):
         self.model = DBERTModel()
         self.query = Query('O wherefore art thou')
-        self.choices = []
+        self.choices = Choices()
 
         with RESOURCES.joinpath('sonnets_small.txt').open() as fh:
             for i, line in enumerate(fh):
                 if not line == '':
-                    self.choices.append(Choice(i, line))
+                    self.choices.append(line)
 
     def test_train(self):
         labels = Labels(float(i % 2) for i in range(len(self.choices)))
