@@ -18,7 +18,6 @@ class DBERTModel(BaseModel):
                                   ConstantLRSchedule)
 
         super().__init__(*args, **kwargs)
-        self.model_path = '.distilbert/'
         self.train_steps = 0
         self.checkpoint_steps = 500
 
