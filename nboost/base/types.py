@@ -3,6 +3,7 @@ from enum import Enum
 
 
 class Route(Enum):
+    """Used as keys for the route dictionary created by the proxy."""
     SEARCH = 0
     TRAIN = 1
     STATUS = 2
@@ -11,6 +12,8 @@ class Route(Enum):
 
 
 class Request(NamedTuple):
+    """The object that the server/codex must pack all requests into. This is
+    necessary to support multiple search apis."""
     method: str
     path: str
     headers: dict
@@ -19,30 +22,35 @@ class Request(NamedTuple):
 
 
 class Response(NamedTuple):
+    """The object that each response must be packed into before sending. Same
+    reason as the Request object. """
     headers: dict
     body: bytes
     status: int
 
 
 class Choices(List[bytes]):
-    pass
+    """A list of candidates returned by the search api """
 
 
 class Labels(List[float]):
-    pass
+    """A list of floats representing the labels for a respective list of
+    choices."""
 
 
 class Qid(int):
-    pass
+    """An integer representing a query id. """
 
 
 class Cid(int):
-    pass
+    """An integer representing a choice id. """
 
 
 class Query(str):
-    pass
+    """A query from the client """
 
 
 class Ranks(List[int]):
-    pass
+    """A list of integers representing the relative ranks for a respective
+    list of choices. For example, for Ranks(4, 3, 1, 2) the first choice has
+    is the worst candidate and the third choice is the best (1st). """
