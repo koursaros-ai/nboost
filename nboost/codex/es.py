@@ -38,7 +38,7 @@ class ESCodex(BaseCodex):
 
         return Topk(topk)
 
-    def magnify(self, topk, req):
+    def magnify(self, req, topk):
         if topk == self.DEFAULT_TOPK:
             pass
         elif 'size' in req.params:
