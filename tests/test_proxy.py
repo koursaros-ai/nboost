@@ -6,6 +6,8 @@ import unittest
 import requests
 import json as JSON
 
+from elasticsearch import Elasticsearch
+
 
 class TestProxy(unittest.TestCase):
     def test_default_proxy(self):
@@ -69,3 +71,16 @@ class TestProxy(unittest.TestCase):
 
         proxy.close()
         server.stop()
+
+    def test_match_query(self):
+        es = Elasticsearch(host='localhost',post=53001)
+        res = es.search(index='mock_index', body={
+            "size": 10,
+            "query": {
+                "match": {
+                    "passage": {
+                        "query": 'This is a test'
+                    }
+                }
+            }
+        }, filter_path=['hits.hits._*'])
