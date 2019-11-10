@@ -5,6 +5,10 @@ import json as JSON
 import gzip
 
 
+class ElasticsearchError(Exception):
+    pass
+
+
 class ESCodex(BaseCodex):
     DEFAULT_TOPK = 10
     SEARCH = {'/{index}/_search': ['GET']}
@@ -44,6 +48,7 @@ class ESCodex(BaseCodex):
             size = self.finddict(body, 'size')
             size['size'] = topk * self.multiplier
             body = JSON.dumps(body).encode()
+            req.headers.pop('Content-Length', None)
             req = Request(req.method, req.path, req.headers, req.params, body)
         elif 'size' in req.params:
             req.params['size'] = topk * self.multiplier
@@ -53,6 +58,10 @@ class ESCodex(BaseCodex):
         return req
 
     def parse(self, req, res):
+
+        if res.status >= 400:
+            raise ElasticsearchError(res.body)
+
         if 'q' in req.params:
             query = req.params['q'].split(':')[-1]
         else:
