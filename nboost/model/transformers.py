@@ -79,7 +79,7 @@ class TransformersModel(BaseModel):
             logits = self.rerank_model(input_ids, attention_mask=attention_mask)[0]
             scores = np.squeeze(logits.detach().cpu().numpy())
             if scores.shape[1] == 2:
-                scores = np.squeeze(scores[:,1] - scores[:,0])
+                scores = np.squeeze(scores[:,0] - scores[:,1])
             if len(logits) == 1:
                 scores = [scores]
             es_ranks = np.arange(len(scores))
