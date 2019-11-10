@@ -22,7 +22,7 @@ class ESCodex(BaseCodex):
             return obj
         for k, v in obj.items():
             if isinstance(v, dict):
-                return self.finditem(v, key)
+                return self.finddict(v, key)
 
     def finditem(self, obj: dict, key: str):
         return self.finddict(obj, key).get(key, None)
