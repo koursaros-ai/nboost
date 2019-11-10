@@ -1,4 +1,1 @@
-aiohttp
-elasticsearch
-flask_compress
-flask_cors
+.

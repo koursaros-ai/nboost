@@ -5,10 +5,8 @@ name: default
 
 steps:
 - name: build
-  image: python:3.7.4-alpine
+  image: pytorch/pytorch:1.1.0-cuda10.0-cudnn7.5-runtime
   commands:
-    - pip install --upgrade pip setuptools wheel
-    - pip install -r requirements.txt
     - python setup.py install
     - python -m unittest tests
 
