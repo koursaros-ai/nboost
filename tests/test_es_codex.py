@@ -45,3 +45,27 @@ class TestESCodex(unittest.TestCase):
         err = codex.catch(ValueError('This is an exception'))
         self.assertEqual(err.status, 500)
 
+    def test_match_burger(self):
+        response_body = RESOURCES.joinpath('match_query_res.json').read_bytes()
+        response_headers = {'Content-Length': len(response_body)}
+        request_body = b'''
+                {
+                    "size": 100,
+                    "query": {
+                        "match" : {
+                            "passage" : {
+                                "query" : "this is a test"
+                            }
+                        }
+                    }
+                }
+                '''
+        method = 'GET'
+        path = '/test/_search'
+        headers = {'Content-Length': len(request_body)}
+        json_req = Request(method, path, headers, {}, request_body)
+        codex = ESCodex(multiplier=5, field='passage')
+        query, choices = codex.parse(json_req, Response(response_headers, response_body, 200))
+        self.assertEqual(query, b"this is a test")
+        self.assertEqual(len(choices), 100)
+
