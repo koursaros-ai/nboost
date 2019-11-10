@@ -59,6 +59,9 @@ class ESCodex(BaseCodex):
             body = JSON.loads(req.body)
             query = self.finditem(body['query'], 'query')
 
+        if not query:
+            raise ValueError('Missing query')
+
         hits = JSON.loads(res.body).get('hits', None)
         if not hits:
             choices = []
