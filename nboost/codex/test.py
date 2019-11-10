@@ -9,7 +9,7 @@ class TestCodex(BaseCodex):
     def topk(self, req):
         return Topk(10)
 
-    def magnify(self, topk, req):
+    def magnify(self, req, topk):
         return req
 
     def parse(self, req, res):
