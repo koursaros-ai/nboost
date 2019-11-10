@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="terminal" baseProfile="full" viewBox="0 0 760 631" width="760" version="1.1">
+    <defs>
+        <termtosvg:template_settings xmlns:termtosvg="https://github.com/nbedos/termtosvg">
+            <termtosvg:screen_geometry columns="95" rows="37"/>
+            <termtosvg:animation type="css"/>
+        </termtosvg:template_settings>
+        <style type="text/css" id="generated-style"><![CDATA[#screen {
+                font-family: 'DejaVu Sans Mono', monospace;
+                font-style: normal;
+                font-size: 14px;
+            }
+
+        text {
+            dominant-baseline: text-before-edge;
+            white-space: pre;
+        }
+    
+            :root {
+                --animation-duration: 9357ms;
+            }
+
+            @keyframes roll {
+                0.000%{transform:translateY(0px)}
+8.710%{transform:translateY(-646px)}
+10.356%{transform:translateY(-1292px)}
+11.660%{transform:translateY(-1938px)}
+13.102%{transform:translateY(-2584px)}
+15.005%{transform:translateY(-3230px)}
+16.020%{transform:translateY(-3876px)}
+19.835%{transform:translateY(-4522px)}
+21.289%{transform:translateY(-5168px)}
+22.529%{transform:translateY(-5814px)}
+24.132%{transform:translateY(-6460px)}
+25.788%{transform:translateY(-7106px)}
+26.461%{transform:translateY(-7752px)}
+27.626%{transform:translateY(-8398px)}
+34.231%{transform:translateY(-9044px)}
+41.915%{transform:translateY(-9690px)}
+42.631%{transform:translateY(-10336px)}
+89.313%{transform:translateY(-10982px)}
+100.000%{transform:translateY(-10982px)}
+            }
+
+            #screen_view {
+                animation-duration: 9357ms;
+                animation-iteration-count:infinite;
+                animation-name:roll;
+                animation-timing-function: steps(1,end);
+                animation-fill-mode: forwards;
+            }
+        ]]></style>
+        <style type="text/css" id="user-style">
+            /* gjm8 color theme (source: https://terminal.sexy/) */
+            .foreground {fill: #c5c5c5;}
+            .background {fill: #1c1c1c;}
+            .color0 {fill: #1c1c1c;}
+            .color1 {fill: #ff005b;}
+            .color2 {fill: #cee318;}
+            .color3 {fill: #ffe755;}
+            .color4 {fill: #048ac7;}
+            .color5 {fill: #833c9f;}
+            .color6 {fill: #0ac1cd;}
+            .color7 {fill: #e5e5e5;}
+            .color8 {fill: #1c1c1c;}
+            .color9 {fill: #ff005b;}
+            .color10 {fill: #cee318;}
+            .color11 {fill: #ffe755;}
+            .color12 {fill: #048ac7;}
+            .color13 {fill: #833c9f;}
+            .color14 {fill: #0ac1cd;}
+            .color15 {fill: #e5e5e5;}
+        </style>
+    </defs>
+    <svg id="screen" width="760" height="629" viewBox="0 0 760 629" preserveAspectRatio="xMidYMin slice">
+        <rect class="background" height="100%" width="100%" x="0" y="0"/><defs><g id="g1"><text x="0" textLength="80" class="foreground">bash-3.2$ </text><text x="80" textLength="8" class="background"> </text></g><g id="g2"><text x="0" textLength="88" class="foreground">bash-3.2$ n</text><text x="88" textLength="8" class="background"> </text></g><g id="g3"><text x="0" textLength="96" class="foreground">bash-3.2$ nb</text><text x="96" textLength="8" class="background"> </text></g><g id="g4"><text x="0" textLength="104" class="foreground">bash-3.2$ nbo</text><text x="104" textLength="8" class="background"> </text></g><g id="g5"><text x="0" textLength="112" class="foreground">bash-3.2$ nboo</text><text x="112" textLength="8" class="background"> </text></g><g id="g6"><text x="0" textLength="120" class="foreground">bash-3.2$ nboos</text><text x="120" textLength="8" class="background"> </text></g><g id="g7"><text x="0" textLength="128" class="foreground">bash-3.2$ nboost</text><text x="128" textLength="8" class="background"> </text></g><g id="g8"><text x="0" textLength="136" class="foreground">bash-3.2$ nboost </text><text x="136" textLength="8" class="background"> </text></g><g id="g9"><text x="0" textLength="144" class="foreground">bash-3.2$ nboost -</text><text x="144" textLength="8" class="background"> </text></g><g id="g10"><text x="0" textLength="152" class="foreground">bash-3.2$ nboost --</text><text x="152" textLength="8" class="background"> </text></g><g id="g11"><text x="0" textLength="160" class="foreground">bash-3.2$ nboost --h</text><text x="160" textLength="8" class="background"> </text></g><g id="g12"><text x="0" textLength="168" class="foreground">bash-3.2$ nboost --he</text><text x="168" textLength="8" class="background"> </text></g><g id="g13"><text x="0" textLength="176" class="foreground">bash-3.2$ nboost --hel</text><text x="176" textLength="8" class="background"> </text></g><g id="g14"><text x="0" textLength="184" class="foreground">bash-3.2$ nboost --help</text><text x="184" textLength="8" class="background"> </text></g><g id="g15"><text x="0" textLength="184" class="foreground">bash-3.2$ nboost --help</text></g><g id="g16"><text x="0" textLength="8" class="background"> </text></g><g id="g17"><text x="0" textLength="464" class="foreground">usage: nboost [-h] [--verbose] [--host HOST] [--port PORT]</text></g><g id="g18"><text x="0" textLength="536" class="foreground">              [--ext_host EXT_HOST] [--ext_port EXT_PORT] [--lr LR]</text></g><g id="g19"><text x="0" textLength="488" class="foreground">              [--model_ckpt MODEL_CKPT] [--data_dir DATA_DIR]</text></g><g id="g20"><text x="0" textLength="584" class="foreground">              [--multiplier MULTIPLIER] [--field FIELD] [--server SERVER]</text></g><g id="g21"><text x="0" textLength="440" class="foreground">              [--codex CODEX] [--model MODEL] [--db DB]</text></g><g id="g22"><text x="0" textLength="120" text-decoration="underline" class="color6">NBoost (v0.0.1)</text><text x="120" textLength="392" class="foreground">: is a scalable, search-api-boosting platform for</text></g><g id="g23"><text x="0" textLength="568" class="foreground">developing and deploying SOTA models to improve the relevance of search</text></g><g id="g24"><text x="0" textLength="72" class="foreground">results..</text></g><g id="g25"><text x="0" textLength="152" class="foreground">optional arguments:</text></g><g id="g26"><text x="0" textLength="440" class="foreground">  -h, --help            show this help message and exit</text></g><g id="g27"><text x="0" textLength="520" class="foreground">  --verbose             turn on detailed logging (default: False)</text></g><g id="g28"><text x="0" textLength="496" class="foreground">  --host HOST           host of the proxy (default: 127.0.0.1)</text></g><g id="g29"><text x="0" textLength="464" class="foreground">  --port PORT           port of the proxy (default: 53001)</text></g><g id="g30"><text x="0" textLength="504" class="foreground">  --ext_host EXT_HOST   host of the server (default: 127.0.0.1)</text></g><g id="g31"><text x="0" textLength="464" class="foreground">  --ext_port EXT_PORT   port of the server (default: 9200)</text></g><g id="g32"><text x="0" textLength="528" class="foreground">  --lr LR               learning rate of the model (default: 0.01)</text></g><g id="g33"><text x="0" textLength="200" class="foreground">  --model_ckpt MODEL_CKPT</text></g><g id="g34"><text x="0" textLength="592" class="foreground">                        path of transformers model or pretrained (default:</text></g><g id="g35"><text x="0" textLength="280" class="foreground">                        marco_bert)</text></g><g id="g36"><text x="0" textLength="504" class="foreground">  --data_dir DATA_DIR   dir for model binary (default: /.cache)</text></g><g id="g37"><text x="0" textLength="200" class="foreground">  --multiplier MULTIPLIER</text></g><g id="g38"><text x="0" textLength="536" class="foreground">                        factor to increase results by (default: 10)</text></g><g id="g39"><text x="0" textLength="576" class="foreground">  --field FIELD         specified meta field to train on (default: None)</text></g><g id="g40"><text x="0" textLength="488" class="foreground">  --server SERVER       server class (default: AioHttpServer)</text></g><g id="g41"><text x="0" textLength="432" class="foreground">  --codex CODEX         codex class (default: ESCodex)</text></g><g id="g42"><text x="0" textLength="512" class="foreground">  --model MODEL         model class (default: TransformersModel)</text></g><g id="g43"><text x="0" textLength="400" class="foreground">  --db DB               db class (default: HashDb)</text></g><g id="g44"><text x="0" textLength="112" class="foreground">bash-3.2$ exit</text></g></defs><g id="screen_view"><g><rect x="80" y="0" width="8" height="17" class="foreground"/><use xlink:href="#g1" y="0"/></g><g><rect x="88" y="646" width="8" height="17" class="foreground"/><use xlink:href="#g2" y="646"/></g><g><rect x="96" y="1292" width="8" height="17" class="foreground"/><use xlink:href="#g3" y="1292"/></g><g><rect x="104" y="1938" width="8" height="17" class="foreground"/><use xlink:href="#g4" y="1938"/></g><g><rect x="112" y="2584" width="8" height="17" class="foreground"/><use xlink:href="#g5" y="2584"/></g><g><rect x="120" y="3230" width="8" height="17" class="foreground"/><use xlink:href="#g6" y="3230"/></g><g><rect x="128" y="3876" width="8" height="17" class="foreground"/><use xlink:href="#g7" y="3876"/></g><g><rect x="136" y="4522" width="8" height="17" class="foreground"/><use xlink:href="#g8" y="4522"/></g><g><rect x="144" y="5168" width="8" height="17" class="foreground"/><use xlink:href="#g9" y="5168"/></g><g><rect x="152" y="5814" width="8" height="17" class="foreground"/><use xlink:href="#g10" y="5814"/></g><g><rect x="160" y="6460" width="8" height="17" class="foreground"/><use xlink:href="#g11" y="6460"/></g><g><rect x="168" y="7106" width="8" height="17" class="foreground"/><use xlink:href="#g12" y="7106"/></g><g><rect x="176" y="7752" width="8" height="17" class="foreground"/><use xlink:href="#g13" y="7752"/></g><g><rect x="184" y="8398" width="8" height="17" class="foreground"/><use xlink:href="#g14" y="8398"/></g><g><use xlink:href="#g15" y="9044"/><rect x="0" y="9061" width="8" height="17" class="foreground"/><use xlink:href="#g16" y="9061"/></g><g><use xlink:href="#g15" y="9690"/><use xlink:href="#g17" y="9707"/><use xlink:href="#g18" y="9724"/><use xlink:href="#g19" y="9741"/><use xlink:href="#g20" y="9758"/><use xlink:href="#g21" y="9775"/><use xlink:href="#g22" y="9809"/><use xlink:href="#g23" y="9826"/><use xlink:href="#g24" y="9843"/><use xlink:href="#g25" y="9877"/><use xlink:href="#g26" y="9894"/><use xlink:href="#g27" y="9911"/><use xlink:href="#g28" y="9928"/><use xlink:href="#g29" y="9945"/><use xlink:href="#g30" y="9962"/><use xlink:href="#g31" y="9979"/><use xlink:href="#g32" y="9996"/><use xlink:href="#g33" y="10013"/><use xlink:href="#g34" y="10030"/><use xlink:href="#g35" y="10047"/><use xlink:href="#g36" y="10064"/><use xlink:href="#g37" y="10081"/><use xlink:href="#g38" y="10098"/><use xlink:href="#g39" y="10115"/><use xlink:href="#g40" y="10132"/><use xlink:href="#g41" y="10149"/><use xlink:href="#g42" y="10166"/><use xlink:href="#g43" y="10183"/><rect x="0" y="10200" width="8" height="17" class="foreground"/><use xlink:href="#g16" y="10200"/></g><g><use xlink:href="#g15" y="10336"/><use xlink:href="#g17" y="10353"/><use xlink:href="#g18" y="10370"/><use xlink:href="#g19" y="10387"/><use xlink:href="#g20" y="10404"/><use xlink:href="#g21" y="10421"/><use xlink:href="#g22" y="10455"/><use xlink:href="#g23" y="10472"/><use xlink:href="#g24" y="10489"/><use xlink:href="#g25" y="10523"/><use xlink:href="#g26" y="10540"/><use xlink:href="#g27" y="10557"/><use xlink:href="#g28" y="10574"/><use xlink:href="#g29" y="10591"/><use xlink:href="#g30" y="10608"/><use xlink:href="#g31" y="10625"/><use xlink:href="#g32" y="10642"/><use xlink:href="#g33" y="10659"/><use xlink:href="#g34" y="10676"/><use xlink:href="#g35" y="10693"/><use xlink:href="#g36" y="10710"/><use xlink:href="#g37" y="10727"/><use xlink:href="#g38" y="10744"/><use xlink:href="#g39" y="10761"/><use xlink:href="#g40" y="10778"/><use xlink:href="#g41" y="10795"/><use xlink:href="#g42" y="10812"/><use xlink:href="#g43" y="10829"/><rect x="80" y="10846" width="8" height="17" class="foreground"/><use xlink:href="#g1" y="10846"/></g><g><use xlink:href="#g15" y="10982"/><use xlink:href="#g17" y="10999"/><use xlink:href="#g18" y="11016"/><use xlink:href="#g19" y="11033"/><use xlink:href="#g20" y="11050"/><use xlink:href="#g21" y="11067"/><use xlink:href="#g22" y="11101"/><use xlink:href="#g23" y="11118"/><use xlink:href="#g24" y="11135"/><use xlink:href="#g25" y="11169"/><use xlink:href="#g26" y="11186"/><use xlink:href="#g27" y="11203"/><use xlink:href="#g28" y="11220"/><use xlink:href="#g29" y="11237"/><use xlink:href="#g30" y="11254"/><use xlink:href="#g31" y="11271"/><use xlink:href="#g32" y="11288"/><use xlink:href="#g33" y="11305"/><use xlink:href="#g34" y="11322"/><use xlink:href="#g35" y="11339"/><use xlink:href="#g36" y="11356"/><use xlink:href="#g37" y="11373"/><use xlink:href="#g38" y="11390"/><use xlink:href="#g39" y="11407"/><use xlink:href="#g40" y="11424"/><use xlink:href="#g41" y="11441"/><use xlink:href="#g42" y="11458"/><use xlink:href="#g43" y="11475"/><use xlink:href="#g44" y="11492"/><rect x="0" y="11509" width="8" height="17" class="foreground"/><use xlink:href="#g16" y="11509"/></g></g></svg>
+</svg>
