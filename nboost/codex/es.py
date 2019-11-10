@@ -50,10 +50,8 @@ class ESCodex(BaseCodex):
             body = JSON.dumps(body).encode()
             req.headers.pop('Content-Length', None)
             req = Request(req.method, req.path, req.headers, req.params, body)
-        elif 'size' in req.params:
-            req.params['size'] = topk * self.multiplier
         else:
-            raise ValueError('Could not find "size" ')
+            req.params['size'] = topk * self.multiplier
 
         return req
 
