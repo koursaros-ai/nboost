@@ -7,7 +7,7 @@ import unittest
 import asyncio
 
 
-class TestDBERTModel(unittest.TestCase):
+class TestTransformersModel(unittest.TestCase):
 
     def setUp(self):
         if not Path('./marco_bert').is_dir():

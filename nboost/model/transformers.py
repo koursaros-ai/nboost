@@ -3,6 +3,7 @@ from .base import BaseModel
 import torch, torch.nn
 import numpy as np
 import os
+import urllib.request
 
 
 class TransformersModel(BaseModel):
@@ -23,8 +24,13 @@ class TransformersModel(BaseModel):
         if os.path.exists(os.path.join(self.model_ckpt, 'config.json')):
             self.model_config = AutoConfig.from_pretrained(self.model_ckpt)
         else:
-            self.model_config = AutoConfig.from_pretrained(self.model_ckpt)
-            self.model_config.num_labels = 1  # set up for regression
+            try:
+                model_url = 'https://storage.googleapis.com/koursaros/%s.zip' % marco_bert
+                urllib.request.urlretrieve()
+
+            except:
+                self.model_config = AutoConfig.from_pretrained(self.model_ckpt)
+                self.model_config.num_labels = 1  # set up for regression
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
