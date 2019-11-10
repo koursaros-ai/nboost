@@ -8,8 +8,8 @@ import unittest
 class TestESCodex(unittest.TestCase):
     def test_es_codex(self):
         codex = ESCodex(multiplier=5, field='message')
-        query_json = RESOURCES.joinpath('es_query.json').read_bytes()
-        result_json = RESOURCES.joinpath('es_result.json').read_bytes()
+        query_json = RESOURCES.joinpath('es/es_query.json').read_bytes()
+        result_json = RESOURCES.joinpath('es/es_result.json').read_bytes()
         method = 'GET'
         path = '/test/_search'
         headers = {'Content-Length': 250}
@@ -46,7 +46,7 @@ class TestESCodex(unittest.TestCase):
         self.assertEqual(err.status, 500)
 
     def test_match_burger(self):
-        response_body = RESOURCES.joinpath('match_query_res.json').read_bytes()
+        response_body = RESOURCES.joinpath('es/match_query_res.json').read_bytes()
         response_headers = {'Content-Length': len(response_body)}
         request_body = b'''
                 {

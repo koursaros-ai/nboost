@@ -11,8 +11,8 @@ from elasticsearch import Elasticsearch
 
 class TestProxy(unittest.TestCase):
     def test_default_proxy(self):
-        query_json = RESOURCES.joinpath('es_query.json').read_bytes()
-        result_json = RESOURCES.joinpath('es_result.json').read_bytes()
+        query_json = RESOURCES.joinpath('es/es_query.json').read_bytes()
+        result_json = RESOURCES.joinpath('es/es_result.json').read_bytes()
         server = AioHttpServer(port=9500, verbose=True)
 
         async def search(req):
