@@ -61,7 +61,7 @@ class TransformersModel(BaseModel):
         else:
             labels = torch.tensor(labels, dtype=torch.long).to(self.device, non_blocking=True)
 
-        if self.model_ckpt == 'distilbert':
+        if self.model_ckpt.split('-')[0] == 'distilbert':
             loss = self.rerank_model(input_ids,labels=labels,attention_mask=attention_mask)[0]
         else:
             loss = self.rerank_model(input_ids,
@@ -83,14 +83,14 @@ class TransformersModel(BaseModel):
         input_ids, attention_mask, token_type_ids = await self.encode(query, choices)
 
         with torch.no_grad():
-            if self.model_ckpt == 'distilbert':
+            if self.model_ckpt.split('-')[0] == 'distilbert':
                 logits = self.rerank_model(input_ids, attention_mask=attention_mask)[0]
             else:
                 logits = self.rerank_model(input_ids,
                                            attention_mask=attention_mask,
                                            token_type_ids=token_type_ids)[0]
             scores = np.squeeze(logits.detach().cpu().numpy())
-            if scores.shape[1] == 2:
+            if len(scores.shape) > 1 and scores.shape[1] == 2:
                 scores = np.squeeze(scores[:,1])
             if len(logits) == 1:
                 scores = [scores]
@@ -102,7 +102,7 @@ class TransformersModel(BaseModel):
 
     async def encode(self, query, choices):
         inputs = [self.tokenizer.encode_plus(
-            query, choice.decode(), add_special_tokens=True
+            choice.decode(), query.decode(), add_special_tokens=True
         ) for choice in choices]
 
         max_len = min(max(len(t['input_ids']) for t in inputs), self.max_seq_len)

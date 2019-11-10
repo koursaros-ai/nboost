@@ -12,8 +12,8 @@ class TestTransformersModel(unittest.TestCase):
     def setUp(self):
         if not Path('./marco_bert').is_dir():
             raise SkipTest('./marco_bert not found')
-        self.model = TransformersModel()
-        self.query = Query('O wherefore art thou')
+        self.model = TransformersModel(model_ckpt='distilbert-base-uncased')
+        self.query = Query('O wherefore art thou'.encode())
         self.choices = Choices()
 
         with RESOURCES.joinpath('sonnets_small.txt').open() as fh:
@@ -25,7 +25,7 @@ class TestTransformersModel(unittest.TestCase):
         labels = Labels(float(i % 2) for i in range(len(self.choices)))
         res = (
             asyncio.get_event_loop()
-            .run_until_complete(self.model.train(self.query, self.choices, labels=labels))
+            .run_until_complete(self.model.train(self.query,self.choices, labels=labels))
         )
 
     def test_rank(self):
