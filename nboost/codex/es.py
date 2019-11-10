@@ -30,7 +30,7 @@ class ESCodex(BaseCodex):
     def topk(self, req):
         topk = req.params.get('size', None)
         if topk is None and req.body:
-            body = JSON.load(req.body)
+            body = JSON.loads(req.body)
             topk = self.finditem(body, 'size')
 
         if topk is None:
