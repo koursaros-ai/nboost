@@ -10,21 +10,11 @@ import time
 
 
 class Proxy:
-    def __init__(self,
-                 host: str = '127.0.0.1',
-                 port: int = 53001,
-                 ext_host: str = '127.0.0.1',
-                 ext_port: int = 54001,
-                 lr: float = 10e-3,
-                 model_ckpt: str = './marco_bert',
-                 data_dir: str = '/.cache',
-                 multiplier: int = 10,
-                 field: str = None,
+    def __init__(self, verbose: bool = False,
                  server: Type[BaseServer] = BaseServer,
                  model: Type[BaseModel] = BaseModel,
                  codex: Type[BaseCodex] = BaseCodex,
                  db: Type[BaseDb] = BaseDb,
-                 verbose: bool = False,
                  **kwargs):
         """The proxy object is the core of nboost.It has four components:
         the model, server, db, and codex.The role of the proxy is to
@@ -59,11 +49,10 @@ class Proxy:
         self.logger = set_logger(self.__class__.__name__)
 
         # pass command line arguments to instantiate each component
-        server = server(host=host, port=port,
-                        ext_host=ext_host, ext_port=ext_port, verbose=verbose)
-        model = model(lr=lr,model=model_ckpt,data_dir=data_dir, verbose=verbose)
-        codex = codex(multiplier=multiplier, field=field, verbose=verbose)
-        db = db(verbose=verbose)
+        server = server(verbose=verbose, **kwargs)
+        model = model(verbose=verbose, **kwargs)
+        codex = codex(verbose=verbose, **kwargs)
+        db = db(verbose=verbose, **kwargs)
 
         def track(f: Any):
             """Tags and times each component for benchmarking purposes. The
