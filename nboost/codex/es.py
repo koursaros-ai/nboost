@@ -39,16 +39,16 @@ class ESCodex(BaseCodex):
         return Topk(topk)
 
     def magnify(self, req, topk):
-        if topk == self.DEFAULT_TOPK:
-            pass
-        elif 'size' in req.params:
-            req.params['size'] = topk * self.multiplier
-        elif req.body:
+        if req.body:
             body = JSON.loads(req.body)
             size = self.finddict(body, 'size')
             size['size'] = topk * self.multiplier
             body = JSON.dumps(body).encode()
             req = Request(req.method, req.path, req.headers, req.params, body)
+        elif 'size' in req.params:
+            req.params['size'] = topk * self.multiplier
+        else:
+            raise ValueError('Could not find "size" ')
 
         return req
 
