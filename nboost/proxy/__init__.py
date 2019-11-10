@@ -85,27 +85,30 @@ class Proxy(StatefulBase):
             from the search api, then filter the larger results with the
             model to return better results. """
 
+            # Codex figures out how many results the client wants.
+            _2: Topk = await track(codex.topk)(_1)
+
             # Codex alters the request to make a larger one.
-            _2: Request = await track(codex.magnify)(_1)
+            _3: Request = await track(codex.magnify)(_1, _2)
 
             # The server asks the search api for the larger request.
-            _3: Response = await track(server.ask)(_2)
+            _4: Response = await track(server.ask)(_3)
 
             # The codex takes the large response and parses out the query
             # from the amplified request and response.
-            _4: Tuple[Query, Choices] = await track(codex.parse)(_2, _3)
+            _5: Tuple[Query, Choices] = await track(codex.parse)(_3, _4)
 
             # the model ranks the choices based on the query.
-            _5: Ranks = await track(model.rank)(*_4)
+            _6: Ranks = await track(model.rank)(*_5)
 
             # the db saves the query and choices, and returns the query id
             # and choice ids for the client to send back during train()
-            _6: Tuple[Qid, List[Cid]] = await track(db.save)(*_4)
+            _7: Tuple[Qid, List[Cid]] = await track(db.save)(*_5)
 
             # the codex formats the new (nboosted) response with the context
             # from the entire search pipeline.
-            _7: Response = await track(codex.pack)(_1, _3, *_4, _5, *_6)
-            return _7
+            _8: Response = await track(codex.pack)(_2, _4, *_5, _6, *_7)
+            return _8
 
         @track
         async def train(_1: Request) -> Response:
