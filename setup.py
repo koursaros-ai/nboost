@@ -23,7 +23,12 @@ setup(
         'neural',
         'inference',
     ],
-    install_requires=['torch', 'transformers', 'termcolor'],
+    install_requires=[
+        'torch',
+        'transformers',
+        'termcolor',
+        'aiohttp'
+    ],
     entry_points={'console_scripts': ['nboost=nboost.cli.__main__:main']},
     classifiers=[
         'Intended Audience :: Education',
