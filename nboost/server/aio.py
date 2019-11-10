@@ -59,7 +59,7 @@ class AioHttpServer(BaseServer):
                 body=res.body,
                 status=res.status)
         except web_exceptions.HTTPNotFound:
-            raise await self.not_found_handler(request)
+            return await self.not_found_handler(request)
 
     async def ask(self, req):
         url = 'http://%s:%s%s?%s' % (
@@ -71,23 +71,17 @@ class AioHttpServer(BaseServer):
                                    headers=headers) as response:
             return await self.format_client_response(response)
 
-    async def forward(self, req):
-        # path = 'http://%s:%s%s?%s' % (
-        #     self.ext_host, self.ext_port, req.path, req.params)
-        # async with aiohttp.ClientSession() as session:
-        #     headers = dict(req.headers)
-        #     headers['Content-Type'] = 'application/json'
-        #     async with getattr(session, req.method.lower())(
-        #             path,
-        #             headers=headers,
-        #             data=req.body) as resp:
-        #         return aiohttp.web.Response(
-        #             status=resp.status,
-        #             headers=resp.headers,
-        #             body=await resp.content.read())
-        # raise web.HTTPTemporaryRedirect(url)
-
-        self.logger.info('NOT FOUND: %s' % req)
-        url = 'http://%s:%s%s?%s' % (
+    async def forward(self, req: web.Request) -> web.Response:
+        path = 'http://%s:%s%s?%s' % (
             self.ext_host, self.ext_port, req.path, req.query_string)
-        return web.HTTPTemporaryRedirect(url)
+        async with aiohttp.ClientSession() as session:
+            headers = dict(req.headers)
+            headers['Content-Type'] = 'application/json'
+            async with getattr(session, req.method.lower())(
+                    path,
+                    headers=headers,
+                    data=await req.read()) as resp:
+                return web.Response(
+                    status=resp.status,
+                    headers=resp.headers,
+                    body=await resp.content.read())
