@@ -63,8 +63,8 @@ def train():
                     candidates.append(hit['_source']['passage'])
                     labels.append(1.0 if doc_id == hit['_id'] else 0.0)
                     # cids.append(hit['cid'])
-            # hits += qid_hits[qid][0]
-            # total += qid_count[qid]
+            hits += qid_hits[qid][0]
+            total += qid_count[qid]
             # if qid_hits[qid][0] > 0:
             #     timeit(requests.request, 'POST', 'http://localhost:53001/train', json={
             #         "qid": query_id,
