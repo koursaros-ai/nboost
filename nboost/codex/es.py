@@ -5,15 +5,6 @@ import json as JSON
 import gzip
 
 
-def _finditem(obj, key):
-    if key in obj: return obj[key]
-    for k, v in obj.items():
-        if isinstance(v,dict):
-            item = _finditem(v, key)
-            if item is not None:
-                return item
-
-
 class ESCodex(BaseCodex):
     DEFAULT_TOPK = 10
     SEARCH = {'/{index}/_search': ['GET']}
@@ -21,23 +12,52 @@ class ESCodex(BaseCodex):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.field:
-            self.logger.error('Please set --field which you would like to rank on')
+            self.logger.error(
+                'Please set --field which you would like to rank on')
             raise NotImplementedError
 
-    def get_topk(self, req: Request) -> int:
-        return int(req.params['size'] if 'size' in req.params else self.DEFAULT_TOPK)
+    def finddict(self, obj: dict, key: str):
+        """recursively find the mutable dictionary containing a key (if any)"""
+        if key in obj:
+            return obj
+        for k, v in obj.items():
+            if isinstance(v, dict):
+                return self.finditem(v, key)
 
-    def magnify(self, req):
-        params = dict(req.params)
-        params['size'] = self.get_topk(req) * self.multiplier
-        return Request(req.method, req.path, req.headers, params, req.body)
+    def finditem(self, obj: dict, key: str):
+        return self.finddict(obj, key).get(key, None)
+
+    def topk(self, req):
+        topk = req.params.get('size', None)
+        if topk is None and req.body:
+            body = JSON.load(req.body)
+            topk = self.finditem(body, 'size')
+
+        if topk is None:
+            topk = self.DEFAULT_TOPK
+
+        return Topk(topk)
+
+    def magnify(self, topk, req):
+        if topk == self.DEFAULT_TOPK:
+            pass
+        elif 'size' in req.params:
+            req.params['size'] = topk * self.multiplier
+        elif req.body:
+            body = JSON.loads(req.body)
+            size = self.finddict(body, 'size')
+            size['size'] = topk * self.multiplier
+            body = JSON.dumps(body).encode()
+            req = Request(req.method, req.path, req.headers, req.params, body)
+
+        return req
 
     def parse(self, req, res):
         if 'q' in req.params:
-            query = req.params['q']
+            query = req.params['q'].split(':')[-1]
         else:
             body = JSON.loads(req.body)
-            query = _finditem(body['query'], 'query')
+            query = self.finditem(body['query'], 'query')
 
         hits = JSON.loads(res.body)['hits'].get('hits', None)
         if not hits:
@@ -45,16 +65,16 @@ class ESCodex(BaseCodex):
 
         choices = [hit['_source'][self.field].encode() for hit in hits]
 
-        return Query(query), Choices(choices)
+        return Query(query, 'utf8'), Choices(choices)
 
-    def pack(self, req, res, query, choices, ranks, qid, cids):
+    def pack(self, topk, res, query, choices, ranks, qid, cids):
         body = JSON.loads(res.body)
         body['qid'] = qid
         for choice, cid, hit in zip(choices, cids, body['hits']['hits']):
             hit['qid'] = qid
             hit['cid'] = cid
 
-        body['hits']['hits'] = [body['hits']['hits'][i] for i in ranks[:self.get_topk(req)]]
+        body['hits']['hits'] = [body['hits']['hits'][i] for i in ranks[:topk]]
         res.headers.pop('Content-Length', None)
         body = JSON.dumps(body).encode()
         if res.headers.get('Content-Encoding', None) == 'gzip':
@@ -62,7 +82,7 @@ class ESCodex(BaseCodex):
         return Response(res.headers, body, 200)
 
     def pluck(self, req):
-        body = JSON.loads(req.body)
+        body = JSON.loads(req.body) if req.body else {}
         if 'qid' in body:
             qid = body['qid']
         elif 'qid' in req.params:
@@ -87,7 +107,7 @@ class ESCodex(BaseCodex):
         return Response({}, JSON.dumps(dict(qid=qid, cid=cids)).encode(), 200)
 
     def catch(self, e):
-        body = JSON.dumps(dict(error=str(e), type=type(e).__name__))
+        body = JSON.dumps(dict(error=repr(e), type=type(e).__name__))
         return Response({}, body, 500)
 
     def pulse(self, state):

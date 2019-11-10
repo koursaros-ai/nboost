@@ -8,7 +8,7 @@ import requests
 
 
 def main():
-    json = RESOURCES.joinpath('example.json').read_bytes()
+    json = RESOURCES.joinpath('es_result.json').read_bytes()
 
     async def search(req):
         return Response({}, json, 200)

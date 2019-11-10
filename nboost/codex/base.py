@@ -30,11 +30,18 @@ class BaseCodex(StatefulBase):
         return dict(multiplier=self.multiplier, field=self.field)
 
     # SEARCH METHODS
-    def magnify(self, req: Request) -> Request:
+    def topk(self, req: Request) -> Topk:
+        """Figure out how many results the client intended to receive
+
+        :param req: initial (ordinary) client request to the search api
+        """
+
+    def magnify(self, topk: Topk, req: Request) -> Request:
         """Receive the client request to the api and multiply the size of
         the request by the multiplier.
 
-        :param req: initial (ordinary) client request to the search api
+        :param topk: # results requested by client; see topk()
+        :param req: initial client request
         :return Request: request to call to the search api for more results
         """
         raise NotImplementedError
@@ -48,7 +55,7 @@ class BaseCodex(StatefulBase):
         raise NotImplementedError
 
     def pack(self,
-             req: Request,
+             topk: Topk,
              res: Response,
              query: Query,
              choices: Choices,
@@ -57,7 +64,7 @@ class BaseCodex(StatefulBase):
              cids: List[Cid]) -> Response:
         """Reformat the proxy response according to the reranked candidates.
 
-        :param req: original client request
+        :param topk: number of results requested; parsed in topk()
         :param res: response to the magnified request
         :param query: original client query.
         :param choices: list of choices List[bytes]

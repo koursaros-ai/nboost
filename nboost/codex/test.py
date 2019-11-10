@@ -6,7 +6,10 @@ import json as JSON
 
 class TestCodex(BaseCodex):
 
-    def magnify(self, req):
+    def topk(self, req):
+        return Topk(10)
+
+    def magnify(self, topk, req):
         return req
 
     def parse(self, req, res):
