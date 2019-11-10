@@ -91,11 +91,11 @@ class Proxy(StatefulBase):
 
             # Codex alters the request to make a larger one.
             _3: Request = await track(codex.magnify)(_1, _2)
+            import pdb
+            pdb.set_trace()
 
             # The server asks the search api for the larger request.
             _4: Response = await track(server.ask)(_3)
-            import pdb
-            pdb.set_trace()
 
             # The codex takes the large response and parses out the query
             # from the amplified request and response.
