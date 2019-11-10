@@ -1,30 +1,20 @@
+from typing import Type, Tuple, Dict, Any
+from inspect import isawaitable
+from ..base import StatefulBase
+from ..server import BaseServer
 from ..codex import BaseCodex
 from ..model import BaseModel
-from ..server import BaseServer
-from ..db import BaseDb
 from ..base.types import *
-from ..base import set_logger
-from typing import Type, Tuple, Dict, List, Any
-from inspect import isawaitable
+from ..db import BaseDb
 import time
 
 
-class Proxy:
+class Proxy(StatefulBase):
     def __init__(self,
-                 host: str = '127.0.0.1',
-                 port: int = 53001,
-                 ext_host: str = '127.0.0.1',
-                 ext_port: int = 54001,
-                 lr: float = 10e-3,
-                 model_ckpt: str = './marco_bert',
-                 data_dir: str = '/.cache',
-                 multiplier: int = 10,
-                 field: str = None,
                  server: Type[BaseServer] = BaseServer,
                  model: Type[BaseModel] = BaseModel,
                  codex: Type[BaseCodex] = BaseCodex,
                  db: Type[BaseDb] = BaseDb,
-                 verbose: bool = False,
                  **kwargs):
         """The proxy object is the core of nboost.It has four components:
         the model, server, db, and codex.The role of the proxy is to
@@ -56,14 +46,12 @@ class Proxy:
         """
 
         super().__init__(**kwargs)
-        self.logger = set_logger(self.__class__.__name__)
 
         # pass command line arguments to instantiate each component
-        server = server(host=host, port=port,
-                        ext_host=ext_host, ext_port=ext_port, verbose=verbose)
-        model = model(lr=lr,model=model_ckpt,data_dir=data_dir, verbose=verbose)
-        codex = codex(multiplier=multiplier, field=field, verbose=verbose)
-        db = db(verbose=verbose)
+        server = server(**kwargs)
+        model = model(**kwargs)
+        codex = codex(**kwargs)
+        db = db(**kwargs)
 
         def track(f: Any):
             """Tags and times each component for benchmarking purposes. The
