@@ -46,9 +46,12 @@ class HashDb(BaseDb):
         elif func not in self.laps[cls]:
             self.laps[cls][func] = dict(avg_ms=ms, laps=1)
         else:
-            ident = self.laps[cls][func]
-            ident['laps'] += 1
-            ident['avg_ms'] = (ident['avg_ms'] * (ident['laps'] - 1) + ms) / ident['laps']
+            f = self.laps[cls][func]
+            f['avg_ms'] *= f['laps']
+            f['laps'] += 1
+            f['avg_ms'] += ms
+            f['avg_ms'] /= f['laps']
+            f['avg_ms'] = round(f['avg_ms'], 5)
 
         self.logger.info('%s.%s() took %s ms' % (cls, func, ms))
 
