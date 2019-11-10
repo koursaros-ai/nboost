@@ -57,7 +57,6 @@ def train():
             cids = []
             for rank, hit in enumerate(res['hits']['hits']):
                 if (qid, hit['_id']) in qrels:
-                    print('hit')
                     count, min_rank = qid_hits[qid]
                     qid_hits[qid] = (count + 1, min(min_rank, rank+1))
                     candidates.append(hit['_source']['passage'])
