@@ -27,3 +27,5 @@ def create_proxy(argv: List[str] = sys.argv[1:]):
     parser.add_argument('--db', type=lambda x: getattr(db, x), default='HashDb', help='db class')
     args = parser.parse_args(argv)
     return Proxy(**vars(args))
+
+
