@@ -43,7 +43,7 @@ class TransformersModel(BaseModel):
         self.optimizer = AdamW(self.rerank_model.parameters(), lr=self.lr, correct_bias=False)
         self.scheduler = ConstantLRSchedule(self.optimizer)
 
-        self.weight = 0.0
+        self.weight = 1.0
 
     async def train(self, query, choices, labels):
         input_ids, attention_mask = await self.encode(query, choices)
