@@ -51,7 +51,6 @@ if __name__ == "__main__":
         res = es.indices.delete(index=INDEX)
         print(res)
     res = es.indices.create(index=INDEX, body=MAPPINGS)
-    print(res)
 
     print('Sending articles.')
     for ok, response in elasticsearch.helpers.streaming_bulk(es, actions=stream_bodies()):
