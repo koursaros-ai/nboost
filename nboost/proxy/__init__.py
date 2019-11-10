@@ -16,8 +16,8 @@ class Proxy(StatefulBase):
                  codex: Type[BaseCodex] = BaseCodex,
                  db: Type[BaseDb] = BaseDb,
                  **kwargs):
-        """The proxy object is the core of nboost.It has four components:
-        the model, server, db, and codex.The role of the proxy is to
+        """The proxy object is the core of NBoost. It has four components:
+        the model, server, db, and codex. The role of the proxy is to
         construct each component and create the route callback(search,
         train, status, not_found, and error).
 
