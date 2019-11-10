@@ -1,7 +1,7 @@
 from nboost.cli import create_proxy
 from nboost.server import AioHttpServer
-from nboost.paths import RESOURCES
 from nboost.base.types import *
+from paths import RESOURCES
 import unittest
 import requests
 import json as JSON

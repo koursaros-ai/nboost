@@ -1,6 +1,6 @@
 from nboost.model import TransformersModel
-from nboost.paths import RESOURCES
 from nboost.base.types import *
+from paths import RESOURCES
 import unittest
 import asyncio
 

@@ -1,6 +1,6 @@
-from nboost.paths import RESOURCES
 from nboost.codex import ESCodex
 from nboost.base.types import *
+from paths import RESOURCES
 import json as JSON
 import unittest
 
