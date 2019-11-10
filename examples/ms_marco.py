@@ -51,7 +51,7 @@ def train():
                     }
                 }
             }, filter_path=['hits.hits._*'])
-            query_id = res['qid']
+            # query_id = res['qid']
             qid_hits = defaultdict(lambda: (0, TOPK+1))
             candidates = []
             labels = []
