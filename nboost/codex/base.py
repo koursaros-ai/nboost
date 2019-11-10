@@ -36,7 +36,7 @@ class BaseCodex(StatefulBase):
         :param req: initial (ordinary) client request to the search api
         """
 
-    def magnify(self, topk: Topk, req: Request) -> Request:
+    def magnify(self, req: Request, topk: Topk) -> Request:
         """Receive the client request to the api and multiply the size of
         the request by the multiplier.
 

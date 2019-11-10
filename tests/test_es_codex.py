@@ -2,7 +2,6 @@ from nboost.paths import RESOURCES
 from nboost.codex import ESCodex
 from nboost.base.types import *
 import json as JSON
-import requests
 import unittest
 
 
@@ -23,11 +22,11 @@ class TestESCodex(unittest.TestCase):
         topk = codex.topk(query_req)
         self.assertEqual(topk, 20)
 
-        query_mreq = codex.magnify(topk, query_req)
+        query_mreq = codex.magnify(query_req, topk)
         self.assertEqual(query_mreq.params['size'], 100)
 
         json_req = Request(method, path, headers, {}, query_json)
-        json_mreq = codex.magnify(topk, json_req)
+        json_mreq = codex.magnify(json_req, topk)
         self.assertEqual(JSON.loads(json_mreq.body)['size'], 100)
 
         query_mres = Response({}, result_json, 200)
