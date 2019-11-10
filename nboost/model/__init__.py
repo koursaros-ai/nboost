@@ -1,4 +1,4 @@
-from .dbert import DBERTModel
+from .transformers import TransformersModel
 from .base import BaseModel
 from .test import TestModel
 
