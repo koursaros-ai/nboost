@@ -16,14 +16,13 @@ class TestAioHttpServer(unittest.TestCase):
         async def post_stuff(req):
             return Response({}, b'I got %s' % req.body, 200)
 
-        server.create_app({
-            Route.SEARCH: ({'/get_stuff': ['GET']}, get_stuff),
-            Route.TRAIN: ({'/send_stuff': ['POST']}, post_stuff),
-        })
+        server.create_app([
+            ({'/get_stuff': ['GET']}, get_stuff),
+            ({'/send_stuff': ['POST']}, post_stuff),
+        ], not_found_handler=lambda x: print(x))
 
         server.start()
         server.is_ready.wait()
-        # time.sleep(1)
         self.assertTrue(server.is_ready.is_set())
 
         res = requests.get('http://localhost:6000/get_stuff')
@@ -31,7 +30,7 @@ class TestAioHttpServer(unittest.TestCase):
         self.assertTrue(res.ok)
 
         res = requests.post('http://localhost:6000/send_stuff',
-                            json=dict(sent='an_avocado'))
+                            data=b'an avocado')
         print(res.content)
         self.assertTrue(res.ok)
 

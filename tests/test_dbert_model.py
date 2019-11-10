@@ -1,6 +1,6 @@
 from nboost.model import DBERTModel
 from nboost.base.types import *
-from tests.paths import RESOURCES
+from nboost.paths import RESOURCES
 import unittest
 import asyncio
 
