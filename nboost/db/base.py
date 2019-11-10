@@ -4,8 +4,11 @@ from typing import Tuple
 
 
 class BaseDb(StatefulBase):
+    """The db is necessary to store queries and choices for use during training
+    and to store tracking statistics."""
+
     # SEARCH METHOD
-    def save(self, query: Query, choices: Choices) -> None:
+    def save(self, query: Query, choices: Choices) -> Tuple[Qid, List[Cid]]:
         """ Save the choices during search for using during train """
         raise NotImplementedError
 
