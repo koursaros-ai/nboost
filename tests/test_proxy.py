@@ -6,8 +6,6 @@ import unittest
 import requests
 import json as JSON
 
-from elasticsearch import Elasticsearch
-
 
 class TestProxy(unittest.TestCase):
     def test_default_proxy(self):
