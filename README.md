@@ -37,10 +37,10 @@
 
 <h2 align="center">What is it</h2>
 
-**NBoost**⚡ is a scalable, search-api-boosting platform for developing and deploying SOTA models to improve the relevance of search results. 
+⚡**NBoost** is a scalable, search-api-boosting platform for developing and deploying SOTA models to improve the relevance of search results. 
 
 <h2 align="center">Overview</h2>
-> 🚧 Under construction.
+**This project is still under development and the core package is not ready for distribution**
 
 
 <h2 align="center">Install NBoost</h2>
