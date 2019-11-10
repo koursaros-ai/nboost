@@ -71,16 +71,3 @@ class TestProxy(unittest.TestCase):
 
         proxy.close()
         server.stop()
-
-    def test_match_query(self):
-        es = Elasticsearch(host='localhost',post=53001)
-        res = es.search(index='mock_index', body={
-            "size": 10,
-            "query": {
-                "match": {
-                    "passage": {
-                        "query": 'This is a test'
-                    }
-                }
-            }
-        }, filter_path=['hits.hits._*'])
