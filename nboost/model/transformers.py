@@ -3,6 +3,7 @@ from .base import BaseModel
 import torch, torch.nn
 import numpy as np
 import os
+import urllib.request
 
 
 class TransformersModel(BaseModel):
@@ -21,8 +22,15 @@ class TransformersModel(BaseModel):
         self.checkpoint_steps = 500
 
         if os.path.exists(os.path.join(self.model_ckpt, 'config.json')):
+            self.logger.info('Loading from checkpoint %s' % self.model_ckpt)
+            self.model_config = AutoConfig.from_pretrained(self.model_ckpt)
+        elif os.path.exists(os.path.join(self.data_dir, 'config.json')):
+            self.logger.info('Loading from trained model in %s' % self.data_dir)
+            self.model_ckpt = self.data_dir
             self.model_config = AutoConfig.from_pretrained(self.model_ckpt)
         else:
+            self.logger.info(
+                'Initializing new model with pretrained weights %s' % self.model_ckpt)
             self.model_config = AutoConfig.from_pretrained(self.model_ckpt)
             self.model_config.num_labels = 1  # set up for regression
 
@@ -46,13 +54,20 @@ class TransformersModel(BaseModel):
         self.weight = 1.0
 
     async def train(self, query, choices, labels):
-        input_ids, attention_mask = await self.encode(query, choices)
+        input_ids, attention_mask, token_type_ids = await self.encode(query, choices)
 
         if self.model_config.num_labels == 1:
             labels = torch.tensor(labels, dtype=torch.float).to(self.device, non_blocking=True)
         else:
             labels = torch.tensor(labels, dtype=torch.long).to(self.device, non_blocking=True)
-        loss = self.rerank_model(input_ids, labels=labels, attention_mask=attention_mask)[0]
+
+        if self.model_ckpt == 'distilbert':
+            loss = self.rerank_model(input_ids,labels=labels,attention_mask=attention_mask)[0]
+        else:
+            loss = self.rerank_model(input_ids,
+                                     labels=labels,
+                                     attention_mask=attention_mask,
+                                     token_type_ids=token_type_ids)[0]
         loss.backward()
         torch.nn.utils.clip_grad_norm_(self.rerank_model.parameters(), self.max_grad_norm)
         self.optimizer.step()
@@ -65,13 +80,18 @@ class TransformersModel(BaseModel):
             await self.save()
 
     async def rank(self, query, choices):
-        input_ids, attention_mask = await self.encode(query, choices)
+        input_ids, attention_mask, token_type_ids = await self.encode(query, choices)
 
         with torch.no_grad():
-            logits = self.rerank_model(input_ids, attention_mask=attention_mask)[0]
+            if self.model_ckpt == 'distilbert':
+                logits = self.rerank_model(input_ids, attention_mask=attention_mask)[0]
+            else:
+                logits = self.rerank_model(input_ids,
+                                           attention_mask=attention_mask,
+                                           token_type_ids=token_type_ids)[0]
             scores = np.squeeze(logits.detach().cpu().numpy())
             if scores.shape[1] == 2:
-                scores = np.squeeze(scores[:,1] - scores[:,0])
+                scores = np.squeeze(scores[:,1])
             if len(logits) == 1:
                 scores = [scores]
             es_ranks = np.arange(len(scores))
@@ -90,11 +110,14 @@ class TransformersModel(BaseModel):
                      [0] * (max_len - len(t['input_ids'][:max_len])) for t in inputs]
         attention_mask = [[1] * len(t['input_ids'][:max_len]) +
                           [0] * (max_len - len(t['input_ids'][:max_len])) for t in inputs]
+        token_type_ids = [t['token_type_ids'][:max_len] +
+                     [0] * (max_len - len(t['token_type_ids'][:max_len])) for t in inputs]
 
         input_ids = torch.tensor(input_ids).to(self.device, non_blocking=True)
         attention_mask = torch.tensor(attention_mask).to(self.device, non_blocking=True)
+        token_type_ids = torch.tensor(token_type_ids).to(self.device, non_blocking=True)
 
-        return input_ids, attention_mask
+        return input_ids, attention_mask, token_type_ids
 
     async def save(self):
         self.logger.info('Saving model')
