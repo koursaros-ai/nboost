@@ -1,8 +1,17 @@
-pipeline:
-  build:
-    image: python:3.7.4-alpine
-    commands:
-      - pip install --upgrade pip setuptools wheel
-      - pip install -r requirements.txt
-      - python setup.py install
-      - python -m unittest tests
+
+kind: pipeline
+type: docker
+name: default
+
+steps:
+- name: build
+  image: python:3.7.4-alpine
+  commands:
+    - pip install --upgrade pip setuptools wheel
+    - pip install -r requirements.txt
+    - python setup.py install
+    - python -m unittest tests
+
+trigger:
+  branch:
+  - master
