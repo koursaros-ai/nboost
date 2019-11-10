@@ -1,5 +1,5 @@
 
-from typing import Dict, Tuple, Callable
+from typing import Dict, Tuple, Callable, Iterable, Any
 from threading import Thread, Event
 from ..base import StatefulBase
 from ..base.types import *
@@ -27,26 +27,30 @@ class BaseServer(StatefulBase, Thread):
         self.ext_host = ext_host
         self.ext_port = ext_port
         self.is_ready = Event()
-
-        try:
-            self.loop = asyncio.get_event_loop()
-        except RuntimeError:
-            self.loop = asyncio.new_event_loop()
-            self.asyncio.set_event_loop(self.loop)
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
 
     def state(self):
         return dict(ext_host=self.ext_host, ext_port=self.ext_port)
 
     def create_app(self,
-                   routes: Dict[Route, Tuple[Dict[str, List[str]], Callable]]):
-        """function to run a web server given a dictionary of routes
+                   routes: Iterable[Tuple[Dict[str, List[str]], Callable]],
+                   not_found_handler: Callable):
+        """function to run a web server given a dictionary of routes. Instead
+        of handling 404 cases within the server, call the not_found handlers
+        for tracking proxy speeds.
 
-        :param routes: {Route => ({path => [methods]}, function)
+        :param routes: list of ({path => [methods]}, function). These routes
+            are specific to search, train, and status routes but should be
+            kept modular for testing purposes.
+        :param not_found_handler: calls the forward() method on the server but
+            also tracks the speed for benchmarking purposes.
         """
         raise NotImplementedError
 
     async def run_app(self):
         """Run the server """
+        raise NotImplementedError
 
     async def close(self):
         """ Close and clean up the server. Called after close() is called on
@@ -58,7 +62,7 @@ class BaseServer(StatefulBase, Thread):
         """ Make the magnified request to the server api. """
         raise NotImplementedError
 
-    async def forward(self, req: Request):
+    async def forward(self, req: Any) -> Any:
         """ forward a request to the external host """
         raise NotImplementedError
 
@@ -67,13 +71,11 @@ class BaseServer(StatefulBase, Thread):
         self.loop.run_until_complete(self.run_app())
         self.is_ready.set()
         self.loop.run_forever()
-        self.logger.critical('LOOP STOPPED')
         self.is_ready.clear()
 
     def stop(self):
         self.logger.critical('CLOSING')
-        wait = asyncio.run_coroutine_threadsafe(self.close(), self.loop)
-        wait.result()
+        asyncio.run_coroutine_threadsafe(self.close(), self.loop).result()
         self.logger.critical('STOPPING LOOP')
         self.loop.call_soon_threadsafe(self.loop.stop)
 

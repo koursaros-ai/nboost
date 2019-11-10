@@ -54,6 +54,7 @@ class Proxy:
         """
 
         super().__init__(**kwargs)
+        self.logger = set_logger(self.__class__.__name__)
 
         # pass command line arguments to instantiate each component
         server = server(host=host, port=port,
@@ -75,11 +76,15 @@ class Proxy:
             ident = (cls, f.__name__)
 
             async def decorator(*args):
-                start = time.perf_counter()
-                res = f(*args)
-                ret = await res if isawaitable(res) else res
-                ms = (time.perf_counter() - start) * 1000
-                db.lap(ms, *ident)
+                try:
+                    start = time.perf_counter()
+                    res = f(*args)
+                    ret = await res if isawaitable(res) else res
+                    ms = (time.perf_counter() - start) * 1000
+                    db.lap(ms, *ident)
+                except Exception as e:
+                    self.logger.error(repr(e), exc_info=True)
+                    ret = codex.catch(e)
                 return ret
             return decorator
 
@@ -142,30 +147,23 @@ class Proxy:
             return _6
 
         @track
-        async def not_found(_1: Request) -> Response:
+        async def not_found(_1: Any) -> Any:
             """What to do when none of the paths given to the server match
             the path requested by the client."""
-            _2: Response = await track(server.forward)(_1)
-            return _2
-
-        @track
-        async def error(_1: Exception) -> Response:
-            """Errors during any route"""
-            _2: Response = await track(codex.catch)(_1)
+            _2: Any = await track(server.forward)(_1)
             return _2
 
         # create functional routes for the server
-        server.create_app({
-            Route.SEARCH: (codex.SEARCH, search),
-            Route.TRAIN: (codex.TRAIN, train),
-            Route.STATUS: (codex.STATUS, status),
-            Route.ERROR: (codex.ERROR, error)
-        })
+        server.create_app([
+            (codex.SEARCH, search),
+            (codex.TRAIN, train),
+            (codex.STATUS, status)
+        ], not_found_handler=not_found)
 
         self.server = server
-        self.logger = set_logger(self.__class__.__name__)
 
     def start(self):
+        self.logger.critical('STARTING SERVER')
         self.server.start()
         self.server.is_ready.wait()
 

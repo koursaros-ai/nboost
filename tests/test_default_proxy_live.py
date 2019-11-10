@@ -1,7 +1,7 @@
 from nboost.cli import create_proxy
+from nboost.paths import RESOURCES
 from elasticsearch import Elasticsearch
 from unittest.case import SkipTest
-from tests.paths import RESOURCES
 import unittest
 import requests
 import time
