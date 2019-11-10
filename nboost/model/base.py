@@ -6,7 +6,7 @@ from ..base.types import *
 class BaseModel(StatefulBase):
     def __init__(self,
                  lr: float = 10e-3,
-                 model_ckpt : str ='./ms_marco',
+                 model_ckpt: str ='./marco_bert',
                  data_dir: str = '/.cache', **kwargs):
         super().__init__()
         self.lr = lr
