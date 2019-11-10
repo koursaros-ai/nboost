@@ -36,7 +36,7 @@ class TransformersModel(BaseModel):
 
         self.rerank_model = AutoModelForSequenceClassification.from_pretrained(
             self.model_ckpt,
-            config=model_config)
+            config=self.model_config)
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_ckpt)
         self.rerank_model.to(self.device, non_blocking=True)
 
