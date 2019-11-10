@@ -1,16 +1,16 @@
+from typing import Type, Tuple, Dict, Any
+from inspect import isawaitable
+from ..base import StatefulBase
+from ..server import BaseServer
 from ..codex import BaseCodex
 from ..model import BaseModel
-from ..server import BaseServer
-from ..db import BaseDb
 from ..base.types import *
-from ..base import set_logger
-from typing import Type, Tuple, Dict, List, Any
-from inspect import isawaitable
+from ..db import BaseDb
 import time
 
 
-class Proxy:
-    def __init__(self, verbose: bool = False,
+class Proxy(StatefulBase):
+    def __init__(self,
                  server: Type[BaseServer] = BaseServer,
                  model: Type[BaseModel] = BaseModel,
                  codex: Type[BaseCodex] = BaseCodex,
@@ -46,13 +46,12 @@ class Proxy:
         """
 
         super().__init__(**kwargs)
-        self.logger = set_logger(self.__class__.__name__)
 
         # pass command line arguments to instantiate each component
-        server = server(verbose=verbose, **kwargs)
-        model = model(verbose=verbose, **kwargs)
-        codex = codex(verbose=verbose, **kwargs)
-        db = db(verbose=verbose, **kwargs)
+        server = server(**kwargs)
+        model = model(**kwargs)
+        codex = codex(**kwargs)
+        db = db(**kwargs)
 
         def track(f: Any):
             """Tags and times each component for benchmarking purposes. The
