@@ -1,8 +1,6 @@
 from nboost.model import TransformersModel
-from nboost.base.types import *
 from nboost.paths import RESOURCES
-from unittest.case import SkipTest
-from pathlib import Path
+from nboost.base.types import *
 import unittest
 import asyncio
 
@@ -10,8 +8,6 @@ import asyncio
 class TestTransformersModel(unittest.TestCase):
 
     def setUp(self):
-        if not Path('./marco_bert').is_dir():
-            raise SkipTest('./marco_bert not found')
         self.model = TransformersModel(model_ckpt='distilbert-base-uncased')
         self.query = Query('O wherefore art thou'.encode())
         self.choices = Choices()
