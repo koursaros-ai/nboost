@@ -10,7 +10,7 @@ setup(
     description='Nboost is a scalable, search-'
                 'api-boosting platform for developing and deploying '
                 'automated SOTA models more relevant search results.',
-    long_description=Path('README.md').read_text(),
+    long_description=Path('README.md').read_text('utf8'),
     author='Koursaros',
     author_email='cole.thienes@gmail.com',
     url='https://github.com/koursaros-ai/nboost',
