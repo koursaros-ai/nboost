@@ -8,10 +8,10 @@ from typing import List
 
 def create_proxy(argv: List[str] = sys.argv[1:]):
     parser = argparse.ArgumentParser(
-        description='%s: is a scalable, search-api-boosting platform for'
-                    'developing and deploying SOTA models to improve the'
+        description='%s: is a scalable, search-api-boosting platform for '
+                    'developing and deploying SOTA models to improve the '
                     'relevance of search results..' % (
-            termcolor.colored('NBoost v%s' % __version__,
+            termcolor.colored('NBoost (v%s)' % __version__,
                               'cyan', attrs=['underline'])),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--verbose', action='store_true', default=False, help='turn on detailed logging')
