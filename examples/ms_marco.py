@@ -36,7 +36,6 @@ def train():
         for qid, _, doc_id, _ in data:
             qrels.add((qid, doc_id))
             qid_count[qid] += 1
-    # queries = dict()
 
     with open(os.path.join(DATA_PATH, 'queries.train.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
@@ -58,6 +57,7 @@ def train():
             cids = []
             for rank, hit in enumerate(res['hits']['hits']):
                 if (qid, hit['_id']) in qrels:
+                    print('hit')
                     count, min_rank = qid_hits[qid]
                     qid_hits[qid] = (count + 1, min(min_rank, rank+1))
                     candidates.append(hit['_source']['passage'])
