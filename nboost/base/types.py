@@ -46,7 +46,11 @@ class Cid(int):
     """An integer representing a choice id. """
 
 
-class Query(str):
+class Topk(int):
+    """Number of results the client requested"""
+
+
+class Query(bytes):
     """A query from the client """
 
 
