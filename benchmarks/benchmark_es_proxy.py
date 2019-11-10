@@ -38,4 +38,4 @@ if __name__ == '__main__':
         '--field', 'text_entry',
         '--multiplier', '2',
         '--verbose'
-    ], ext_host='35.238.60.182', laps=100)
+    ], ext_host='localhost', laps=100)
