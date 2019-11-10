@@ -83,5 +83,4 @@ class AioHttpServer(BaseServer):
                     data=await req.read()) as resp:
                 return web.Response(
                     status=resp.status,
-                    headers=resp.headers,
                     body=await resp.content.read())
