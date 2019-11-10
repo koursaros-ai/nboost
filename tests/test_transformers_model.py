@@ -1,4 +1,4 @@
-from nboost.model import DBERTModel
+from nboost.model import TransformersModel
 from nboost.base.types import *
 from tests.paths import RESOURCES
 import unittest
@@ -8,7 +8,7 @@ import asyncio
 class TestDBERTModel(unittest.TestCase):
 
     def setUp(self):
-        self.model = DBERTModel()
+        self.model = TransformersModel()
         self.query = Query('O wherefore art thou')
         self.choices = Choices()
 

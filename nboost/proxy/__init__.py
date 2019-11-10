@@ -16,7 +16,7 @@ class Proxy:
                  ext_host: str = '127.0.0.1',
                  ext_port: int = 54001,
                  lr: float = 10e-3,
-                 model_ckpt: str = './ms_marco',
+                 model_ckpt: str = './marco_bert',
                  data_dir: str = '/.cache',
                  multiplier: int = 10,
                  field: str = None,
