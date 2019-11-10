@@ -10,7 +10,7 @@ ES_PORT = 9200
 # ES_HOST = 'localhost'
 # ES_PORT = 53001
 DATA_PATH = '.'
-TOPK = 10
+TOPK = 100
 REQUEST_TIMEOUT = 10000
 
 # es = Elasticsearch(host=ES_HOST)
