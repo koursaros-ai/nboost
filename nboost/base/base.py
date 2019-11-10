@@ -15,9 +15,6 @@ class StatefulBase:
         # useful counter that you can call next() on
         self.counter = itertools.count()
 
-        if kwargs:
-            self.logger.critical('Unused arguments: %s' % kwargs)
-
     @property
     def _state(self) -> dict:
         """If a component has a defined state() method, it is chained together
