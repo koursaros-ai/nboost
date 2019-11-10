@@ -1,59 +1,8 @@
-kind: pipeline
-name: default
-
-clone:
-  depth: 10
-
-steps:
-
-- name: check commit style
-  image: node:alpine
-  commands:
-  - npm install --global --save-dev @commitlint/config-conventional @commitlint/cli
-  - "echo \"module.exports = {extends: ['@commitlint/config-conventional']}\" > commitlint.config.js"
-  - echo $DRONE_COMMIT_MESSAGE | commitlint
-  when:
-    branch:
-      exclude:
-      - chore-bumping-version
-
-- name: install koursaros and unit test
-  image: python:3.7.4-alpine
-  commands:
-  - pip install cffi==1.12.3
-  - pip install -e .
-  - python -m unittest tests/*.py -v
-
-
-trigger:
-  branch:
-  - master
-  event:
-  - pull_request
-
----
-
-kind: pipeline
-name: master-coverity
-
-clone:
-  depth: 50
-
-- name: pip-install koursaros
-  image: python:3.7.4-alpine
-  environment:
-    CODECOV_TOKEN:
-      from_secret: CODECOV_TOKEN
-  commands:
-  - pip install cffi==1.12.3
-  - pip install -e .
-  - pip install coverage codecov
-  - coverage run -m unittest discover -s tests/
-  - coverage report --skip-covered
-  - codecov --token $CODECOV_TOKEN
-
-trigger:
-  branch:
-  - master
-  event:
-  - push
+pipeline:
+  build:
+    image: python:3.7.4-alpine
+    commands:
+      - pip install --upgrade pip setuptools wheel
+      - pip install -r requirements.txt
+      - python setup.py install
+      - python -m unittest tests
