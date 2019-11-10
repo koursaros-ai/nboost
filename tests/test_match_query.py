@@ -27,10 +27,6 @@ def stream_bodies():
                     "passage": passage,
                 }
             }
-            if int(id) % 10000 == 0:
-                print(f'Sent {id}: {passage}.')
-            if id > 1000:
-                break
             yield body
 
 class TestMatchQuery(unittest.TestCase):
