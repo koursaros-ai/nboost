@@ -29,7 +29,8 @@ setup(
         'torch',
         'transformers',
         'termcolor',
-        'aiohttp'
+        'aiohttp',
+        'requests'
     ],
     entry_points={'console_scripts': ['nboost=nboost.cli.__main__:main']},
     classifiers=[
