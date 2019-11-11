@@ -17,6 +17,7 @@ class TestModel(unittest.TestCase):
                 if not line == '':
                     self.choices.append(line.encode())
 
+    @unittest.SkipTest
     def test_train(self):
         labels = Labels(float(i % 2) for i in range(len(self.choices)))
         res = (
@@ -24,6 +25,7 @@ class TestModel(unittest.TestCase):
             .run_until_complete(self.model.train(self.query,self.choices, labels=labels))
         )
 
+    @unittest.SkipTest
     def test_rank(self):
         res = (
             asyncio.get_event_loop()
