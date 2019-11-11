@@ -20,12 +20,6 @@ output_q = Queue()
 input_q = Queue()
 
 
-def pad_docs(candidates, eval_size):
-    if len(candidates) < eval_size:
-        return candidates + ['FAKE DOC'] * (eval_size - len(candidates))
-    return candidates
-
-
 class BertMarcoModel(BaseModel):
 
     def __init__(self, **kwargs):
@@ -176,29 +170,20 @@ class BertMarcoModel(BaseModel):
 
             result = estimator.predict(input_fn=input_fn,
                                        yield_single_examples=True)
-            start_time = time.time()
-            examples = 0
-            results = []
+
             for item in result:
-                results.append((item["log_probs"], item["label_ids"]))
-
-                if len(results) == num_eval_docs:
-                    log_probs, labels = zip(*results)
-                    log_probs = np.stack(log_probs).reshape(-1, 2)
-
-                    scores = log_probs[:, 1]
-                    pred_docs = scores.argsort()[::-1]
-
-                    for doc_idx in pred_docs:
-                        output_q.put(doc_idx)
-                    examples += 1
-                    results = []
-                    print("took %s seconds" % ((time.time() - start_time) / examples))
+                output_q.put((item["log_probs"], item["label_ids"]))
 
         model_thread = Thread(target=run_model, args=(self,))
         model_thread.start()
 
     def rank(self, query, choices):
-        candidates = pad_docs([c.decode() for c in choices], num_eval_docs)
+        candidates = [c.decode() for c in choices]
         input_q.put((query.decode(), candidates))
-        return Ranks([output_q.get() for _ in range(num_eval_docs)][:len(choices)])
+
+        results = [output_q.get() for _ in range(len(candidates))]
+        log_probs, labels = zip(*results)
+        log_probs = np.stack(log_probs).reshape(-1, 2)
+        scores = log_probs[:, 1]
+        pred_docs = scores.argsort()[::-1]
+        return Ranks(pred_docs)
