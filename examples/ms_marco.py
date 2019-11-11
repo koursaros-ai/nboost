@@ -34,7 +34,9 @@ def eval():
 
     with open(os.path.join(DATA_PATH, 'queries.train.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
+        total = 0
         for qid, query in data:
+            total += 1
             res = timeit(es.search, index=INDEX, body={
                 "size": TOPK,
                 "query": {
@@ -50,7 +52,7 @@ def eval():
                 if (qid, hit['_id']) in qrels:
                     print(qid, ' ', rank)
                     qid_count[qid] = max(qid_count[qid], (1.0 / (float(rank + 1))))
-                    mrr = sum(qid_count.values()) / len(qid_count.keys())
+                    mrr = sum(qid_count.values()) / total
                     print("MRR: %s " % mrr)
 
 
