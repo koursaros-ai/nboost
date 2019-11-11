@@ -1,6 +1,7 @@
 from ..base import StatefulBase
 from aiohttp import web
 from ..base.types import *
+import os
 
 
 class BaseModel(StatefulBase):
@@ -10,6 +11,8 @@ class BaseModel(StatefulBase):
                  data_dir: str = '/.cache', **kwargs):
         super().__init__()
         self.lr = lr
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
         self.data_dir = data_dir
         self.model_ckpt = model_ckpt
 
