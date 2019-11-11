@@ -1,6 +1,3 @@
-import collections
-import csv
-import os
 import time
 from queue import Queue
 from threading import Thread
@@ -212,4 +209,4 @@ class BertMarcoModel(BaseModel):
     def rank(self, query, choices):
         candidates = pad_docs([c.decode() for c in choices], num_eval_docs)
         input_q.put((query.decode(), candidates))
-        return Ranks([output_q.get() for _ in range(num_eval_docs)])
+        return Ranks([output_q.get() for _ in range(num_eval_docs)][:len(choices)])
