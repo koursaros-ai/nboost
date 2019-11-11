@@ -1,16 +1,18 @@
 from setuptools import setup, find_packages
 from pathlib import Path
+from nboost import __version__
 
 setup(
     name='nboost',
     packages=find_packages(),
     include_package_data=True,
-    version='0.0.1',
-    license='MIT',
+    version=__version__,
+    license='Apache 2.0',
     description='Nboost is a scalable, search-'
                 'api-boosting platform for developing and deploying '
                 'automated SOTA models more relevant search results.',
     long_description=Path('README.md').read_text('utf8'),
+    long_description_content_type='text/markdown',
     author='Koursaros',
     author_email='cole.thienes@gmail.com',
     url='https://github.com/koursaros-ai/nboost',
@@ -41,7 +43,7 @@ setup(
         'Topic :: Software Development',
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
