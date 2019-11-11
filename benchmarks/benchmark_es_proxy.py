@@ -3,6 +3,7 @@ from nboost.cli import create_proxy
 from statistics import mean
 import requests
 import time
+import sys
 
 
 def benchmark_es_proxy(ext_host='localhost', argv=[], laps=50):
@@ -30,12 +31,20 @@ def benchmark_es_proxy(ext_host='localhost', argv=[], laps=50):
 
 
 if __name__ == '__main__':
+
+    if len(sys.argv) > 1:
+        model = sys.argv[1]
+    if len(sys.argv) > 2:
+        ext_host = sys.argv[2]
+    if len(sys.argv) > 3:
+        laps = sys.argv[3]
+
     benchmark_es_proxy(argv=[
         '--codex', 'ESCodex',
-        '--model', 'TestModel',
+        '--model', model,
         '--port', '9000',
         '--ext_port', '9200',
         '--field', 'text_entry',
-        '--multiplier', '2',
+        '--multiplier', '10',
         '--verbose'
-    ], ext_host='localhost', laps=100)
+    ], ext_host=ext_host, laps=laps)
