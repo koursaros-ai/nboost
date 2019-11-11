@@ -10,7 +10,6 @@ class ElasticsearchError(Exception):
 
 
 class ESCodex(BaseCodex):
-    DEFAULT_TOPK = 10
     SEARCH = {'/{index}/_search': ['GET']}
 
     def __init__(self, *args, **kwargs):
@@ -20,40 +19,60 @@ class ESCodex(BaseCodex):
                 'Please set --field which you would like to rank on')
             raise NotImplementedError
 
-    def finddict(self, obj: dict, key: str):
-        """recursively find the mutable dictionary containing a key (if any)"""
-        if key in obj:
-            return obj
-        for k, v in obj.items():
-            if isinstance(v, dict):
-                return self.finddict(v, key)
-
-    def finditem(self, obj: dict, key: str):
-        return self.finddict(obj, key).get(key, None)
-
     def topk(self, req):
-        topk = req.params.get('size', None)
-        if topk is None and req.body:
-            body = JSON.loads(req.body)
-            topk = self.finditem(body, 'size')
+        # try to get the nested size and otherwise default to 10
+        try:
+            # check request parameters
+            return Topk(req.params['size'])
+        except KeyError:
+            pass
 
-        if topk is None:
-            topk = self.DEFAULT_TOPK
-
-        return Topk(topk)
-
-    def magnify(self, req, topk):
+        # if not in params and no req body then return default
         if req.body:
             body = JSON.loads(req.body)
-            size = self.finddict(body, 'size')
-            size['size'] = topk * self.multiplier
-            body = JSON.dumps(body).encode()
-            req.headers.pop('Content-Length', None)
-            req = Request(req.method, req.path, req.headers, req.params, body)
         else:
-            req.params['size'] = topk * self.multiplier
+            return Topk(10)
 
-        return req
+        try:
+            return Topk(body['size'])
+        except KeyError:
+            pass
+
+        try:
+            return Topk(body['collapse']['inner_hits']['size'])
+        except KeyError:
+            pass
+
+        # if size is not found
+        return Topk(10)
+
+    def magnify(self, req, topk):
+        mtopk = topk * self.multiplier
+        topk_is_set = False
+        body = req.body
+        req.headers.pop('Content-Length', None)
+
+        if body:
+            body = JSON.loads(req.body)
+
+            if 'size' in body:
+                body['size'] = mtopk
+                topk_is_set = True
+
+            try:
+                # if it's in inner hits set to topk
+                _ = body['collapse']['inner_hits']['size']
+                body['collapse']['inner_hits']['size'] = mtopk
+                topk_is_set = True
+            except KeyError:
+                pass
+
+            body = JSON.dumps(body).encode()
+
+        if not topk_is_set:
+            req.params['size'] = mtopk
+
+        return Request(req.method, req.path, req.headers, req.params, body)
 
     def parse(self, req, res):
 
@@ -62,11 +81,16 @@ class ESCodex(BaseCodex):
 
         if 'q' in req.params:
             query = req.params['q'].split(':')[-1]
-        else:
+        elif req.body:
             body = JSON.loads(req.body)
-            query = self.finditem(body['query'], 'query')
+            try:
+                query = body['query']['match'][self.field]
+                if isinstance(query, dict):
+                    query = query['query']
+            except KeyError:
+                raise ValueError('Missing query')
 
-        if not query:
+        else:
             raise ValueError('Missing query')
 
         hits = JSON.loads(res.body).get('hits', None)
