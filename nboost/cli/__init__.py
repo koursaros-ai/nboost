@@ -24,6 +24,7 @@ def create_proxy(argv: List[str] = sys.argv[1:]):
     parser.add_argument('--data_dir', type=str, default='/.cache', help='dir for model binary')
     parser.add_argument('--multiplier', type=int, default=10, help='factor to increase results by')
     parser.add_argument('--field', type=str, help='specified meta field to train on')
+    parser.add_argument('--laps', type=int, default=100, help='number of laps to perform for benchmarking')
     parser.add_argument('--server', type=lambda x: getattr(server, x), default='AioHttpServer', help='server class')
     parser.add_argument('--codex', type=lambda x: getattr(codex, x), default='ESCodex', help='codex class')
     parser.add_argument('--model', type=lambda x: getattr(model, x), default='TransformersModel', help='model class')
