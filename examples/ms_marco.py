@@ -31,7 +31,6 @@ def eval():
         data = csv.reader(fh, delimiter='\t')
         for qid, _, doc_id, _ in data:
             qrels.add((qid, doc_id))
-            qid_count[qid] += 1
 
     with open(os.path.join(DATA_PATH, 'queries.train.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
@@ -47,7 +46,6 @@ def eval():
                 }
             }, filter_path=['hits.hits._*'])
 
-            qid_count = dict()
             for rank, hit in enumerate(res['hits']['hits']):
                 if (qid, hit['_id']) in qrels:
                     print(qid, ' ', rank)
