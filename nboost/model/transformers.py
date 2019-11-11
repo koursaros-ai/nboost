@@ -1,7 +1,7 @@
 from ..base.types import Ranks
 from .base import BaseModel
 # import torch, torch.nn
-# import numpy as np
+import numpy as np
 import os
 import urllib.request
 
@@ -16,6 +16,7 @@ class TransformersModel(BaseModel):
                                   AutoTokenizer,
                                   AdamW,
                                   ConstantLRSchedule)
+        import torch, torch.nn
 
         super().__init__(*args, **kwargs)
         self.train_steps = 0
@@ -54,6 +55,7 @@ class TransformersModel(BaseModel):
         self.weight = 1.0
 
     async def train(self, query, choices, labels):
+        import torch, torch.nn
         input_ids, attention_mask, token_type_ids = await self.encode(query, choices)
 
         if self.model_config.num_labels == 1:
@@ -80,6 +82,7 @@ class TransformersModel(BaseModel):
             await self.save()
 
     async def rank(self, query, choices):
+        import torch, torch.nn
         input_ids, attention_mask, token_type_ids = await self.encode(query, choices)
 
         with torch.no_grad():
@@ -101,6 +104,7 @@ class TransformersModel(BaseModel):
             return Ranks(np.argsort(avg_rank))
 
     async def encode(self, query, choices):
+        import torch, torch.nn
         inputs = [self.tokenizer.encode_plus(
             query.decode(), choice.decode(), add_special_tokens=True
         ) for choice in choices]
