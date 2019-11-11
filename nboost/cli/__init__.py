@@ -23,7 +23,7 @@ def create_proxy(argv: List[str] = sys.argv[1:]):
     parser.add_argument('--model_ckpt', type=str, default='marco_bert/bert_model.ckpt', help='path to rerank model')
     parser.add_argument('--max_seq_len', type=int, default=128, help='max combined token length')
     parser.add_argument('--batch_size', type=int, default=4, help='batch size for running through rerank model')
-    parser.add_argument('--data_dir', type=str, default='/.cache', help='dir for model binary')
+    parser.add_argument('--data_dir', type=str, default='./.cache', help='dir for model binary')
     parser.add_argument('--multiplier', type=int, default=10, help='factor to increase results by')
     parser.add_argument('--field', type=str, help='specified meta field to train on')
     parser.add_argument('--laps', type=int, default=100, help='number of laps to perform for benchmarking')

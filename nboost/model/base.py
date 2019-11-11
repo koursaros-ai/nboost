@@ -8,7 +8,7 @@ class BaseModel(StatefulBase):
     def __init__(self,
                  lr: float = 10e-3,
                  model_ckpt: str ='./marco_bert',
-                 data_dir: str = '/.cache',
+                 data_dir: str = './.cache',
                  max_seq_len: int = 128,
                  batch_size: int = 4, **kwargs):
         super().__init__()
