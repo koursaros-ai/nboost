@@ -2,7 +2,7 @@ from ..base import StatefulBase
 from aiohttp import web
 from ..base.types import *
 from .helpers import download_model, extract
-from . import MODEL_PATHS
+from .helpers import MODEL_PATHS
 import os
 
 
