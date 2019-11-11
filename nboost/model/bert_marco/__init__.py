@@ -25,7 +25,7 @@ class BertMarcoModel(BaseModel):
         model_thread.start()
 
     @staticmethod
-    def create_model(self, bert_config, input_ids, input_mask, segment_ids,
+    def create_model(bert_config, input_ids, input_mask, segment_ids,
                      labels, num_labels):
         """Creates a classification model."""
         model = modeling.BertModel(
