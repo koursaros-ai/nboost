@@ -8,7 +8,6 @@ from transformers import (AutoConfig,
 import torch, torch.nn
 import numpy as np
 import os
-import urllib.request
 
 
 class TransformersModel(BaseModel):
