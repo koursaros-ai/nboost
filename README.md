@@ -7,6 +7,9 @@
     <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
 </a>
 <a href="https://pypi.org/project/nboost/">
+    <img src="https://img.shields.io/pypi/pyversions/nboost.svg" />
+</a>
+<a href="https://pypi.org/project/nboost/">
     <img alt="PyPI" src="https://img.shields.io/pypi/v/nboost.svg">
 </a>
 <a href='https://nboost.readthedocs.io/en/latest/'>
