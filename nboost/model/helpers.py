@@ -4,7 +4,7 @@ import os
 import tarfile
 
 MODEL_PATHS = {
-    "tf_bert_marco" : {
+    "bert_base_uncased_msmarco" : {
         "url" : "https://storage.googleapis.com/koursaros/bert_marco.tar.gz",
         "ckpt" : "bert_marco/bert_model.ckpt"
     }
