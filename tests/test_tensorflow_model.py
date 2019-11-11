@@ -21,8 +21,5 @@ class TestModel(unittest.TestCase):
                     self.choices.append(line.encode())
 
     def test_rank(self):
-        res = (
-            asyncio.get_event_loop()
-            .run_until_complete(self.model.rank(self.query, self.choices))
-        )
+        res = self.model.rank(self.query, self.choices)
         self.assertIsInstance(res, list)
