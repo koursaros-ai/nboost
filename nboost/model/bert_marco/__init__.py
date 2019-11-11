@@ -174,11 +174,19 @@ class BertMarcoModel(BaseModel):
                 }
                 yield features
 
+    def pad(self, candidates):
+        if len(candidates) % self.batch_size == 0:
+            return candidates
+        else:
+            candidates += ['PADDING DOC'] * (self.batch_size - (len(candidates) % self.batch_size))
+            return candidates
+
     def rank(self, query, choices):
         candidates = [c.decode() for c in choices]
+        candidates = self.pad(candidates)
         self.input_q.put((query.decode(), candidates))
 
-        results = [self.output_q.get() for _ in range(len(candidates))]
+        results = [self.output_q.get() for _ in range(len(candidates))][:len(choices)]
         log_probs, labels = zip(*results)
         log_probs = np.stack(log_probs).reshape(-1, 2)
         scores = log_probs[:, 1]
