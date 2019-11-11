@@ -17,6 +17,7 @@ class TestModel(unittest.TestCase):
                 if not line == '':
                     self.choices.append(line.encode())
 
+    @unittest.SkipTest
     def test_train(self):
         labels = Labels(float(i % 2) for i in range(len(self.choices)))
         res = (

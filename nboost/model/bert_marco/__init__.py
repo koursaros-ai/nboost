@@ -18,8 +18,8 @@ class BertMarcoModel(BaseModel):
         self.output_q = Queue()
         self.input_q = Queue()
 
-        self.vocab_file = os.path.join(os.path.dirname(self.model_ckpt), 'vocab.txt')
-        self.bert_config_file = os.path.join(os.path.dirname(self.model_ckpt), 'bert_config.json')
+        self.vocab_file = os.path.join(self.model_dir, 'vocab.txt')
+        self.bert_config_file = os.path.join(self.model_dir, 'bert_config.json')
 
         model_thread = Thread(target=self.run_model)
         model_thread.start()
