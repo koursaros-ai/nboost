@@ -1,5 +1,5 @@
 <p align="center">
-<img src=".github/banner.png?raw=true" alt="Nboost">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/banner.png?raw=true" alt="Nboost">
 </p>
 
 <p align="center">
@@ -75,7 +75,7 @@ pip install nboost[all]
 Either way, if you end up reading the following message after `$ nboost --help` or `$ docker run koursaros/nboost --help`, then you are ready to go!
 
 <p align="center">
-<img src=".github/cli-help.svg" alt="success installation of NBoost">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/cli-help.svg" alt="success installation of NBoost">
 </p>
 
 
