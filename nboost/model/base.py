@@ -24,13 +24,14 @@ class BaseModel(StatefulBase):
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
         if not os.path.exists(self.model_dir) and self.model_ckpt in MODEL_PATHS:
-            self.model_ckpt = os.path.join(self.data_dir, MODEL_PATHS[self.model_ckpt]['ckpt'])
-            self.model_dir = os.path.dirname(self.model_ckpt)
+            model_ckpt_path = os.path.join(self.data_dir, MODEL_PATHS[self.model_ckpt]['ckpt'])
+            self.model_dir = os.path.dirname(model_ckpt_path)
             if not os.path.exists(self.model_dir):
                 file = download_model(self.model_ckpt, self.data_dir)
                 extract(file, self.data_dir)
                 os.remove(file)
                 assert os.path.exists(self.model_dir)
+            self.model_ckpt = model_ckpt_path
         else:
             raise FileNotFoundError(self.model_ckpt)
 
