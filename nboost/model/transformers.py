@@ -1,26 +1,23 @@
 from ..base.types import Ranks
 from .base import BaseModel
-# import torch, torch.nn
-import numpy as np
-import os
-import urllib.request
-
-
-class TransformersModel(BaseModel):
-    max_grad_norm = 1.0
-    max_seq_len = 128
-
-    def __init__(self, *args, **kwargs):
-        from transformers import (AutoConfig,
+from transformers import (AutoConfig,
                                   AutoModelForSequenceClassification,
                                   AutoTokenizer,
                                   AdamW,
                                   ConstantLRSchedule)
-        import torch, torch.nn
+import torch, torch.nn
+import numpy as np
+import os
 
+
+class TransformersModel(BaseModel):
+    max_grad_norm = 1.0
+
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.train_steps = 0
         self.checkpoint_steps = 500
+        self.distilbert = 'distilbert' in self.model_ckpt
 
         if os.path.exists(os.path.join(self.model_ckpt, 'config.json')):
             self.logger.info('Loading from checkpoint %s' % self.model_ckpt)
@@ -55,7 +52,6 @@ class TransformersModel(BaseModel):
         self.weight = 1.0
 
     async def train(self, query, choices, labels):
-        import torch, torch.nn
         input_ids, attention_mask, token_type_ids = await self.encode(query, choices)
 
         if self.model_config.num_labels == 1:
@@ -63,7 +59,7 @@ class TransformersModel(BaseModel):
         else:
             labels = torch.tensor(labels, dtype=torch.long).to(self.device, non_blocking=True)
 
-        if self.model_ckpt.split('-')[0] == 'distilbert':
+        if self.distilbert:
             loss = self.rerank_model(input_ids,labels=labels,attention_mask=attention_mask)[0]
         else:
             loss = self.rerank_model(input_ids,
@@ -82,11 +78,10 @@ class TransformersModel(BaseModel):
             await self.save()
 
     async def rank(self, query, choices):
-        import torch, torch.nn
         input_ids, attention_mask, token_type_ids = await self.encode(query, choices)
 
         with torch.no_grad():
-            if self.model_ckpt.split('-')[0] == 'distilbert':
+            if self.distilbert:
                 logits = self.rerank_model(input_ids, attention_mask=attention_mask)[0]
             else:
                 logits = self.rerank_model(input_ids,
@@ -104,7 +99,6 @@ class TransformersModel(BaseModel):
             return Ranks(np.argsort(avg_rank))
 
     async def encode(self, query, choices):
-        import torch, torch.nn
         inputs = [self.tokenizer.encode_plus(
             query.decode(), choice.decode(), add_special_tokens=True
         ) for choice in choices]
