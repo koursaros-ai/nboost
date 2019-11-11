@@ -44,7 +44,7 @@ class Proxy(StatefulBase):
         :param codex: uninitialized codex class
         :param db: uninitialized db class
         """
-
+        self.kwargs = kwargs
         super().__init__(**kwargs)
 
         # pass command line arguments to instantiate each component
