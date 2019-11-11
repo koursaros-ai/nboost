@@ -3,8 +3,12 @@ import sys
 import os
 import tarfile
 
-from . import MODEL_PATHS
-
+MODEL_PATHS = {
+    "tf_bert_marco" : {
+        "url" : "https://storage.googleapis.com/koursaros/bert_marco.tar.gz",
+        "ckpt" : "bert_marco/bert_model.ckpt"
+    }
+}
 
 def download_model(model, data_dir):
     link = MODEL_PATHS[model]['url']
