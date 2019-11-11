@@ -21,6 +21,7 @@ def create_proxy(argv: List[str] = sys.argv[1:]):
     parser.add_argument('--ext_port', type=int, default=9200, help='port of the server')
     parser.add_argument('--lr', type=float, default=10e-3, help='learning rate of the model')
     parser.add_argument('--model_ckpt', type=str, default='marco_bert/bert_model.ckpt', help='path of transformers model or pretrained')
+    parser.add_argument('--model', type=str, default='BertMarcoModel', help='path of transformers model or pretrained')
     parser.add_argument('--max_seq_len', type=int, default=128, help='max combined token length')
     parser.add_argument('--batch_size', type=int, default=4, help='batch size for running through rerank model')
     parser.add_argument('--data_dir', type=str, default='/.cache', help='dir for model binary')
