@@ -10,7 +10,6 @@ from . import modeling, tokenization
 from ..base import BaseModel
 
 bert_config_file = 'bert_marco/bert_config.json'
-model_dir = 'bert_marco/'
 VOCAB_FILE = 'bert_marco/vocab.txt'
 
 batch_size = 4
@@ -164,8 +163,7 @@ class BertMarcoModel(BaseModel):
             bert_config = modeling.BertConfig.from_json_file(bert_config_file)
             assert MAX_SEQ_LENGTH <= bert_config.max_position_embeddings
 
-            run_config = tf.estimator.RunConfig(
-                model_dir=model_dir)
+            run_config = tf.estimator.RunConfig()
 
             model_fn = model_fn_builder(
                 bert_config=bert_config,
