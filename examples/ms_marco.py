@@ -10,7 +10,7 @@ INDEX = 'ms_marco'
 ES_HOST = 'localhost'
 ES_PORT = 53001
 DATA_PATH = '.'
-TOPK = 10
+TOPK = 1000
 REQUEST_TIMEOUT = 10000
 
 es = Elasticsearch(host=ES_HOST,port=ES_PORT,timeout=REQUEST_TIMEOUT)
