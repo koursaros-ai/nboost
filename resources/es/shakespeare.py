@@ -15,7 +15,7 @@ def ensure_shakespeare_elasticsearch():
 
     try:
         res = requests.get('http://localhost:9200/shakespeare/_count')
-        if res.json()['count'] < 10 ** 5:
+        if res.json().get('count', 0) < 10 ** 5:
             raise RuntimeError
     except ConnectionError:
         subprocess.call(BUILD, shell=True)
