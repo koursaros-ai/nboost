@@ -15,8 +15,7 @@ MAPPINGS = {
     "mappings": {
         "properties": {
             "passage": {
-                "type": "text",
-                "analyzer": "english"
+                "type": "text"
             }
         }
     },
