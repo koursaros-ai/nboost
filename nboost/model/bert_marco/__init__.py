@@ -10,7 +10,6 @@ from . import modeling, tokenization
 from ..base import BaseModel
 
 bert_config_file = 'bert_marco/bert_config.json'
-init_ckpt = 'bert_marco/bert_model.ckpt'
 model_dir = 'bert_marco/'
 VOCAB_FILE = 'bert_marco/vocab.txt'
 

@@ -1,4 +1,4 @@
-from nboost.model import TransformersModel
+from nboost.model import BertMarcoModel
 from nboost.base.types import *
 from paths import RESOURCES
 import unittest
@@ -8,7 +8,7 @@ import asyncio
 class TestModel(unittest.TestCase):
 
     def setUp(self):
-        self.model = TransformersModel(model_ckpt='distilbert-base-uncased')
+        self.model = BertMarcoModel(model_ckpt='bert_marco/bert_model.ckpt')
         self.query = Query('O wherefore art thou'.encode())
         self.choices = Choices()
 
@@ -16,13 +16,6 @@ class TestModel(unittest.TestCase):
             for i, line in enumerate(fh):
                 if not line == '':
                     self.choices.append(line.encode())
-
-    def test_train(self):
-        labels = Labels(float(i % 2) for i in range(len(self.choices)))
-        res = (
-            asyncio.get_event_loop()
-            .run_until_complete(self.model.train(self.query,self.choices, labels=labels))
-        )
 
     def test_rank(self):
         res = (
