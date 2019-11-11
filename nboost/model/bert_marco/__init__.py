@@ -155,7 +155,7 @@ def input_fn(params):
     return dataset
 
 
-def run_model():
+def run_model(model: BaseModel):
     bert_config = modeling.BertConfig.from_json_file(bert_config_file)
     assert MAX_SEQ_LENGTH <= bert_config.max_position_embeddings
 
@@ -165,7 +165,7 @@ def run_model():
     model_fn = model_fn_builder(
         bert_config=bert_config,
         num_labels=2,
-        init_checkpoint=init_ckpt)
+        init_checkpoint=model.model_ckpt)
 
     estimator = tf.estimator.Estimator(
         model_fn=model_fn,
@@ -203,7 +203,7 @@ class BertMarcoModel(BaseModel):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        model_thread = Thread(target=run_model)
+        model_thread = Thread(target=run_model, args=(self,))
         model_thread.start()
 
     def rank(self, query, choices):
