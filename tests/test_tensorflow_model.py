@@ -9,8 +9,8 @@ import os
 class TestModel(unittest.TestCase):
 
     def setUp(self):
-        if not os.path.exists('bert_marco/bert_model.ckpt'):
-            raise unittest.SkipTest('Skipping BERT marco test, model binary not found')
+        if not os.path.exists('bert_marco/bert_config.ckpt'):
+            raise unittest.SkipTest("Skipping BERT marco test, model binary not found")
         self.model = BertMarcoModel(model_ckpt='bert_marco/bert_model.ckpt')
         self.query = Query('O wherefore art thou'.encode())
         self.choices = Choices()
