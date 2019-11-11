@@ -27,12 +27,12 @@ def eval():
     qrels = set()
     qid_count = defaultdict(int)
 
-    with open(os.path.join(DATA_PATH, 'qrels.train.tsv')) as fh:
+    with open(os.path.join(DATA_PATH, 'qrels.dev.small.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
         for qid, _, doc_id, _ in data:
             qrels.add((qid, doc_id))
 
-    with open(os.path.join(DATA_PATH, 'queries.train.tsv')) as fh:
+    with open(os.path.join(DATA_PATH, 'queries.dev.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
         total = 0
         for qid, query in data:
