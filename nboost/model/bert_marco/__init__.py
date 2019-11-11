@@ -163,7 +163,7 @@ class BertMarcoModel(BaseModel):
             bert_config = modeling.BertConfig.from_json_file(bert_config_file)
             assert MAX_SEQ_LENGTH <= bert_config.max_position_embeddings
 
-            run_config = tf.estimator.RunConfig()
+            run_config = tf.estimator.RunConfig(model_dir=self.data_dir)
 
             model_fn = model_fn_builder(
                 bert_config=bert_config,
