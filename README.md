@@ -40,44 +40,30 @@
 
 <h2 align="center">What is it</h2>
 
-⚡**NBoost** is a scalable, search-api-boosting platform for developing and deploying SOTA models to improve the relevance of search results.
+⚡**NBoost** is a scalable, search-api-boosting proxy for developing and deploying SOTA models to improve the relevance of search results.
  
- **NBoost** can also be used as the backbone for question answering or other downstream tasks that require ranked inputs.
+Nboost leverages finetuned models to produce domain-specific neural search engines. The platform can also improve other downstream tasks requiring ranked input, such as question answering.
 
 <h2 align="center">Overview</h2>
-**This project is still under development and the core package is not ready for distribution**
+**This project is currently undergoing rapid release cycles and the core package is not ready for distribution**
 
 
 <h2 align="center">Install NBoost</h2>
 
 There are two ways to get NBoost, either as a Docker image or as a PyPi package. **For cloud users, we highly recommend using NBoost via Docker**. 
+> 🚸 Tensorflow, and Pytorch are not part of the "barebone" NBoost installation. Depending on your model, you may have to install them in advance.
 
-### Run NBoost as a Docker Container
+For installing NBoost, follow the table below.
 
-```bash
-docker run koursaros/nboost:latest-alpine
-```
+Dependency      | 🐳 Docker                             | 📦 pypi
+--------------- | ------------------------------------- | --------------------------
+**None**        | `koursaros/nboost:latest-alpine`      | `pip install nboost`
+**Pytorch**     | `koursaros/nboost:latest-torch`       | `pip install nboost[torch]`      
+**Tensorflow**  | `koursaros/nboost:latest-tf`          | `pip install nboost[tf]`
+**All**         | `koursaros/nboost:latest-all`         | `pip install nboost[all]` 
 
-This command downloads the latest NBoost image (based on [Alpine Linux](https://alpinelinux.org/)) and runs it in a container. When the container runs, it prints an informational message and exits.
 
-
-### 📦 Install NBoost via `pip`
-
-You can also install NBoost as a *Python3* package via:
-```bash
-pip install nboost
-```
-
-Note that this will only install a "barebone" version of NBoost, consists of **the minimal dependencies** for running Nboost. 
-
-> 🚸 Tensorflow, Pytorch and torchvision are not part of NBoost installation. Depending on your model, you may have to install them in advance.
-
-Though not recommended, you can install NBoost with full dependencies via:
-```bash
-pip install nboost[all]
-```
-
-Either way, if you end up reading the following message after `$ nboost --help` or `$ docker run koursaros/nboost --help`, then you are ready to go!
+Any way you install it, if you end up reading the following message after `$ nboost --help` or `$ docker run koursaros/nboost --help`, then you are ready to go!
 
 <p align="center">
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/cli-help.svg?sanitize=true" alt="success installation of NBoost">
@@ -108,20 +94,53 @@ The proxy object is the core of NBoost. It has four components: the **model**, *
 - [**Codex**](http://nboost.readthedocs.io/en/latest/chapter/component.html#codex): translating incoming messages from specific search apis (i.e. Elasticsearch);
 
 
-### Setting up a Neural Proxy for Elasticsearch in 1 minute
+### Setting up a Neural Proxy for Elasticsearch in 3 minutes
 
 In this example we will set up a proxy to sit in between the client and Elasticsearch and boost the results!
-#### Command line
-> 🚧 Under construction.
+
+#### Setting up an Elasticsearch Server
+> 🔔 If you already have an Elasticsearch server, you can move on to the next step!
+
+If you don't have Elasticsearch, not to worry! You can set up a local Elasticsearch cluster by using docker. First, get the ES image by running:
+```bash
+docker pull elasticsearch:7.4.2
+```
+Once you have the image, you can run an Elasticsearch server via:
+```bash
+docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearch:7.4.2
+```
+
+#### Indexing some data
+For demonstration purposes, we will be indexing the [complete works of William Shakespeare on Elasticsearch](https://www.elastic.co/guide/en/kibana/7.1/tutorial-load-dataset.html). You can add the index to your Elasticsearch server by running:
+```bash
+nboost index --type shakespeare --host localhost --port 9200
+```` 
+> 📢 If your server is not on your local machine, change the `--host` and `--port` switches accordingly.
+
+#### Deploying the proxy
+Now we're ready to deploy our Neural Proxy! It is very simple to do this, simply run:
+```bash
+nboost proxy --ext_host localhost --ext_port 9200
+```
+> The `--ext_host` and `--ext_port` should be the same as the Elasticsearch server above!
+
+If you get this message: `LISTENING: <host>:<port>`, then we're good to go.
+
+Now let's test it out! Hit the proxy with:
+```bash
+curl "http://localhost:9200/shakespeare/_search?q=text_entry:search%20profitable&pretty&size=2"
+```
+
+If the Elasticsearch result has the `_nboost` tag in it, congratulations it's working!
+<p align="center">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/cli-help.svg?sanitize=true" alt="success installation of NBoost">
+</p>
 
 ### Elastic made easy
-
 To increase the number of parallel proxies, simply increase `--workers`:
-
 > 🚧 Under construction.
 
 ### Deploying a proxy via Docker Swarm/Kubernetes
-
 > 🚧 Under construction.
 
 
