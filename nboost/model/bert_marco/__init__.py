@@ -13,7 +13,6 @@ bert_config_file = 'bert_marco/bert_config.json'
 VOCAB_FILE = 'bert_marco/vocab.txt'
 
 batch_size = 4
-num_eval_docs = 100
 MAX_SEQ_LENGTH = 128
 
 output_q = Queue()
