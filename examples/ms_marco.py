@@ -26,16 +26,20 @@ def timeit(fn, *args, **kwargs):
 def eval():
     qrels = set()
     qid_count = defaultdict(int)
+    qids = set()
 
-    with open(os.path.join(DATA_PATH, 'qrels.train.tsv')) as fh:
+    with open(os.path.join(DATA_PATH, 'qrels.dev.small.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
         for qid, _, doc_id, _ in data:
             qrels.add((qid, doc_id))
+            qids.add(qid)
 
-    with open(os.path.join(DATA_PATH, 'queries.train.tsv')) as fh:
+    with open(os.path.join(DATA_PATH, 'queries.dev.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
         total = 0
         for qid, query in data:
+            if not qid in qids:
+                continue
             total += 1
             res = timeit(es.search, index=INDEX, body={
                 "size": TOPK,
