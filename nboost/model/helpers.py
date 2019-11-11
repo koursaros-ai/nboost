@@ -14,7 +14,7 @@ def download_model(model, data_dir):
     link = MODEL_PATHS[model]['url']
     file_name = os.path.join(data_dir, MODEL_PATHS[model]['url'].split('/')[-1])
     with open(file_name, "wb") as f:
-        print("Downloading %s" % file_name)
+        print("Downloading %s" % link)
         response = requests.get(link, stream=True)
         total_length = response.headers.get('content-length')
 

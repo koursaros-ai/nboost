@@ -9,7 +9,7 @@ import os
 class BaseModel(StatefulBase):
     def __init__(self,
                  lr: float = 10e-3,
-                 model_ckpt: str ='./marco_bert',
+                 model_ckpt: str ='bert_base_msmarco',
                  data_dir: str = './.cache',
                  max_seq_len: int = 128,
                  batch_size: int = 4, **kwargs):
