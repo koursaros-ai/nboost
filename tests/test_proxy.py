@@ -57,8 +57,9 @@ class TestProxy(unittest.TestCase):
         self.assertTrue(train_res.ok)
 
         # test fallback
-        fallback_res = requests.post('http://localhost:53001/only_on_server')
-        print(fallback_res.content)
+        fallback_res = requests.post('http://localhost:53001/only_on_server',
+                                     data=b'hello there my friend')
+        print('fallback:', fallback_res.content)
         self.assertTrue(fallback_res.ok)
 
         # test status
