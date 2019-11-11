@@ -1,7 +1,7 @@
 from ..base.types import Ranks
 from .base import BaseModel
-import torch, torch.nn
-import numpy as np
+# import torch, torch.nn
+# import numpy as np
 import os
 import urllib.request
 
