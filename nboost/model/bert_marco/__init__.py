@@ -24,6 +24,40 @@ class BertMarcoModel(BaseModel):
         model_thread = Thread(target=self.run_model)
         model_thread.start()
 
+    @staticmethod
+    def create_model(self, bert_config, input_ids, input_mask, segment_ids,
+                     labels, num_labels):
+        """Creates a classification model."""
+        model = modeling.BertModel(
+            config=bert_config,
+            is_training=False,
+            input_ids=input_ids,
+            input_mask=input_mask,
+            token_type_ids=segment_ids,
+            use_one_hot_embeddings=False)
+
+        output_layer = model.get_pooled_output()
+        hidden_size = output_layer.shape[-1].value
+
+        output_weights = tf.get_variable(
+            "output_weights", [num_labels, hidden_size],
+            initializer=tf.truncated_normal_initializer(stddev=0.02))
+
+        output_bias = tf.get_variable(
+            "output_bias", [num_labels], initializer=tf.zeros_initializer())
+
+        with tf.variable_scope("loss"):
+            logits = tf.matmul(output_layer, output_weights, transpose_b=True)
+            logits = tf.nn.bias_add(logits, output_bias)
+            log_probs = tf.nn.log_softmax(logits, axis=-1)
+
+            one_hot_labels = tf.one_hot(labels, depth=num_labels, dtype=tf.float32)
+
+            per_example_loss = -tf.reduce_sum(one_hot_labels * log_probs, axis=-1)
+            loss = tf.reduce_mean(per_example_loss)
+
+            return (loss, per_example_loss, log_probs)
+
     def model_fn_builder(self, bert_config, num_labels, init_checkpoint):
         """Returns `model_fn` closure for TPUEstimator."""
 
@@ -105,39 +139,6 @@ class BertMarcoModel(BaseModel):
 
         for item in result:
             self.output_q.put((item["log_probs"], item["label_ids"]))
-
-    def create_model(self, bert_config, input_ids, input_mask, segment_ids,
-                     labels, num_labels):
-        """Creates a classification model."""
-        model = modeling.BertModel(
-            config=bert_config,
-            is_training=False,
-            input_ids=input_ids,
-            input_mask=input_mask,
-            token_type_ids=segment_ids,
-            use_one_hot_embeddings=False)
-
-        output_layer = model.get_pooled_output()
-        hidden_size = output_layer.shape[-1].value
-
-        output_weights = tf.get_variable(
-            "output_weights", [num_labels, hidden_size],
-            initializer=tf.truncated_normal_initializer(stddev=0.02))
-
-        output_bias = tf.get_variable(
-            "output_bias", [num_labels], initializer=tf.zeros_initializer())
-
-        with tf.variable_scope("loss"):
-            logits = tf.matmul(output_layer, output_weights, transpose_b=True)
-            logits = tf.nn.bias_add(logits, output_bias)
-            log_probs = tf.nn.log_softmax(logits, axis=-1)
-
-            one_hot_labels = tf.one_hot(labels, depth=num_labels, dtype=tf.float32)
-
-            per_example_loss = -tf.reduce_sum(one_hot_labels * log_probs, axis=-1)
-            loss = tf.reduce_mean(per_example_loss)
-
-            return (loss, per_example_loss, log_probs)
 
     def feature_generator(self):
         tokenizer = tokenization.FullTokenizer(vocab_file=self.vocab_file, do_lower_case=True)
