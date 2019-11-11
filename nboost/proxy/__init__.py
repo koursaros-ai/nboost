@@ -32,6 +32,8 @@ class Proxy(StatefulBase):
         :param ext_port: search api port.
         :param lr: learning rate of the model.
         :param model_ckpt: checkpoint for loading initial model
+        :param max_seq_len: max combined token length
+        :param batch_size: batch size for running through rerank model
         :param data_dir: data directory to cache the model.
         :param multiplier: the factor to multiply the search request by. For
             example, in the case of Elasticsearch if the client requests 10

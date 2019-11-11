@@ -1,14 +1,17 @@
-from nboost.model import TransformersModel
+from nboost.model import BertMarcoModel
 from nboost.base.types import *
 from paths import RESOURCES
 import unittest
 import asyncio
+import os
 
 
 class TestModel(unittest.TestCase):
 
     def setUp(self):
-        self.model = TransformersModel(model_ckpt='distilbert-base-uncased')
+        if not os.path.exists('bert_marco/bert_config.json'):
+            raise unittest.SkipTest("Skipping BERT marco test, model binary not found")
+        self.model = BertMarcoModel(model_ckpt='bert_marco/bert_model.ckpt')
         self.query = Query('O wherefore art thou'.encode())
         self.choices = Choices()
 
@@ -17,16 +20,6 @@ class TestModel(unittest.TestCase):
                 if not line == '':
                     self.choices.append(line.encode())
 
-    def test_train(self):
-        labels = Labels(float(i % 2) for i in range(len(self.choices)))
-        res = (
-            asyncio.get_event_loop()
-            .run_until_complete(self.model.train(self.query,self.choices, labels=labels))
-        )
-
     def test_rank(self):
-        res = (
-            asyncio.get_event_loop()
-            .run_until_complete(self.model.rank(self.query, self.choices))
-        )
+        res = self.model.rank(self.query, self.choices)
         self.assertIsInstance(res, list)
