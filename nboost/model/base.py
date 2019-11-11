@@ -32,9 +32,6 @@ class BaseModel(StatefulBase):
                 os.remove(file)
                 assert os.path.exists(self.model_dir)
             self.model_ckpt = model_ckpt_path
-        else:
-            raise FileNotFoundError(self.model_ckpt)
-
 
     def post_start(self):
         """ Executes after the process forks """
