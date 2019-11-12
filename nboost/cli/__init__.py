@@ -28,7 +28,7 @@ def get_args(argv: List[str] = None):
     parser.add_argument('--ext_host', type=str, default='127.0.0.1', help='host of the server')
     parser.add_argument('--ext_port', type=int, default=9200, help='port of the server')
     parser.add_argument('--lr', type=float, default=10e-3, help='learning rate of the model')
-    parser.add_argument('--model_dir', type=str, default='bert_marco', help='name or directory of the finetuned model')
+    parser.add_argument('--model_dir', type=str, default='bert-base-uncased-msmarco', help='name or directory of the finetuned model')
     parser.add_argument('--is_custom', type=bool, default=False, help='whether or not you are using a local custom model')
     parser.add_argument('--data_dir', type=Path, default=PKG_PATH.joinpath('.cache'), help='dir for model binary')
     parser.add_argument('--max_seq_len', type=int, default=64, help='max combined token length')

@@ -48,6 +48,16 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 **This project is currently undergoing rapid release cycles and the core package is not ready for distribution**
 
 
+Fine-tuned Models                       | Domain              | MRR @10 vs BM25(ES default)| Reranking Top 50
+--------------------------------------- | ------------------- | -------------------------- | -----
+`bert-base-uncased-msmarco`(**default**)| passage relevance   | **0.301** vs 0.173 (1.8x)  | ~250 ms/query [^footnote]
+`bert-base-cased-finetuned-mrpc`        | question relevance  | - | -
+`albert-tiny-msmarco`                   | passage relevance   | - | -
+
+<a href = '#contact'>Contact us to request domain-specific models or leave feedback</a>
+
+[^footnote] On nvidia T4 GPU
+
 <h2 align="center">Install NBoost</h2>
 
 There are two ways to get NBoost, either as a Docker image or as a PyPi package. **For cloud users, we highly recommend using NBoost via Docker**. 

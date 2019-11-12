@@ -25,5 +25,5 @@ CLASS_MAP = {
 
 # model_dir => url
 MODEL_MAP = {
-    "bert_marco": "https://storage.googleapis.com/koursaros/bert_marco.tar.gz"
+    "bert-base-uncased-msmarco'": "https://storage.googleapis.com/koursaros/bert_marco.tar.gz"
 }
