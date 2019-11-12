@@ -1,11 +1,10 @@
 from elasticsearch import Elasticsearch
 import elasticsearch.helpers
 import os, csv, sys
+import argparse
 
 ## MS MARCO DUMP
 
-ES_HOST = '35.238.60.182'
-ES_PORT = 9200
 READ_CHUNKSIZE = 10 * 6
 REQUEST_TIMEOUT = 10000
 MAX_CHUNK_BYTES = 10 ** 9
@@ -57,16 +56,21 @@ def stream_subset():
 
 
 if __name__ == "__main__":
-    if sys.argv[1] == 'ms_marco':
+    parser = argparse.ArgumentParser(description='Dump to elasticsearch')
+    parser.add_argument('--task', required=True)
+    parser.add_argument('--es_host', default='localhost')
+    parser.add_argument('--es_port', default=9200)
+    args = parser.parse_args()
+    if args.task == 'ms_marco':
         action = stream_msmarco_full
         index = 'ms_marco'
-    elif sys.argv[1] == 'demo':
+    elif args.task == 'demo':
         action = stream_subset
         index = 'demo'
     else:
-        raise NotImplementedError
+        raise NotImplementedError('Available tasks are ms_marco and demo')
 
-    es = Elasticsearch(host=ES_HOST, port=ES_PORT, timeout=REQUEST_TIMEOUT)
+    es = Elasticsearch(host=args.es_host, port=args.es_port, timeout=REQUEST_TIMEOUT)
 
     if es.indices.exists(index):
         res = es.indices.delete(index=index)
