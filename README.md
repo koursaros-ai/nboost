@@ -74,7 +74,7 @@ Any way you install it, if you end up reading the following message after `$ nbo
 
 - [Preliminaries](#-preliminaries)
   * [📡The Proxy](#microservice)
-- [Setting up a Neural Proxy for Elasticsearch in 1 minute](#Setting-up-a-Neural-Proxy-for-Elasticsearch-in-1-minute)
+- [Setting up a Neural Proxy for Elasticsearch in 3 minutes](#Setting-up-a-Neural-Proxy-for-Elasticsearch-in-1-minute)
 - [Elastic made easy](#elastic-made-easy)
 - [Deploying a distributed proxy via Docker Swarm/Kubernetes](#deploying-a-flow-via-docker-swarmkubernetes)
 - [‍Take-home messages](#-take-home-messages)
