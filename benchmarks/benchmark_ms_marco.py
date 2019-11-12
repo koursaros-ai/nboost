@@ -10,7 +10,7 @@ DATA_PATH = '.'
 TOPK = 10
 REQUEST_TIMEOUT = 10000
 
-es = Elasticsearch(host=ES_HOST,port=ES_PORT,timeout=REQUEST_TIMEOUT)
+es = Elasticsearch(host=ES_HOST, port=ES_PORT, timeout=REQUEST_TIMEOUT)
 
 
 def timeit(fn, *args, **kwargs):
@@ -51,7 +51,6 @@ def benchmark_ms_marco():
 
             for rank, hit in enumerate(res['hits']['hits']):
                 if (qid, hit['_id']) in qrels:
-                    print(qid, ' ', rank)
                     qid_count[qid] = max(qid_count[qid], (1.0 / (float(rank + 1))))
                     mrr = sum(qid_count.values()) / total
                     print("MRR: %s " % mrr)
