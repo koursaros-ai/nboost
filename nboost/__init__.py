@@ -19,6 +19,7 @@ class_map = {
     },
     'model': {
         'TestModel': 'test',
-        'TransformersModel': 'transformers'
+        'TransformersModel': 'transformers',
+        'MarcoBertModel': 'bert_marco'
     }
 }

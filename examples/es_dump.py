@@ -5,9 +5,10 @@ import os, csv
 ## MS MARCO DUMP
 INDEX = 'ms_marco'
 
-# ES_HOST = '35.238.60.182'
-ES_HOST = 'localhost'
-ES_PORT = 8000
+ES_HOST = '35.238.60.182'
+ES_PORT = 9200
+# ES_HOST = 'localhost'
+# ES_PORT = 8000
 READ_CHUNKSIZE = 10 * 6
 REQUEST_TIMEOUT = 10000
 MAX_CHUNK_BYTES = 10 ** 9
