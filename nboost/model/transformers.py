@@ -18,6 +18,7 @@ class TransformersModel(BaseModel):
         super().__init__(*args, **kwargs)
         self.train_steps = 0
         self.checkpoint_steps = 500
+        self.model_ckpt = self.model_dir
         self.distilbert = 'distilbert' in self.model_ckpt
 
         if os.path.exists(os.path.join(self.model_ckpt, 'config.json')):
