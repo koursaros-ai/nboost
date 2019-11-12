@@ -14,6 +14,8 @@ class BertModel(BaseModel):
         self.output_q = Queue()
         self.input_q = Queue()
 
+        ckpts = self.model_dir.joinpath('./*.ckpt.*').glob()
+        self.checkpoint = ckpts[0].split('.ckpt')[0] + '.ckpt'
         self.vocab_file = self.model_dir.joinpath('vocab.txt')
         self.bert_config_file = self.model_dir.joinpath('bert_config.json')
 

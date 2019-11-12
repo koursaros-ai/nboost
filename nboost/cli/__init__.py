@@ -48,5 +48,3 @@ def get_args(argv: List[str] = None):
 def create_proxy(argv: List[str] = None):
     args = get_args(argv)
     return Proxy(**vars(args))
-
-
