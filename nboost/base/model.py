@@ -9,7 +9,6 @@ class BaseModel(StatefulBase):
     def __init__(self,
                  lr: float = 10e-3,
                  model_dir: str = 'bert_marco',
-                 is_custom: bool = False,
                  data_dir: Path = PKG_PATH.joinpath('.cache'),
                  max_seq_len: int = 128,
                  batch_size: int = 4, **kwargs):
@@ -18,7 +17,6 @@ class BaseModel(StatefulBase):
         self.max_seq_len = max_seq_len
         self.batch_size = batch_size
         self.model_dir = model_dir
-        self.is_custom = is_custom
         self.data_dir = data_dir
         self.model_dir = data_dir.joinpath(model_dir).absolute()
 

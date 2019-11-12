@@ -28,3 +28,6 @@ def main(argv: List[str] = None):
     args = parser.parse_args(argv)
 
 
+if __name__ == "__main__":
+    main()
+
