@@ -1,16 +1,17 @@
 from nboost.cli import create_proxy
 from nboost.server import AioHttpServer
 from nboost.base.types import *
-from paths import RESOURCES
 import unittest
 import requests
 import json as JSON
+from . import RESOURCES
 
 
 class TestProxy(unittest.TestCase):
     def test_default_proxy(self):
-        query_json = RESOURCES.joinpath('es/es_query.json').read_bytes()
-        result_json = RESOURCES.joinpath('es/es_result.json').read_bytes()
+
+        query_json = RESOURCES.joinpath('es_query.json').read_bytes()
+        result_json = RESOURCES.joinpath('es_result.json').read_bytes()
         server = AioHttpServer(port=9500, verbose=True)
 
         async def search(req):
@@ -26,6 +27,7 @@ class TestProxy(unittest.TestCase):
         ], not_found_handler)
 
         proxy = create_proxy([
+            '--port', '8000',
             '--model', 'TestModel',
             '--field', 'message',
             '--ext_port', '9500',
@@ -38,7 +40,7 @@ class TestProxy(unittest.TestCase):
         # search
         params = dict(size=5, q='test query')
 
-        proxy_res = requests.get('http://localhost:53001/mock_index/_search', params=params)
+        proxy_res = requests.get('http://localhost:8000/mock_index/_search', params=params)
         print(proxy_res.content)
         self.assertTrue(proxy_res.ok)
 
@@ -53,17 +55,17 @@ class TestProxy(unittest.TestCase):
                  qid=proxy_json['qid'])
         )
 
-        train_res = requests.post('http://localhost:53001/train', data=json)
+        train_res = requests.post('http://localhost:8000/train', data=json)
         self.assertTrue(train_res.ok)
 
         # test fallback
-        fallback_res = requests.post('http://localhost:53001/only_on_server',
+        fallback_res = requests.post('http://localhost:8000/only_on_server',
                                      data=b'hello there my friend')
         print('fallback:', fallback_res.content)
         self.assertTrue(fallback_res.ok)
 
         # test status
-        status_res = requests.get('http://localhost:53001/status')
+        status_res = requests.get('http://localhost:8000/status')
         self.assertTrue(status_res.ok)
         print(status_res.content.decode())
         # time.sleep(30)

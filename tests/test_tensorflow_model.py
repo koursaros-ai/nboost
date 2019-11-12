@@ -1,8 +1,7 @@
 from nboost.model import BertMarcoModel
 from nboost.base.types import *
-from paths import RESOURCES
+from . import RESOURCES
 import unittest
-import asyncio
 import os
 
 
@@ -15,7 +14,7 @@ class TestModel(unittest.TestCase):
         self.query = Query('O wherefore art thou'.encode())
         self.choices = Choices()
 
-        with RESOURCES.joinpath('sonnets_small.txt').open() as fh:
+        with RESOURCES.joinpath('sonnets.txt').open() as fh:
             for i, line in enumerate(fh):
                 if not line == '':
                     self.choices.append(line.encode())
