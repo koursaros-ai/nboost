@@ -50,9 +50,10 @@ def stream_bodies():
 if __name__ == "__main__":
     es = Elasticsearch(host=ES_HOST,port=ES_PORT,timeout=REQUEST_TIMEOUT)
 
-    # if es.indices.exists(INDEX):
-    #     res = es.indices.delete(index=INDEX)
-    # res = es.indices.create(index=INDEX, body=MAPPINGS)
+    if es.indices.exists(INDEX):
+        res = es.indices.delete(index=INDEX)
+        print(res)
+    res = es.indices.create(index=INDEX, body=MAPPINGS)
 
     print('Sending articles.')
     for ok, response in elasticsearch.helpers.streaming_bulk(es, actions=stream_bodies()):
