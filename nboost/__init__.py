@@ -19,7 +19,7 @@ CLASS_MAP = {
     'model': {
         'TestModel': 'test',
         'TransformersModel': 'transformers',
-        'MarcoBertModel': 'bert_marco'
+        'BertModel': 'bert_model'
     }
 }
 
