@@ -84,3 +84,32 @@ class AioHttpServer(BaseServer):
                 return web.Response(
                     status=resp.status,
                     body=await resp.content.read())
+
+        # async def pipe(self, reader, writer, http):
+        #     try:
+        #         while not reader.at_eof():
+        #             writer.write(await reader.read(self.read_bytes))
+        #     finally:
+        #         if http:
+        #             await writer.write_eof()
+        #         else:
+        #             await writer.close()
+        #
+        # async def handle_not_found(self, request):
+        #     # self.handler.redirect(self.client.ext_url(request))
+        #     local_writer = aiohttp.web.StreamResponse()
+        #     await local_writer.prepare(request)
+        #     remote_reader, remote_writer = await asyncio.open_connection(
+        #         self.host, self.port)
+        #     local_reader = request.content
+        #     # version = b' HTTP/' + str(request.version[0]).encode() + b'.' + str(request.version[1]).encode()
+        #     start_line = request.method.encode() + \
+        #                  b' ' + request.raw_path.encode() + b'\n'
+        #     remote_writer.write(start_line)
+        #     remote_writer.write(b''.join([header[0] + b':' + header[1] + b'\n'
+        #                                   for header in request.raw_headers]))
+        #     remote_writer.write(b'\n')
+        #     pipe1 = self.pipe(local_reader, remote_writer, False)
+        #     pipe2 = self.pipe(remote_reader, local_writer, True)
+        #     await asyncio.gather(pipe1, pipe2)
+        #     return local_writer
