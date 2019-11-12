@@ -1,8 +1,8 @@
-from nboost.codex import ESCodex
+from nboost.codex.es import ESCodex
 from nboost.base.types import *
 import json as JSON
 import unittest
-from . import RESOURCES
+from tests import RESOURCES
 
 
 class TestESCodex(unittest.TestCase):

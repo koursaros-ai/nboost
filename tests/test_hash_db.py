@@ -1,5 +1,5 @@
 from nboost.base.types import *
-from nboost.db import HashDb
+from nboost.db.hash import HashDb
 import unittest
 
 

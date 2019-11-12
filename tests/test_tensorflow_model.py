@@ -1,4 +1,4 @@
-from nboost.model import BertMarcoModel
+from nboost.model.bert_marco import BertMarcoModel
 from nboost.base.types import *
 from . import RESOURCES
 import unittest

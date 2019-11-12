@@ -1,10 +1,10 @@
 from nboost.cli import create_proxy
-from nboost.server import AioHttpServer
+from nboost.server.aio import AioHttpServer
 from nboost.base.types import *
 import unittest
 import requests
 import json as JSON
-from . import RESOURCES
+from tests import RESOURCES
 
 
 class TestProxy(unittest.TestCase):

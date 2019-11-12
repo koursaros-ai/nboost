@@ -1,4 +1,4 @@
-from nboost.model import TransformersModel
+from nboost.model.transformers import TransformersModel
 from nboost.base.types import *
 from . import RESOURCES
 import unittest

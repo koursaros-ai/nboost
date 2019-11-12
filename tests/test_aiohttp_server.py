@@ -1,4 +1,4 @@
-from nboost.server import AioHttpServer
+from nboost.server.aio import AioHttpServer
 from nboost.base.types import *
 import json as JSON
 import requests
