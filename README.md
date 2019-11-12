@@ -54,6 +54,8 @@ Fine-tuned Models                       | Domain              | MRR @10 vs BM25 
 `bert-base-cased-finetuned-mrpc`<a href='#footnotes'><sup>[2]</sup></a>      | question relevance  | - | -
 `albert-tiny-msmarco`                   | passage relevance   | - | -
 
+To download and run nboost with one of these fine-tuned models run `nboost --model_dir=<model> --ext_host=<es_host>`
+
 <a href = '#contact'>Contact us to request domain-specific models or leave feedback</a>
 
 <h2 align="center">Install NBoost</h2>
