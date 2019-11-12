@@ -4,10 +4,10 @@ import os
 
 try:
     from transformers import (AutoConfig,
-                                      AutoModelForSequenceClassification,
-                                      AutoTokenizer,
-                                      AdamW,
-                                      ConstantLRSchedule)
+                              AutoModelForSequenceClassification,
+                              AutoTokenizer,
+                              AdamW,
+                              ConstantLRSchedule)
     import torch, torch.nn
     import numpy as np
 except:
