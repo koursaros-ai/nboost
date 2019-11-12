@@ -16,8 +16,8 @@ class BertModel(BaseModel):
 
         ckpts = self.model_dir.glob('*.ckpt.*')
         self.checkpoint = str(list(ckpts)[0]).split('.ckpt')[0] + '.ckpt'
-        self.vocab_file = self.model_dir.joinpath('vocab.txt')
-        self.bert_config_file = self.model_dir.joinpath('bert_config.json')
+        self.vocab_file = str(self.model_dir.joinpath('vocab.txt'))
+        self.bert_config_file = str(self.model_dir.joinpath('bert_config.json'))
 
         model_thread = Thread(target=self.run_model)
         model_thread.start()
