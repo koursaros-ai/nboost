@@ -28,30 +28,30 @@ class BaseModel(StatefulBase):
         else:
             self.logger.info('Did not find model cache in %s' % self.model_dir)
 
-            try:
+            if model_dir in MODEL_MAP:
                 url = MODEL_MAP[model_dir]
-            except KeyError:
-                raise LookupError('Could not find finetuned model "%s". '
-                                  'The supported finetuned models are %s.' % (
-                                   model_dir, MODEL_MAP.keys()))
 
-            tar_gz_path = self.data_dir.joinpath(Path(url).name)
-            if tar_gz_path.exists():
-                self.logger.info('Found model cache in %s' % tar_gz_path)
+                tar_gz_path = self.data_dir.joinpath(Path(url).name)
+                if tar_gz_path.exists():
+                    self.logger.info('Found model cache in %s' % tar_gz_path)
+                else:
+                    w = tar_gz_path.open('wb+')
+                    self.logger.info('Downloading "%s" finetuned model.' % model_dir)
+                    download_file(url, w)
+                    w.close()
+
+                r = tar_gz_path.open('rb')
+                self.logger.info('Extracting "%s" from %s' % (model_dir, tar_gz_path))
+                extract_tar_gz(r, self.data_dir)
+                r.close()
+
+                if not self.model_dir.exists():
+                    raise NotADirectoryError('Could not download finetuned model '
+                                             'to directory "%s".' % self.model_dir)
             else:
-                w = tar_gz_path.open('wb+')
-                self.logger.info('Downloading "%s" finetuned model.' % model_dir)
-                download_file(url, w)
-                w.close()
-
-            r = tar_gz_path.open('rb')
-            self.logger.info('Extracting "%s" from %s' % (model_dir, tar_gz_path))
-            extract_tar_gz(r, self.data_dir)
-            r.close()
-
-            if not self.model_dir.exists():
-                raise NotADirectoryError('Could not download finetuned model '
-                                         'to directory "%s".' % self.model_dir)
+                self.logger.warning('Could not find finetuned model "%s" in '
+                                    '%s. Falling back to pytorch/tf resolution' % (
+                                    model_dir, MODEL_MAP.keys()))
 
     def post_start(self):
         """ Executes after the process forks """
