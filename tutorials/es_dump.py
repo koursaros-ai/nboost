@@ -27,12 +27,12 @@ MAPPINGS = {
 }
 
 
-def stream_msmarco_full():
+def stream_msmarco_full(index):
     with open(os.path.join('collection.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
         for id, passage in data:
             body = {
-                "_index": INDEX,
+                "_index": index,
                 "_id": id,
                 "_source": {
                     "passage": passage,
@@ -43,11 +43,11 @@ def stream_msmarco_full():
             yield body
 
 
-def stream_subset():
+def stream_subset(index):
     with open('tutorial_subset.txt') as data:
         for passage in data:
             body = {
-                "_index": INDEX,
+                "_index": index,
                 "_source": {
                     "passage": passage,
                 }
@@ -63,22 +63,20 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.task == 'ms_marco':
         action = stream_msmarco_full
-        index = 'ms_marco'
     elif args.task == 'demo':
         action = stream_subset
-        index = 'demo'
     else:
         raise NotImplementedError('Available tasks are ms_marco and demo')
 
     es = Elasticsearch(host=args.es_host, port=args.es_port, timeout=REQUEST_TIMEOUT)
 
-    if es.indices.exists(index):
-        res = es.indices.delete(index=index)
+    if es.indices.exists(args.task):
+        res = es.indices.delete(index=args.task)
         print(res)
-    res = es.indices.create(index=index, body=MAPPINGS)
+    res = es.indices.create(index=args.task, body=MAPPINGS)
 
     print('Sending articles.')
-    for ok, response in elasticsearch.helpers.streaming_bulk(es, actions=action()):
+    for ok, response in elasticsearch.helpers.streaming_bulk(es, actions=action(args.task)):
         if not ok:
             # failure inserting
             print(response)
