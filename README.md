@@ -72,12 +72,15 @@ Any way you install it, if you end up reading the following message after `$ nbo
 
 <h2 align="center">Getting Started</h2>
 
-- [Preliminaries](#-preliminaries)
-  * [📡The Proxy](#microservice)
-- [Setting up a Neural Proxy for Elasticsearch in 3 minutes](#Setting-up-a-Neural-Proxy-for-Elasticsearch-in-1-minute)
+- [Preliminaries](#preliminaries)
+  * [📡The Proxy](#the-proxy)
+- [Setting up a Neural Proxy for Elasticsearch in 3 minutes](#Setting-up-a-Neural-Proxy-for-Elasticsearch-in-3-minutes)
+  * [Setting up an Elasticsearch Server](#setting-up-an-elasticsearch-server)
+  * [Deploying the proxy](#deploying-the-proxy)
+  * [Indexing some data](#indexing-some-data)
 - [Elastic made easy](#elastic-made-easy)
-- [Deploying a distributed proxy via Docker Swarm/Kubernetes](#deploying-a-flow-via-docker-swarmkubernetes)
-- [‍Take-home messages](#-take-home-messages)
+- [Deploying a distributed proxy via Docker Swarm/Kubernetes](#deploying-a-proxy-via-docker-swarmkubernetes)
+- [‍Take-home messages](#take-home-messages)
 
 
 ### Preliminaries
@@ -86,13 +89,7 @@ Before we start, let me first introduce the most important concept, the **Proxy*
 
 #### 📡The Proxy
 
-The proxy object is the core of NBoost. It has four components: the **model**, **server**, **db**, and **codex**. The only role of the proxy is to manage these four components.
-
-- [**Model**](http://nboost.readthedocs.io/en/latest/chapter/component.html#model): ranking search results before sending to the client, and training on feedback;
-- [**Server**](http://nboost.readthedocs.io/en/latest/chapter/component.html#server): receiving incoming client requests and passing them to the other components;
-- [**Db**](http://nboost.readthedocs.io/en/latest/chapter/component.html#db): storing past searches in order to learn from client feedback, also logging/benchmarking;
-- [**Codex**](http://nboost.readthedocs.io/en/latest/chapter/component.html#codex): translating incoming messages from specific search apis (i.e. Elasticsearch);
-
+The [**proxy**](http://nboost.readthedocs.io/en/latest/chapter/proxy.html) object is the core of NBoost. The proxy is essentially a wrapper to enable serving the **model**. It is able to understand incoming messages from specific search apis (i.e. Elasticsearch). When the proxy receives a message, it increases the amount of results the client is asking for so that the model can rerank a larger set and return the (hopefully) better results. For instance, if a client asks for 10 results to do with the query "brown dogs" from Elasticsearch, then the proxy may increase the results request to 100 and filter down the best ten results for the client.
 
 ### Setting up a Neural Proxy for Elasticsearch in 3 minutes
 
@@ -110,21 +107,20 @@ Once you have the image, you can run an Elasticsearch server via:
 docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearch:7.4.2
 ```
 
-#### Indexing some data
-For demonstration purposes, we will be indexing [a set of passages about open-source software](https://microsoft.github.io/TREC-2019-Deep-Learning/). You can add the index to your Elasticsearch server by running:
-```bash
-nboost-tutorial opensource --es_host localhost --es_port 9200
-```` 
-> 📢 If your server is not on your local machine, change the `--host` and `--port` switches accordingly.
-
 #### Deploying the proxy
 Now we're ready to deploy our Neural Proxy! It is very simple to do this, simply run:
 ```bash
 nboost --ext_host localhost --ext_port 9200
 ```
-> The `--ext_host` and `--ext_port` should be the same as the Elasticsearch server above!
+> 📢 The `--ext_host` and `--ext_port` should be the same as the Elasticsearch server above!
 
 If you get this message: `LISTENING: <host>:<port>`, then we're good to go.
+
+#### Indexing some data
+The proxy is set up so that there is no need to ever talk to the server directly from here on out. You can send index requests, stats requests, but only the search requests will be altered. For demonstration purposes, we will be indexing [a set of passages about open-source software](https://microsoft.github.io/TREC-2019-Deep-Learning/) through NBoost. You can add the index to your Elasticsearch server by running:
+```bash
+nboost-tutorial opensource --host localhost --port 8000
+```` 
 
 Now let's test it out! Hit the proxy with:
 ```bash
