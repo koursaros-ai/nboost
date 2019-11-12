@@ -23,14 +23,11 @@ class BaseModel(StatefulBase):
         # make sure data directory exists
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
-        if is_custom:
-            if not self.model_dir.exists():
-                raise NotADirectoryError('Could not find model directory %s. '
-                                         'Please name the path according to '
-                                         'data_dir/finetuned' % self.model_dir)
-        elif self.model_dir.exists():
+        if self.model_dir.exists():
             self.logger.info('Using model cache from %s' % self.model_dir)
         else:
+            self.logger.info('Did not find model cache in %s' % self.model_dir)
+
             try:
                 url = MODEL_MAP[model_dir]
             except KeyError:
