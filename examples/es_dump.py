@@ -5,7 +5,9 @@ import os, csv
 ## MS MARCO DUMP
 INDEX = 'ms_marco'
 
-ES_HOST = '35.238.60.182'
+# ES_HOST = '35.238.60.182'
+ES_HOST = 'localhost'
+ES_PORT = 8000
 READ_CHUNKSIZE = 10 * 6
 REQUEST_TIMEOUT = 10000
 MAX_CHUNK_BYTES = 10 ** 9
@@ -45,12 +47,11 @@ def stream_bodies():
 
 
 if __name__ == "__main__":
-    es = Elasticsearch(host=ES_HOST,timeout=REQUEST_TIMEOUT)
+    es = Elasticsearch(host=ES_HOST,port=ES_PORT,timeout=REQUEST_TIMEOUT)
 
-    if es.indices.exists(INDEX):
-        res = es.indices.delete(index=INDEX)
-        print(res)
-    res = es.indices.create(index=INDEX, body=MAPPINGS)
+    # if es.indices.exists(INDEX):
+    #     res = es.indices.delete(index=INDEX)
+    # res = es.indices.create(index=INDEX, body=MAPPINGS)
 
     print('Sending articles.')
     for ok, response in elasticsearch.helpers.streaming_bulk(es, actions=stream_bodies()):

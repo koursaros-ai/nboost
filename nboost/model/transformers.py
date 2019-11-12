@@ -1,13 +1,17 @@
 from ..base.types import Ranks
 from .base import BaseModel
-from transformers import (AutoConfig,
-                                  AutoModelForSequenceClassification,
-                                  AutoTokenizer,
-                                  AdamW,
-                                  ConstantLRSchedule)
-import torch, torch.nn
-import numpy as np
 import os
+
+try:
+    from transformers import (AutoConfig,
+                              AutoModelForSequenceClassification,
+                              AutoTokenizer,
+                              AdamW,
+                              ConstantLRSchedule)
+    import torch, torch.nn
+    import numpy as np
+except:
+    pass
 
 
 class TransformersModel(BaseModel):
