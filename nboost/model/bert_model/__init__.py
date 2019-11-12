@@ -126,7 +126,7 @@ class BertModel(BaseModel):
         model_fn = self.model_fn_builder(
             bert_config=bert_config,
             num_labels=2,
-            init_checkpoint=self.model_dir)  # TODO: add ckpt resolution
+            init_checkpoint=self.checkpoint)
 
         estimator = tf.estimator.Estimator(
             model_fn=model_fn,
