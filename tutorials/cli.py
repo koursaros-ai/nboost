@@ -1,11 +1,12 @@
 from typing import List
 import argparse
 import termcolor
+from tutorials import api
 
 
 def set_opensource_parser(parser):
     parser.add_argument('--es_host', type=str, default='127.0.0.1', help='host of the proxy')
-    parser.add_argument('--es_port', type=int, default=8000, help='port of the proxy')
+    parser.add_argument('--es_port', type=int, default=9200, help='port of the proxy')
 
 
 def set_another_tutorial_parser(parser):
@@ -26,8 +27,5 @@ def main(argv: List[str] = None):
     set_another_tutorial_parser(sp.add_parser('demo', help='example tutorial stub', formatter_class=adf))
 
     args = parser.parse_args(argv)
-
-
-if __name__ == "__main__":
-    main()
+    getattr(api, args.tutorial)(args)
 

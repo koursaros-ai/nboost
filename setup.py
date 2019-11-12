@@ -32,7 +32,10 @@ setup(
         'aiohttp',
         'requests'
     ],
-    entry_points={'console_scripts': ['nboost=nboost.cli.__main__:main']},
+    entry_points={'console_scripts': [
+        'nboost=nboost.cli.__main__:main',
+        'nboost-tutorial=tutorials.cli:main'
+    ]},
     classifiers=[
         'Intended Audience :: Education',
         'Intended Audience :: Science/Research',

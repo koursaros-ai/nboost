@@ -29,8 +29,11 @@ def opensource(args):
 
     if es.indices.exists('opensource'):
         res = es.indices.delete(index='opensource')
+        print('Deleting opensource index')
         print(res)
     res = es.indices.create(index='opensource', body=index)
+    print('Creating opensource index on %s:%s' % (args.es_host, args.es_port))
     print(res)
 
+    print('Indexing opensource.txt')
     es_bulk_index(es, stream_index())
