@@ -1,5 +1,4 @@
 import csv, os
-import requests
 from elasticsearch import Elasticsearch
 from collections import defaultdict
 import time
