@@ -38,7 +38,7 @@ def get_args(argv: List[str] = None):
     parser.add_argument('--laps', type=int, default=100, help='number of laps to perform for benchmarking')
     parser.add_argument('--server', type=lambda x: import_class('server', x), default='AioHttpServer', help='server class')
     parser.add_argument('--codex', type=lambda x: import_class('codex', x), default='ESCodex', help='codex class')
-    parser.add_argument('--model', type=lambda x: import_class('model', x), default='BertMarcoModel', help='model class')
+    parser.add_argument('--model', type=lambda x: import_class('model', x), default='BertModel', help='model class')
     parser.add_argument('--db', type=lambda x: import_class('db', x), default='HashDb', help='db class')
     args = parser.parse_args(argv)
     return args
