@@ -1,14 +1,11 @@
 import csv, os
-import requests
 from elasticsearch import Elasticsearch
 from collections import defaultdict
 import time
 
 INDEX = 'ms_marco'
-ES_HOST = '35.238.60.182'
-ES_PORT = 9200
-# ES_HOST = 'localhost'
-# ES_PORT = 53001
+ES_HOST = 'localhost'
+ES_PORT = 53001
 DATA_PATH = '.'
 TOPK = 10
 REQUEST_TIMEOUT = 10000
@@ -23,7 +20,7 @@ def timeit(fn, *args, **kwargs):
     return res
 
 
-def eval():
+def benchmark_ms_marco():
     qrels = set()
     qid_count = defaultdict(int)
     qids = set()
@@ -61,4 +58,4 @@ def eval():
 
 
 if __name__ == '__main__':
-    eval()
+    benchmark_ms_marco()
