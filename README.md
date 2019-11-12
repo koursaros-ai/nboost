@@ -111,16 +111,16 @@ docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elastics
 ```
 
 #### Indexing some data
-For demonstration purposes, we will be indexing the [complete works of William Shakespeare on Elasticsearch](https://www.elastic.co/guide/en/kibana/7.1/tutorial-load-dataset.html). You can add the index to your Elasticsearch server by running:
+For demonstration purposes, we will be indexing [a set of passages about open-source software](https://microsoft.github.io/TREC-2019-Deep-Learning/). You can add the index to your Elasticsearch server by running:
 ```bash
-nboost index --type shakespeare --host localhost --port 9200
+nboost-tutorial opensource --es_host localhost --es_port 9200
 ```` 
 > 📢 If your server is not on your local machine, change the `--host` and `--port` switches accordingly.
 
 #### Deploying the proxy
 Now we're ready to deploy our Neural Proxy! It is very simple to do this, simply run:
 ```bash
-nboost proxy --ext_host localhost --ext_port 9200
+nboost --ext_host localhost --ext_port 9200
 ```
 > The `--ext_host` and `--ext_port` should be the same as the Elasticsearch server above!
 
@@ -128,7 +128,7 @@ If you get this message: `LISTENING: <host>:<port>`, then we're good to go.
 
 Now let's test it out! Hit the proxy with:
 ```bash
-curl "http://localhost:9200/shakespeare/_search?q=text_entry:search%20profitable&pretty&size=2"
+curl "http://localhost:8000/opensource/_search?q=passage:what%20is%20mozilla%20firefox&pretty&size=2"
 ```
 
 If the Elasticsearch result has the `_nboost` tag in it, congratulations it's working!
