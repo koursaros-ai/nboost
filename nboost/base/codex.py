@@ -1,5 +1,5 @@
-from ..base import StatefulBase
-from ..base.types import *
+from .types import *
+from .base import StatefulBase
 from typing import Tuple
 
 

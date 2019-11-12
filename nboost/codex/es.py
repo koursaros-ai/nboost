@@ -1,6 +1,5 @@
-from .base import BaseCodex
-from ..base.types import *
 from pprint import pformat
+from ..base import *
 import json as JSON
 import gzip
 

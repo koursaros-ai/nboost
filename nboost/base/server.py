@@ -1,8 +1,7 @@
-
 from typing import Dict, Tuple, Callable, Iterable, Any
 from threading import Thread, Event
-from ..base import StatefulBase
-from ..base.types import *
+from .base import StatefulBase
+from .types import *
 import asyncio
 
 

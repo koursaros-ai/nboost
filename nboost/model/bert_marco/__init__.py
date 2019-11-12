@@ -1,13 +1,9 @@
 from queue import Queue
 from threading import Thread
-from ...base.types import Ranks
-
 import numpy as np
 import tensorflow as tf
-import os
-
 from . import modeling, tokenization
-from ..base import BaseModel
+from ...base import *
 
 
 class BertMarcoModel(BaseModel):

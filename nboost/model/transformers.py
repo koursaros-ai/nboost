@@ -1,5 +1,5 @@
 from ..base.types import Ranks
-from .base import BaseModel
+from ..base import BaseModel
 import os
 
 try:

@@ -1,8 +1,7 @@
 from aiohttp import web, web_exceptions, client
 from urllib.parse import urlencode
 from typing import Callable
-from ..base.types import *
-from . import BaseServer
+from ..base import *
 import aiohttp
 
 

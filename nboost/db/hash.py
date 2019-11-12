@@ -1,5 +1,4 @@
-from .base import BaseDb
-from ..base.types import Qid, Cid
+from ..base import *
 import hashlib
 
 

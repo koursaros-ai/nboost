@@ -1,18 +1,25 @@
-import argparse
-import sys
-import termcolor
-from .. import model, server, codex, db, __version__
-from ..proxy import Proxy
+from .. import __version__, class_map
+from nboost.proxy import Proxy
 from typing import List
+import importlib
+import termcolor
+import argparse
 
 
-def create_proxy(argv: List[str] = None):
+def import_class(module: str, name: str):
+    if name in class_map[module]:
+        file = 'nboost.%s.%s' % (module, class_map[module][name])
+        return getattr(importlib.import_module(file), name)
+    else:
+        raise ImportError('Can not locate %s with name "%s"' % (module, name))
+
+
+def get_args(argv: List[str] = None):
+    version = termcolor.colored('NBoost (v%s)' % __version__, 'cyan', attrs=['underline'])
     parser = argparse.ArgumentParser(
         description='%s: is a scalable, search-api-boosting platform for '
                     'developing and deploying SOTA models to improve the '
-                    'relevance of search results..' % (
-            termcolor.colored('NBoost (v%s)' % __version__,
-                              'cyan', attrs=['underline'])),
+                    'relevance of search results..' % version,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--verbose', action='store_true', default=False, help='turn on detailed logging')
     parser.add_argument('--host', type=str, default='127.0.0.1', help='host of the proxy')
@@ -27,11 +34,16 @@ def create_proxy(argv: List[str] = None):
     parser.add_argument('--multiplier', type=int, default=5, help='factor to increase results by')
     parser.add_argument('--field', type=str, help='specified meta field to train on')
     parser.add_argument('--laps', type=int, default=100, help='number of laps to perform for benchmarking')
-    parser.add_argument('--server', type=lambda x: getattr(server, x), default='AioHttpServer', help='server class')
-    parser.add_argument('--codex', type=lambda x: getattr(codex, x), default='ESCodex', help='codex class')
-    parser.add_argument('--model', type=lambda x: getattr(model, x), default='BertMarcoModel', help='model class')
-    parser.add_argument('--db', type=lambda x: getattr(db, x), default='HashDb', help='db class')
+    parser.add_argument('--server', type=lambda x: import_class('server', x), default='AioHttpServer', help='server class')
+    parser.add_argument('--codex', type=lambda x: import_class('codex', x), default='ESCodex', help='codex class')
+    parser.add_argument('--model', type=lambda x: import_class('model', x), default='BertMarcoModel', help='model class')
+    parser.add_argument('--db', type=lambda x: import_class('db', x), default='HashDb', help='db class')
     args = parser.parse_args(argv)
+    return args
+
+
+def create_proxy(argv: List[str] = None):
+    args = get_args(argv)
     return Proxy(**vars(args))
 
 
