@@ -48,15 +48,17 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 **This project is currently undergoing rapid release cycles and the core package is not ready for distribution**
 
 
-Fine-tuned Models                       | Domain              | MRR @10 vs BM25(ES default)| Reranking Top 50
+Fine-tuned Models                       | Domain              | MRR @10 vs BM25            | Reranking Top 50
 --------------------------------------- | ------------------- | -------------------------- | -----
-`bert-base-uncased-msmarco`(**default**)| passage relevance   | **0.301** vs 0.173 (1.8x)  | ~250 ms/query [^footnote]
-`bert-base-cased-finetuned-mrpc`        | question relevance  | - | -
+`bert-base-uncased-msmarco`(**default**)<sup>1</sup>| passage relevance   | **0.301** vs 0.173 (1.8x)  | ~250 ms/query <sup>3</sup>
+`bert-base-cased-finetuned-mrpc`<sup>2</sup>        | question relevance  | - | -
 `albert-tiny-msmarco`                   | passage relevance   | - | -
 
 <a href = '#contact'>Contact us to request domain-specific models or leave feedback</a>
 
-[^footnote] On nvidia T4 GPU
+<sup>1</sup>https://github.com/nyu-dl/dl4marco-bert
+<sup>2</sup>https://github.com/huggingface/transformers
+<sup>3</sup>On nvidia T4 GPU
 
 <h2 align="center">Install NBoost</h2>
 

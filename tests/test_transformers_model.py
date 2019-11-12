@@ -8,7 +8,7 @@ import asyncio
 class TestModel(unittest.TestCase):
 
     def setUp(self):
-        self.model = TransformersModel(model_ckpt='distilbert-base-uncased')
+        self.model = TransformersModel(model_dir='distilbert-base-uncased')
         self.query = Query('O wherefore art thou'.encode())
         self.choices = Choices()
 
