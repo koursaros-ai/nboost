@@ -1,45 +1,72 @@
+from .helpers import download_file, extract_tar_gz
+from .. import MODEL_MAP, PKG_PATH
 from .base import StatefulBase
-from aiohttp import web
 from .types import *
-import requests
-import tarfile
-import sys
-import os
+from pathlib import Path
 
 
 class BaseModel(StatefulBase):
-    MODEL_PATHS = {
-        "bert_base_msmarco": {
-            "url": "https://storage.googleapis.com/koursaros/bert_marco.tar.gz",
-            "ckpt": "bert_marco/bert_model.ckpt"
-        }
-    }
-
     def __init__(self,
                  lr: float = 10e-3,
-                 model_ckpt: str ='bert_base_msmarco',
-                 data_dir: str = './.cache',
+                 pretrained: str = 'bert_base',
+                 finetuned: str = 'bert_marco',
+                 is_custom: bool = False,
+                 data_dir: Path = PKG_PATH.joinpath('.cache'),
                  max_seq_len: int = 128,
                  batch_size: int = 4, **kwargs):
         super().__init__()
         self.lr = lr
-        self.data_dir = data_dir
-        self.model_ckpt = model_ckpt
-        self.model_dir = os.path.dirname(self.model_ckpt)
         self.max_seq_len = max_seq_len
         self.batch_size = batch_size
+        self.pretrained = pretrained
+        self.finetuned = finetuned
+        self.is_custom = is_custom
+        self.data_dir = data_dir
+        self.model_dir = data_dir.joinpath(self.finetuned).absolute()
+        self.ckpt_file = self.__class__.__module__.split('.')[-1] + '.ckpt'
+        self.ckpt_path = self.model_dir.joinpath(self.ckpt_file)
 
-        if not os.path.exists(data_dir):
-            os.makedirs(data_dir)
-        if not os.path.exists(self.model_dir) and self.model_ckpt in self.MODEL_PATHS:
-            model_ckpt_path = os.path.join(self.data_dir, self.MODEL_PATHS[self.model_ckpt]['ckpt'])
-            self.model_dir = os.path.dirname(model_ckpt_path)
-            if not os.path.exists(self.model_dir):
-                file = self.download_model(self.model_ckpt, self.data_dir)
-                self.extract_model(file, self.data_dir)
-                os.remove(file)
-                assert os.path.exists(self.model_dir)
-            self.model_ckpt = model_ckpt_path
+        # make sure data directory exists
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+
+        if is_custom:
+            if not self.model_dir.exists():
+                raise NotADirectoryError('Could not find model directory %s. '
+                                         'Please name the path according to '
+                                         'data_dir/finetuned' % self.model_dir)
+        elif self.model_dir.exists():
+            self.logger.info('Using model cache from %s' % self.model_dir)
+        else:
+            try:
+                pretrained_map = MODEL_MAP[pretrained]
+            except KeyError:
+                raise LookupError('Could not find pretrained model "%s". '
+                                  'The supported pretrained models are %s.' % (
+                                   pretrained, MODEL_MAP.keys()))
+            try:
+                url = pretrained_map[finetuned]
+            except KeyError:
+                raise LookupError('Could not find finetuned model "%s". '
+                                  'The supported models for "%s" are %s' % (
+                                  finetuned, pretrained, pretrained_map.keys()))
+
+            tar_gz_path = self.data_dir.joinpath(Path(url).name)
+            if tar_gz_path.exists():
+                self.logger.info('Found model cache in %s' % tar_gz_path)
+            else:
+                w = tar_gz_path.open('wb+')
+                self.logger.info('Downloading "%s", a finetuned %s model.' % (finetuned, pretrained))
+                download_file(url, w)
+                w.close()
+
+            r = tar_gz_path.open('rb')
+            self.logger.info('Extracting "%s" from %s' % (finetuned, tar_gz_path))
+            extract_tar_gz(r, self.data_dir)
+            r.close()
+
+            if not self.model_dir.exists():
+                raise NotADirectoryError('Could not download finetuned model '
+                                         'to directory "%s".' % self.model_dir)
 
     def post_start(self):
         """ Executes after the process forks """
@@ -50,38 +77,12 @@ class BaseModel(StatefulBase):
 
     def train(self, query: Query, choices: Choices, labels: Labels) -> None:
         """ train """
-        raise web.HTTPNotImplemented
+        raise NotImplementedError
 
     def rank(self, query: Query, choices: Choices) -> Ranks:
         """
         sort list of indices of topk candidates
         """
-        raise web.HTTPNotImplemented
+        raise NotImplementedError
 
-    def download_model(self, model, data_dir):
-        link = self.MODEL_PATHS[model]['url']
-        file_name = os.path.join(data_dir, self.MODEL_PATHS[model]['url'].split('/')[-1])
-        with open(file_name, "wb") as f:
-            print("Downloading %s" % link)
-            response = requests.get(link, stream=True)
-            total_length = response.headers.get('content-length')
 
-            if total_length is None:  # no content length header
-                f.write(response.content)
-            else:
-                dl = 0
-                total_length = int(total_length)
-                for data in response.iter_content(chunk_size=4096):
-                    dl += len(data)
-                    f.write(data)
-                    done = int(50 * dl / total_length)
-                    sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
-                    sys.stdout.flush()
-        return file_name
-
-    @staticmethod
-    def extract_model(archive, data_dir):
-        print("Extracting %s" % archive)
-        tar = tarfile.open(archive)
-        tar.extractall(data_dir)
-        tar.close()

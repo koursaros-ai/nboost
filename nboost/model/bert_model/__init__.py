@@ -6,7 +6,7 @@ from . import modeling, tokenization
 from ...base import *
 
 
-class BertMarcoModel(BaseModel):
+class BertModel(BaseModel):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -124,7 +124,7 @@ class BertMarcoModel(BaseModel):
         model_fn = self.model_fn_builder(
             bert_config=bert_config,
             num_labels=2,
-            init_checkpoint=self.model_ckpt)
+            init_checkpoint=str(self.ckpt_path))
 
         estimator = tf.estimator.Estimator(
             model_fn=model_fn,

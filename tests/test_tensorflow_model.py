@@ -1,14 +1,13 @@
-from nboost.model.bert_marco import BertMarcoModel
+from nboost.model.bert_model import BertModel
 from nboost.base.types import *
 from tests import RESOURCES
 import unittest
-import os
 
 
 class TestModel(unittest.TestCase):
 
     def setUp(self):
-        self.model = BertMarcoModel(model_ckpt='bert_base_msmarco')
+        self.model = BertModel()
         self.query = Query('O wherefore art thou'.encode())
         self.choices = Choices()
 
