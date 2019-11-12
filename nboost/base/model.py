@@ -8,8 +8,7 @@ from pathlib import Path
 class BaseModel(StatefulBase):
     def __init__(self,
                  lr: float = 10e-3,
-                 pretrained: str = 'bert_base',
-                 finetuned: str = 'bert_marco',
+                 model_dir: str = 'bert_marco',
                  is_custom: bool = False,
                  data_dir: Path = PKG_PATH.joinpath('.cache'),
                  max_seq_len: int = 128,
@@ -18,13 +17,10 @@ class BaseModel(StatefulBase):
         self.lr = lr
         self.max_seq_len = max_seq_len
         self.batch_size = batch_size
-        self.pretrained = pretrained
-        self.finetuned = finetuned
+        self.model_dir = model_dir
         self.is_custom = is_custom
         self.data_dir = data_dir
-        self.model_dir = data_dir.joinpath(self.finetuned).absolute()
-        self.ckpt_file = self.__class__.__module__.split('.')[-1] + '.ckpt'
-        self.ckpt_path = self.model_dir.joinpath(self.ckpt_file)
+        self.model_dir = data_dir.joinpath(model_dir).absolute()
 
         # make sure data directory exists
         self.data_dir.mkdir(parents=True, exist_ok=True)
@@ -38,29 +34,23 @@ class BaseModel(StatefulBase):
             self.logger.info('Using model cache from %s' % self.model_dir)
         else:
             try:
-                pretrained_map = MODEL_MAP[pretrained]
-            except KeyError:
-                raise LookupError('Could not find pretrained model "%s". '
-                                  'The supported pretrained models are %s.' % (
-                                   pretrained, MODEL_MAP.keys()))
-            try:
-                url = pretrained_map[finetuned]
+                url = MODEL_MAP[model_dir]
             except KeyError:
                 raise LookupError('Could not find finetuned model "%s". '
-                                  'The supported models for "%s" are %s' % (
-                                  finetuned, pretrained, pretrained_map.keys()))
+                                  'The supported finetuned models are %s.' % (
+                                   model_dir, MODEL_MAP.keys()))
 
             tar_gz_path = self.data_dir.joinpath(Path(url).name)
             if tar_gz_path.exists():
                 self.logger.info('Found model cache in %s' % tar_gz_path)
             else:
                 w = tar_gz_path.open('wb+')
-                self.logger.info('Downloading "%s", a finetuned %s model.' % (finetuned, pretrained))
+                self.logger.info('Downloading "%s" finetuned model.' % model_dir)
                 download_file(url, w)
                 w.close()
 
             r = tar_gz_path.open('rb')
-            self.logger.info('Extracting "%s" from %s' % (finetuned, tar_gz_path))
+            self.logger.info('Extracting "%s" from %s' % (model_dir, tar_gz_path))
             extract_tar_gz(r, self.data_dir)
             r.close()
 

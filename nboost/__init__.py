@@ -23,9 +23,7 @@ CLASS_MAP = {
     }
 }
 
-# pretrained => finetuned => url
+# model_dir => url
 MODEL_MAP = {
-    "bert_model": {
-        "bert_marco": "https://storage.googleapis.com/koursaros/bert_marco.tar.gz"
-    }
+    "bert_marco": "https://storage.googleapis.com/koursaros/bert_marco.tar.gz"
 }

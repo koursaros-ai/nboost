@@ -14,8 +14,8 @@ class BertModel(BaseModel):
         self.output_q = Queue()
         self.input_q = Queue()
 
-        self.vocab_file = os.path.join(self.model_dir, 'vocab.txt')
-        self.bert_config_file = os.path.join(self.model_dir, 'bert_config.json')
+        self.vocab_file = self.model_dir.joinpath('vocab.txt')
+        self.bert_config_file = self.model_dir.joinpath('bert_config.json')
 
         model_thread = Thread(target=self.run_model)
         model_thread.start()
@@ -124,7 +124,7 @@ class BertModel(BaseModel):
         model_fn = self.model_fn_builder(
             bert_config=bert_config,
             num_labels=2,
-            init_checkpoint=str(self.ckpt_path))
+            init_checkpoint=self.model_dir)  # TODO: add ckpt resolution
 
         estimator = tf.estimator.Estimator(
             model_fn=model_fn,
