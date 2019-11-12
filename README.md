@@ -48,7 +48,7 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 **This project is currently undergoing rapid release cycles and the core package is not ready for distribution**
 
 
-Fine-tuned Models                       | Domain              | MRR @10 vs BM25            | Reranking Top 50
+Fine-tuned Models                       | Domain              | MRR @10 vs BM25            | Speed Reranking Top 50
 --------------------------------------- | ------------------- | -------------------------- | -----
 `bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a>| passage relevance   | **0.301** vs 0.173 (1.8x)  | ~250 ms/query<a href='#footnotes'><sup>[3]</sup></a>
 `bert-base-cased-finetuned-mrpc`<a href='#footnotes'><sup>[2]</sup></a>      | question relevance  | - | -
