@@ -3,12 +3,9 @@ import elasticsearch.helpers
 import os, csv, sys
 
 ## MS MARCO DUMP
-INDEX = 'ms_marco'
 
 ES_HOST = '35.238.60.182'
 ES_PORT = 9200
-# ES_HOST = 'localhost'
-# ES_PORT = 8000
 READ_CHUNKSIZE = 10 * 6
 REQUEST_TIMEOUT = 10000
 MAX_CHUNK_BYTES = 10 ** 9
@@ -62,17 +59,19 @@ def stream_subset():
 if __name__ == "__main__":
     if sys.argv[1] == 'ms_marco':
         action = stream_msmarco_full
+        index = 'ms_marco'
     elif sys.argv[1] == 'demo':
         action = stream_subset
+        index = 'demo'
     else:
         raise NotImplementedError
 
     es = Elasticsearch(host=ES_HOST, port=ES_PORT, timeout=REQUEST_TIMEOUT)
 
-    if es.indices.exists(INDEX):
-        res = es.indices.delete(index=INDEX)
+    if es.indices.exists(index):
+        res = es.indices.delete(index=index)
         print(res)
-    res = es.indices.create(index=INDEX, body=MAPPINGS)
+    res = es.indices.create(index=index, body=MAPPINGS)
 
     print('Sending articles.')
     for ok, response in elasticsearch.helpers.streaming_bulk(es, actions=action()):
