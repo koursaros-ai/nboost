@@ -1,6 +1,6 @@
 from elasticsearch import Elasticsearch
 import elasticsearch.helpers
-import os, csv
+import os, csv, sys
 
 ## MS MARCO DUMP
 INDEX = 'ms_marco'
@@ -31,7 +31,7 @@ MAPPINGS = {
 }
 
 
-def stream_bodies():
+def stream_msmarco_full():
     with open(os.path.join('collection.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')
         for id, passage in data:
@@ -47,8 +47,27 @@ def stream_bodies():
             yield body
 
 
+def stream_subset():
+    with open('tutorial_subset.txt') as data:
+        for passage in data:
+            body = {
+                "_index": INDEX,
+                "_source": {
+                    "passage": passage,
+                }
+            }
+            yield body
+
+
 if __name__ == "__main__":
-    es = Elasticsearch(host=ES_HOST,port=ES_PORT,timeout=REQUEST_TIMEOUT)
+    if sys.argv[1] == 'ms_marco':
+        action = stream_msmarco_full
+    elif sys.argv[1] == 'demo':
+        action = stream_subset
+    else:
+        raise NotImplementedError
+
+    es = Elasticsearch(host=ES_HOST, port=ES_PORT, timeout=REQUEST_TIMEOUT)
 
     if es.indices.exists(INDEX):
         res = es.indices.delete(index=INDEX)
@@ -56,7 +75,7 @@ if __name__ == "__main__":
     res = es.indices.create(index=INDEX, body=MAPPINGS)
 
     print('Sending articles.')
-    for ok, response in elasticsearch.helpers.streaming_bulk(es, actions=stream_bodies()):
+    for ok, response in elasticsearch.helpers.streaming_bulk(es, actions=action()):
         if not ok:
             # failure inserting
             print(response)
