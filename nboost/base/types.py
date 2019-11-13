@@ -1,5 +1,6 @@
-from typing import NamedTuple, List
+from typing import List, Dict
 from enum import Enum
+from requests.structures import CaseInsensitiveDict
 
 
 class Route(Enum):
@@ -11,50 +12,76 @@ class Route(Enum):
     ERROR = 4
 
 
-class Request(NamedTuple):
+class Request:
     """The object that the server/codex must pack all requests into. This is
     necessary to support multiple search apis."""
-    method: str
-    path: str
-    headers: dict
-    params: dict
-    body: bytes
+    __slots__ = ['method', 'path', 'params', 'version', 'headers', 'body']
+
+    def __init__(self,
+                 method: bytes,
+                 path: bytes,
+                 params: Dict[bytes, bytes],
+                 version: bytes,
+                 headers: Dict[bytes, bytes],
+                 body: bytes):
+        self.method: bytes = method
+        self.path = path
+        self.params = params
+        self.version = version
+        self.headers = CaseInsensitiveDict(headers)
+        self.body = body
 
 
-class Response(NamedTuple):
+class Response:
     """The object that each response must be packed into before sending. Same
     reason as the Request object. """
-    headers: dict
-    body: bytes
-    status: int
+    __slots__ = ['version', 'status', 'phrase', 'headers', 'body']
+
+    def __init__(self,
+                 version: bytes,
+                 status: int,
+                 headers: Dict[bytes, bytes],
+                 body: bytes):
+        self.version = version
+        self.status = status
+        self.headers = CaseInsensitiveDict(headers)
+        self.body = body
 
 
-class Choices(List[bytes]):
-    """A list of candidates returned by the search api """
+class Qid(bytes):
+    """An id for a query"""
 
 
-class Labels(List[float]):
-    """A list of floats representing the labels for a respective list of
-    choices."""
+class Query:
+    """A query from the client """
+    __slots__ = ['body', 'ident']
+
+    def __init__(self, body: bytes, ident: Qid = None):
+        self.body = body
+        self.ident = ident
 
 
-class Qid(int):
-    """An integer representing a query id. """
+class Cid(bytes):
+    """An id for a choice"""
 
 
-class Cid(int):
-    """An integer representing a choice id. """
+class Choice:
+    """A list of candidates returned by the search api. Each one may have
+     a label which is a list of floats representing the forward pass value for
+     a respective list of choice. Also a rank, representing it's ranks for a
+    respective list of choices."""
+    __slots__ = ['body', 'ident', 'rank', 'label']
+
+    def __init__(self,
+                 body: bytes,
+                 ident: Cid = None,
+                 rank: int = None,
+                 label: float = None):
+        self.body = body
+        self.ident = ident
+        self.rank = rank
+        self.label = label
 
 
 class Topk(int):
     """Number of results the client requested"""
-
-
-class Query(bytes):
-    """A query from the client """
-
-
-class Ranks(List[int]):
-    """A list of integers representing the relative ranks for a respective
-    list of choices. For example, for Ranks(4, 3, 1, 2) the first choice has
-    is the worst candidate and the third choice is the best (1st). """

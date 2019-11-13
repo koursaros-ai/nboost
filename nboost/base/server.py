@@ -1,4 +1,4 @@
-from typing import Dict, Tuple, Callable, Iterable, Any
+from typing import Tuple, Callable, Iterable, Any
 from threading import Thread, Event
 from .base import StatefulBase
 from .types import *
@@ -25,6 +25,7 @@ class BaseServer(StatefulBase, Thread):
         self.port = port
         self.ext_host = ext_host
         self.ext_port = ext_port
+        self.id = '%s:%s->%s:%s' % (host, port, ext_host, ext_port)
         self.is_ready = Event()
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
@@ -33,13 +34,13 @@ class BaseServer(StatefulBase, Thread):
         return dict(ext_host=self.ext_host, ext_port=self.ext_port)
 
     def create_app(self,
-                   routes: Iterable[Tuple[Dict[str, List[str]], Callable]],
+                   routes: Iterable[Tuple[bytes, List[bytes], Callable]],
                    not_found_handler: Callable):
         """function to run a web server given a dictionary of routes. Instead
         of handling 404 cases within the server, call the not_found handlers
         for tracking proxy speeds.
 
-        :param routes: list of ({path => [methods]}, function). These routes
+        :param routes: iter of (path , methods, function). These routes
             are specific to search, train, and status routes but should be
             kept modular for testing purposes.
         :param not_found_handler: calls the forward() method on the server but
@@ -66,15 +67,15 @@ class BaseServer(StatefulBase, Thread):
         raise NotImplementedError
 
     def run(self):
-        self.logger.critical('STARTING')
+        self.logger.critical('STARTING PROXY')
         self.loop.run_until_complete(self.run_app())
         self.is_ready.set()
+        self.logger.critical('LISTENING: %s' % self.id)
         self.loop.run_forever()
         self.is_ready.clear()
 
     def stop(self):
-        self.logger.critical('CLOSING')
+        self.logger.critical('STOPPING PROXY')
         asyncio.run_coroutine_threadsafe(self.close(), self.loop).result()
-        self.logger.critical('STOPPING LOOP')
         self.loop.call_soon_threadsafe(self.loop.stop)
-
+        self.logger.critical('CLOSED: %s' % self.id)

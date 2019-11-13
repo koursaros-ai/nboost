@@ -4,18 +4,18 @@ from tests import RESOURCES
 import unittest
 
 
-class TestModel(unittest.TestCase):
+class TestTransformersModel(unittest.TestCase):
 
     def setUp(self):
         self.model = BertModel()
-        self.query = Query('O wherefore art thou'.encode())
-        self.choices = Choices()
+        self.query = Query(b'O wherefore art thou')
+        self.choices = []
 
         with RESOURCES.joinpath('sonnets.txt').open() as fh:
             for i, line in enumerate(fh):
                 if not line == '':
-                    self.choices.append(line.encode())
+                    self.choices.append(Choice(line.encode()))
 
     def test_rank(self):
-        res = self.model.rank(self.query, self.choices)
-        self.assertIsInstance(res, list)
+        self.model.rank(self.query, self.choices)
+        self.assertIsInstance(self.choices[0].rank, int)

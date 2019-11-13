@@ -1,4 +1,3 @@
-from ..base.types import Ranks
 from ..base import BaseModel
 import os
 
@@ -18,8 +17,7 @@ class TransformersModel(BaseModel):
         super().__init__(*args, **kwargs)
         self.train_steps = 0
         self.checkpoint_steps = 500
-        self.model_ckpt = self.model_dir
-        self.distilbert = 'distilbert' in self.model_ckpt
+        self.distilbert = 'distilbert' in str(self.model_dir)
 
         if os.path.exists(os.path.join(self.model_ckpt, 'config.json')):
             self.logger.info('Loading from checkpoint %s' % self.model_ckpt)
@@ -53,7 +51,8 @@ class TransformersModel(BaseModel):
 
         self.weight = 1.0
 
-    async def train(self, query, choices, labels):
+    async def train(self, query, choices):
+        labels = [choice.label for choice in choices]
         input_ids, attention_mask, token_type_ids = await self.encode(query, choices)
 
         if self.model_config.num_labels == 1:
@@ -98,11 +97,13 @@ class TransformersModel(BaseModel):
             model_ranks = np.argsort(scores)[::-1]
             avg_rank = self.weight*model_ranks + (1-self.weight)*es_ranks
             self.logger.info(self.weight)
-            return Ranks(np.argsort(avg_rank))
+            ranks = np.argsort(avg_rank)
+            for i, rank in enumerate(ranks):
+                choices[i].rank = i
 
     async def encode(self, query, choices):
         inputs = [self.tokenizer.encode_plus(
-            query.decode(), choice.decode(), add_special_tokens=True
+            query.body.decode(), choice.body.decode(), add_special_tokens=True
         ) for choice in choices]
 
         max_len = min(max(len(t['input_ids']) for t in inputs), self.max_seq_len)

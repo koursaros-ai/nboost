@@ -10,7 +10,7 @@ class TestModel(unittest.TestCase):
     def setUp(self):
         self.model = TransformersModel(model_ckpt='distilbert-base-uncased')
         self.query = Query('O wherefore art thou'.encode())
-        self.choices = Choices()
+        self.choices = []
 
         with RESOURCES.joinpath('sonnets.txt').open() as fh:
             for i, line in enumerate(fh):
@@ -19,10 +19,11 @@ class TestModel(unittest.TestCase):
 
     @unittest.SkipTest
     def test_train(self):
-        labels = Labels(float(i % 2) for i in range(len(self.choices)))
+        for i, choice in enumerate(self.choices):
+            choice.label = i % 2
         res = (
             asyncio.get_event_loop()
-            .run_until_complete(self.model.train(self.query,self.choices, labels=labels))
+            .run_until_complete(self.model.train(self.query, self.choices))
         )
 
     def test_rank(self):
