@@ -49,15 +49,17 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/overview.svg?sanitize=true" alt="system overview">
 
 
-Fine-tuned Models                       | Domain              | MRR @10 vs BM25            | Speed @ Reranking 50
+Fine-tuned Models                       | Domain              | Efficacy<sup>[4]</sup> | Scoring Speed
 --------------------------------------- | ------------------- | -------------------------- | -----
-`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a>| <a href ='http://www.msmarco.org/'>bing queries</a> | **0.301** vs 0.173 (1.8x)  | ~250 ms/query<a href='#footnotes'><sup>[3]</sup></a>
+`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a>| <a href ='http://www.msmarco.org/'>bing queries</a> | **0.301** vs 0.173 (1.8x)  | ~5 ms/rank<a href='#footnotes'><sup>[3]</sup></a>
 `bert-base-cased-finetuned-mrpc`<a href='#footnotes'><sup>[2]</sup></a> | <a href = 'https://aclweb.org/aclwiki/Paraphrase_Identification_(State_of_the_art)'>paraphrase detection</a> | - | -
-`albert-tiny-msmarco`                   | -  | - | -
+`albert-tiny-msmarco` <i>(coming soon)</i>| -  | - | ~0.7ms /rank <a href='#footnotes'><sup>[3]</sup></a>
 
 To download and run nboost with one of these fine-tuned models run `nboost --model_dir=<model> --ext_host=<es_host>`
 
 <a href = '#contact'>Contact us to request domain-specific models or leave feedback</a>
+
+<sup>[4]</sup> <a href = 'https://en.wikipedia.org/wiki/Mean_reciprocal_rank'>Mean Reciprocal Rank </a> compared to BM25, the default for Elasticsearch. Reranking top 100.
 
 <h2 align="center">Install NBoost</h2>
 
@@ -211,7 +213,7 @@ If you use NBoost in an academic paper, we would love to be cited. Here are the 
 
 <sup>[1]</sup> https://github.com/nyu-dl/dl4marco-bert <br/>
 <sup>[2]</sup> https://github.com/huggingface/transformers <br/>
-<sup>[3]</sup> On nvidia T4 GPU <br/>
+<sup>[3]</sup> ms for reranking each hit. On nvidia T4 GPU. <br/>
 
 <h2 align="center">License</h2>
 
