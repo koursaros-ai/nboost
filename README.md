@@ -50,9 +50,9 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 
 Fine-tuned Models                       | Domain              | MRR @10 vs BM25            | Speed @ Reranking 50
 --------------------------------------- | ------------------- | -------------------------- | -----
-`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a>| passage relevance   | **0.301** vs 0.173 (1.8x)  | ~250 ms/query<a href='#footnotes'><sup>[3]</sup></a>
-`bert-base-cased-finetuned-mrpc`<a href='#footnotes'><sup>[2]</sup></a>      | question relevance  | - | -
-`albert-tiny-msmarco`                   | passage relevance   | - | -
+`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a>| <a href ='http://www.msmarco.org/'>bing queries</a> | **0.301** vs 0.173 (1.8x)  | ~250 ms/query<a href='#footnotes'><sup>[3]</sup></a>
+`bert-base-cased-finetuned-mrpc`<a href='#footnotes'><sup>[2]</sup></a> | <a href = 'https://aclweb.org/aclwiki/Paraphrase_Identification_(State_of_the_art)'>paraphrase detection</a> | - | -
+`albert-tiny-msmarco`                   | -  | - | -
 
 To download and run nboost with one of these fine-tuned models run `nboost --model_dir=<model> --ext_host=<es_host>`
 
