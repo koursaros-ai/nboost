@@ -47,9 +47,7 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 <h2 align="center">Overview</h2>
 <p align="center">
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/overview.svg?sanitize=true" alt="system overview">
-</p>
-<p>Takes an Elasticsearch query for <b>k</b> results, magnifies the return set by some arbitrary factor <b>n</b>, reranks the results with a regresion transformer model, and returns the top k.
-</p>
+
 
 Fine-tuned Models                       | Domain              | MRR @10 vs BM25            | Speed @ Reranking 50
 --------------------------------------- | ------------------- | -------------------------- | -----
