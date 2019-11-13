@@ -5,8 +5,8 @@ from tutorials import api
 
 
 def set_opensource_parser(parser):
-    parser.add_argument('--es_host', type=str, default='127.0.0.1', help='host of the proxy')
-    parser.add_argument('--es_port', type=int, default=9200, help='port of the proxy')
+    parser.add_argument('--host', type=str, default='127.0.0.1', help='host of the proxy')
+    parser.add_argument('--port', type=int, default=9200, help='port of the proxy')
 
 
 def set_another_tutorial_parser(parser):
