@@ -44,6 +44,8 @@
  
 Nboost leverages finetuned models to produce domain-specific neural search engines. The platform can also improve other downstream tasks requiring ranked input, such as question answering.
 
+<a href = '#contact'>Contact us to request domain-specific models or leave feedback</a>
+
 <h2 align="center">Overview</h2>
 <p align="center">
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/overview.svg?sanitize=true" alt="system overview">
@@ -57,8 +59,6 @@ Fine-tuned Models                       | Domain              | Search Boost<sup
 To download and run nboost with one of these fine-tuned models run 
 
 `nboost --model_dir=<model> --ext_host=<es_host>`
-
-<a href = '#contact'>Contact us to request domain-specific models or leave feedback</a>
 
 <sup>[4]</sup> <a href = 'https://en.wikipedia.org/wiki/Mean_reciprocal_rank'>Mean Reciprocal Rank </a> compared to BM25, the default for Elasticsearch. Reranking top 100.
 
