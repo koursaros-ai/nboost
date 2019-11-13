@@ -47,6 +47,9 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 <h2 align="center">Overview</h2>
 **This project is currently undergoing rapid release cycles and the core package is not ready for distribution**
 
+<p align="center">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/overview.svg?sanitize=true" alt="system overview">
+</p>
 
 Fine-tuned Models                       | Domain              | MRR @10 vs BM25            | Speed @ Reranking 50
 --------------------------------------- | ------------------- | -------------------------- | -----
