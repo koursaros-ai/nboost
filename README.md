@@ -54,7 +54,9 @@ Fine-tuned Models                       | Domain              | Search Boost<sup
 `bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a>| <a href ='http://www.msmarco.org/'>bing queries</a> | **0.301** vs 0.173 (1.8x)  | ~5 ms/rank<a href='#footnotes'><sup>[3]</sup></a>
 `albert-tiny-msmarco` <i>(coming soon)</i>| -  | - | ~0.7ms /rank <a href='#footnotes'><sup>[3]</sup></a>
 
-To download and run nboost with one of these fine-tuned models run `nboost --model_dir=<model> --ext_host=<es_host>`
+To download and run nboost with one of these fine-tuned models run 
+
+`nboost --model_dir=<model> --ext_host=<es_host>`
 
 <a href = '#contact'>Contact us to request domain-specific models or leave feedback</a>
 
