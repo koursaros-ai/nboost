@@ -1,7 +1,7 @@
 from typing import List
 import argparse
 import termcolor
-from tutorials import api
+from nboost.tutorial import api
 
 
 def set_opensource_parser(parser):
