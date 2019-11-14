@@ -1,10 +1,10 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 from pathlib import Path
 from nboost import __version__
 
 setup(
     name='nboost',
-    packages=find_packages(),
+    packages=['nboost'],
     include_package_data=True,
     version=__version__,
     license='Apache 2.0',
