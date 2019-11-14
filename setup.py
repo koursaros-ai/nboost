@@ -30,7 +30,9 @@ setup(
         'transformers',
         'termcolor',
         'aiohttp',
-        'requests'
+        'requests',
+        'tensorflow',
+        'elasticsearch'
     ],
     entry_points={'console_scripts': [
         'nboost=nboost.cli.__main__:main',

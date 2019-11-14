@@ -41,8 +41,8 @@ class Proxy(StatefulBase):
         :param codex: uninitialized codex class
         :param db: uninitialized db class
         """
-        self.kwargs = kwargs
         super().__init__(**kwargs)
+        self.kwargs = kwargs
 
         # pass command line arguments to instantiate each component
         server = server(**kwargs)
@@ -87,26 +87,25 @@ class Proxy(StatefulBase):
             _2: Topk = await track(codex.topk)(_1)
 
             # Codex alters the request to make a larger one.
-            _3: Request = await track(codex.magnify)(_1, _2)
+            await track(codex.magnify)(_1, _2)
 
             # The server asks the search api for the larger request.
-            _4: Response = await track(server.ask)(_3)
+            _3: Response = await track(server.ask)(_1)
 
-            # The codex takes the large response and parses out the query
-            # from the amplified request and response.
-            _5: Tuple[Query, Choices] = await track(codex.parse)(_3, _4)
+            # The codex parses out the query from the amplified req and res.
+            _4: Tuple[Query, List[Choice]] = await track(codex.parse)(_1, _3)
 
-            # the model ranks the choices based on the query.
-            _6: Ranks = await track(model.rank)(*_5)
+            # the model adds a rank to each of the choices
+            await track(model.rank)(*_4)
 
-            # the db saves the query and choices, and returns the query id
-            # and choice ids for the client to send back during train()
-            _7: Tuple[Qid, List[Cid]] = await track(db.save)(*_5)
+            # the db saves the query and choices, and assigns query ids
+            # and choice ids if they we're not previously assigned (for train)
+            await track(db.save)(*_4)
 
             # the codex formats the new (nboosted) response with the context
             # from the entire search pipeline.
-            _8: Response = await track(codex.pack)(_2, _4, *_5, _6, *_7)
-            return _8
+            await track(codex.pack)(_2, _3, *_4)
+            return _3
 
         @track
         async def train(_1: Request) -> Response:
@@ -119,7 +118,7 @@ class Proxy(StatefulBase):
 
             # Db retrieves the content it saved during search(). It also
             # assigns a label to each choice based on the clients request.
-            _3: Tuple[Query, Choices, Labels] = await track(db.get)(*_2)
+            _3: Tuple[Query, List[Choice]] = await track(db.get)(*_2)
             await track(model.train)(*_3)
 
             # acknowledge that the request was sent to the model
@@ -146,9 +145,9 @@ class Proxy(StatefulBase):
 
         # create functional routes for the server
         server.create_app([
-            (codex.SEARCH, search),
-            (codex.TRAIN, train),
-            (codex.STATUS, status)
+            codex.SEARCH + (search,),
+            codex.TRAIN + (train,),
+            codex.STATUS + (status,),
         ], not_found_handler=not_found)
 
         self.server = server

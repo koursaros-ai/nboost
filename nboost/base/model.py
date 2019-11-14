@@ -60,13 +60,13 @@ class BaseModel(StatefulBase):
     def state(self):
         return dict(lr=self.lr, data_dir=self.data_dir)
 
-    def train(self, query: Query, choices: Choices, labels: Labels) -> None:
+    def train(self, query: Query, choices: List[Choice]) -> None:
         """ train """
         raise NotImplementedError
 
-    def rank(self, query: Query, choices: Choices) -> Ranks:
+    def rank(self, query: Query, choices: List[Choice]) -> None:
         """
-        sort list of indices of topk candidates
+        assign relative ranks to each choice
         """
         raise NotImplementedError
 

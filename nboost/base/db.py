@@ -8,12 +8,12 @@ class BaseDb(StatefulBase):
     and to store tracking statistics."""
 
     # SEARCH METHOD
-    def save(self, query: Query, choices: Choices) -> Tuple[Qid, List[Cid]]:
+    def save(self, query: Query, choices: List[Choice]) -> Tuple[Qid, List[Cid]]:
         """ Save the choices during search for using during train """
         raise NotImplementedError
 
     # TRAIN METHOD
-    def get(self, qid: Qid, cid: List[Cid]) -> Tuple[Query, Choices, Labels]:
+    def get(self, qid: Qid, cid: List[Cid]) -> Tuple[Query, List[Choice]]:
         """ Return the choice for training """
         raise NotImplementedError
 

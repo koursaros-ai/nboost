@@ -25,14 +25,14 @@ def opensource(args):
                 }
                 yield body
 
-    es = Elasticsearch(host=args.es_host, port=args.es_port, timeout=10000)
+    es = Elasticsearch(host=args.host, port=args.port, timeout=10000)
 
     if es.indices.exists('opensource'):
         res = es.indices.delete(index='opensource')
         print('Deleting opensource index')
         print(res)
+    print('Creating opensource index on %s:%s' % (args.host, args.port))
     res = es.indices.create(index='opensource', body=index)
-    print('Creating opensource index on %s:%s' % (args.es_host, args.es_port))
     print(res)
 
     print('Indexing opensource.txt')

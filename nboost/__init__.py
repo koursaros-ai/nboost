@@ -14,7 +14,8 @@ CLASS_MAP = {
         'HashDb': 'hash'
     },
     'server': {
-        'AioHttpServer': 'aio'
+        'AioHttpServer': 'aio',
+        'LoopServer': 'loop'
     },
     'model': {
         'TestModel': 'test',

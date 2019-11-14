@@ -180,13 +180,14 @@ class BertModel(BaseModel):
             return candidates
 
     def rank(self, query, choices):
-        candidates = [c.decode() for c in choices]
+        candidates = [c.body.decode() for c in choices]
         candidates = self.pad(candidates)
-        self.input_q.put((query.decode(), candidates))
+        self.input_q.put((query.body.decode(), candidates))
 
         results = [self.output_q.get() for _ in range(len(candidates))][:len(choices)]
         log_probs, labels = zip(*results)
         log_probs = np.stack(log_probs).reshape(-1, 2)
         scores = log_probs[:, 1]
         pred_docs = scores.argsort()[::-1]
-        return Ranks(pred_docs)
+        for i, rank in enumerate(pred_docs):
+            choices[i].rank = int(rank)

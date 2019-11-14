@@ -1,6 +1,7 @@
 from pprint import pformat
 from ..base import *
 import json as JSON
+from typing import Tuple
 import gzip
 
 
@@ -9,7 +10,7 @@ class ElasticsearchError(Exception):
 
 
 class ESCodex(BaseCodex):
-    SEARCH = {'/{index}/_search': ['GET']}
+    SEARCH = (rb'/.*/_search', [b'GET'])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -18,11 +19,11 @@ class ESCodex(BaseCodex):
                 'Please set --field which you would like to rank on')
             raise NotImplementedError
 
-    def topk(self, req):
+    def topk(self, req: Request) -> Topk:
         # try to get the nested size and otherwise default to 10
         try:
             # check request parameters
-            return Topk(req.params['size'])
+            return Topk(req.params[b'size'])
         except KeyError:
             pass
 
@@ -45,11 +46,10 @@ class ESCodex(BaseCodex):
         # if size is not found
         return Topk(10)
 
-    def magnify(self, req, topk):
+    def magnify(self, req: Request, topk: Topk) -> None:
         mtopk = topk * self.multiplier
         topk_is_set = False
         body = req.body
-        req.headers.pop('Content-Length', None)
 
         if body:
             body = JSON.loads(req.body)
@@ -66,82 +66,80 @@ class ESCodex(BaseCodex):
             except KeyError:
                 pass
 
-            body = JSON.dumps(body).encode()
+            req.body = JSON.dumps(body).encode()
 
         if not topk_is_set:
-            req.params['size'] = mtopk
+            req.params[b'size'] = str(mtopk).encode()
 
-        return Request(req.method, req.path, req.headers, req.params, body)
-
-    def parse(self, req, res):
-
+    def parse(self, req: Request, res: Response) -> Tuple[Query, List[Choice]]:
         if res.status >= 400:
             raise ElasticsearchError(res.body)
 
-        if 'q' in req.params:
-            query = req.params['q'].split(':')[-1]
+        if b'q' in req.params:
+            query = req.params[b'q'].split(b':')[-1]
         elif req.body:
             body = JSON.loads(req.body)
             try:
                 query = body['query']['match'][self.field]
                 if isinstance(query, dict):
                     query = query['query']
+                query = query.encode()
             except KeyError:
                 raise ValueError('Missing query')
 
         else:
             raise ValueError('Missing query')
 
-        hits = JSON.loads(res.body).get('hits', None)
-        if not hits:
-            choices = []
-        else:
-            choices = [hit['_source'][self.field].encode() for hit in hits['hits']]
+        hits = JSON.loads(res.body).get('hits', [])
+        choices = []
+        for hit in hits.get('hits', []):
+            choices += [Choice(
+                hit['_source'][self.field].encode(), ident=hit['_id']
+            )]
 
-        return Query(query, 'utf8'), Choices(choices)
+        return Query(query), choices
 
-    def pack(self, topk, res, query, choices, ranks, qid, cids):
+    def pack(self,
+             topk: Topk,
+             res: Response,
+             query: Query,
+             choices: List[Choice]) -> None:
         body = JSON.loads(res.body)
-        body['qid'] = qid
-        for choice, cid, hit in zip(choices, cids, body['hits']['hits']):
-            hit['qid'] = qid
-            hit['cid'] = cid
+        body['_nboost'] = query.ident.decode()
+        body['hits']['hits'] = [body['hits']['hits'][c.rank] for c in choices][:topk]
+        res.body = JSON.dumps(body).encode()
 
-        body['hits']['hits'] = [body['hits']['hits'][i] for i in ranks[:topk]]
-        res.headers.pop('Content-Length', None)
-        body = JSON.dumps(body).encode()
-        if res.headers.get('Content-Encoding', None) == 'gzip':
-            body = gzip.compress(body)
-        return Response(res.headers, body, 200)
-
-    def pluck(self, req):
+    def pluck(self, req: Request) -> Tuple[Qid, List[Cid]]:
         body = JSON.loads(req.body) if req.body else {}
-        if 'qid' in body:
-            qid = body['qid']
-        elif 'qid' in req.params:
-            qid = req.params['qid']
+        if '_nboost' in body:
+            qid = Qid(body['_nboost'], 'utf8')
+        elif b'_nboost' in req.params:
+            qid = req.params[b'_nboost']
         else:
-            raise ValueError('qid not found')
+            raise ValueError('_nboost not found')
 
-        if 'cid' in body:
-            cids = [Cid(body['cid'])]
-        elif 'cid' in req.params:
-            cids = [Cid(req.params['cid'])]
-        elif 'cids' in body:
-            cids = [Cid(cid) for cid in body['cids']]
-        elif 'cids' in req.params:
-            cids = [Cid(cid) for cid in req.params['cids']]
+        if '_id' in body:
+            cids = [Cid(body['_id'], 'utf8')]
+        elif b'_id' in req.params:
+            cids = [Cid(req.params[b'_id'])]
+        elif '_ids' in body:
+            cids = [Cid(cid) for cid in body['_ids']]
+        elif b'_ids' in req.params:
+            cids = [Cid(cid) for cid in req.params[b'_ids']]
         else:
-            raise ValueError('cid not found')
+            raise ValueError('_id not found')
 
         return Qid(qid), cids
 
-    def ack(self, qid, cids):
-        return Response({}, JSON.dumps(dict(qid=qid, cid=cids)).encode(), 200)
+    def ack(self, qid: Qid, cids: List[Cid]) -> Response:
+        cids = [cid.decode() for cid in cids]
+        body = JSON.dumps(dict(_nboost=qid.decode(), _ids=cids))
+        return Response(b'HTTP/1.1', 200, {}, body.encode())
 
-    def catch(self, e):
-        body = JSON.dumps(dict(error=repr(e), type=type(e).__name__))
-        return Response({}, body, 500)
+    def catch(self, e: Exception) -> Response:
+        body = JSON.dumps(dict(error=repr(e), type=type(e).__name__)).encode()
+        return Response(b'HTTP/1.1', 500, {}, body)
 
-    def pulse(self, state):
-        return Response({}, pformat(state), 200)
+    def pulse(self, state: dict) -> Response:
+        return Response(b'HTTP/1.1', 200, {}, pformat(state).encode())
+

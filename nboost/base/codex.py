@@ -14,12 +14,12 @@ class BaseCodex(StatefulBase):
     Any other path/route will be proxied through. Paths/routes are defined as
     {path => route} below.
     """
-    SEARCH = {'/search': ['GET']}
-    TRAIN = {'/train': ['POST']}
-    STATUS = {'/status': ['GET']}
+    SEARCH = (b'/search', [b'GET'])
+    TRAIN = (b'/train', [b'POST'])
+    STATUS = (b'/status', [b'GET'])
 
     # for testing
-    ERROR = {'/error': ['POST']}
+    ERROR = (b'/error', [b'POST'])
 
     def __init__(self, multiplier: int = 10, field: str = None, **kwargs):
         super().__init__(**kwargs)
@@ -36,7 +36,7 @@ class BaseCodex(StatefulBase):
         :param req: initial (ordinary) client request to the search api
         """
 
-    def magnify(self, req: Request, topk: Topk) -> Request:
+    def magnify(self, req: Request, topk: Topk) -> None:
         """Receive the client request to the api and multiply the size of
         the request by the multiplier.
 
@@ -46,8 +46,9 @@ class BaseCodex(StatefulBase):
         """
         raise NotImplementedError
 
-    def parse(self, req: Request, res: Response) -> Tuple[Query, Choices]:
+    def parse(self, req: Request, res: Response) -> Tuple[Query, List[Choice]]:
         """Parse the query and choices from the magnified request and response.
+        Optionally assign an ident to the query and choices.
 
         :param req: magnified request
         :param res: magnified response
@@ -58,10 +59,7 @@ class BaseCodex(StatefulBase):
              topk: Topk,
              res: Response,
              query: Query,
-             choices: Choices,
-             ranks: Ranks,
-             qid: Qid,
-             cids: List[Cid]) -> Response:
+             choices: List[Choice]) -> None:
         """Reformat the proxy response according to the reranked candidates.
 
         :param topk: number of results requested; parsed in topk()
@@ -80,7 +78,7 @@ class BaseCodex(StatefulBase):
         Choice ids should always be casted to a list for standardization."""
         raise NotImplementedError
 
-    def ack(self, qid: Qid, cid: Cid) -> Response:
+    def ack(self, qid: Qid, cids: List[Cid]) -> Response:
         """Acknowledge that train was scheduled for that qid/cid"""
         raise NotImplementedError
 
@@ -91,7 +89,7 @@ class BaseCodex(StatefulBase):
         raise NotImplementedError
 
     # ERROR METHOD
-    def catch(self, e: Exception):
+    def catch(self, e: Exception) -> Response:
         """All errors caught during any component method will be sent here and
         should be returned to the client/handled."""
         raise NotImplementedError

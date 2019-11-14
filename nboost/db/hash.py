@@ -13,30 +13,30 @@ class HashDb(BaseDb):
         self.map = dict()
 
     def save(self, query, choices):
-        qid = next(self.counter)
+        if query.ident is None:
+            query.ident = Qid(str(next(self.counter)), 'utf8')
+
         cids = []
-
         for choice in choices:
-            cid = int(hashlib.sha1(choice).hexdigest(), 16) % (10 ** 8)
-            cids.append(cid)
-            self.choices[cid] = choice
+            if choice.ident is None:
+                cid = Cid(hashlib.sha1(choice.body).hexdigest().encode())
+                choice.ident = cid
 
-        self.queries[qid] = query
-        self.map[qid] = cids
+            cids.append(choice.ident)
+            self.choices[choice.ident] = choice.body
 
-        return Qid(qid), [Cid(cid) for cid in cids]
+        self.queries[query.ident] = query.body
+        self.map[query.ident] = cids
 
     def get(self, qid, cids):
-        query = self.queries[qid]
+        query = Query(self.queries[qid], qid)
         choices = []
-        labels = []
 
         cids = self.map[qid]
         for _cid in cids:
-            choices.append(self.choices[_cid])
-            labels.append(1.0 if _cid in cids else 0.0)
+            choices.append(Choice(self.choices[_cid], _cid))
 
-        return query, choices, labels
+        return query, choices
 
     def lap(self, ms, cls, func):
 
