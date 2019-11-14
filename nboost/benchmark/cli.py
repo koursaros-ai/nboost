@@ -1,8 +1,8 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from nboost.cli import add_default_args
+from nboost.benchmark import api
 from nboost.proxy import Proxy
 from statistics import mean
-from nboost.benchmark import api
 from typing import List
 import termcolor
 import requests
