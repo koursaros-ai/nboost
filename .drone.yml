@@ -7,7 +7,7 @@ steps:
 - name: build
   image: pytorch/pytorch:1.1.0-cuda10.0-cudnn7.5-runtime
   commands:
-    - python setup.py install
+    - pip install -e .[all]
     - python -m unittest discover tests
 
 trigger:
