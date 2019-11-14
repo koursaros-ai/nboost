@@ -53,17 +53,19 @@ class Benchmarker:
                 direct_doc_ids = self.direct_doc_id_producer(query)
                 _3 = time.perf_counter() * 1000
 
+                n = i - 1
+
                 ms = _2 - _1
-                self.proxy_avg_ms = sum([self.proxy_avg_ms * i, ms]) / i
+                self.proxy_avg_ms = sum([self.proxy_avg_ms * n, ms]) / i
 
                 ms = _3 - _2
-                self.direct_avg_ms = sum([self.direct_avg_ms * i, ms]) / i
+                self.direct_avg_ms = sum([self.direct_avg_ms * n, ms]) / i
 
                 mrr = self.calculate_mrr(qid, proxied_doc_ids)
-                self.proxy_avg_mrr = sum([self.proxy_avg_mrr * i, mrr]) / i
+                self.proxy_avg_mrr = sum([self.proxy_avg_mrr * n, mrr]) / i
 
                 mrr = self.calculate_mrr(qid, direct_doc_ids)
-                self.direct_avg_mrr = sum([self.direct_avg_mrr * i, mrr]) / i
+                self.direct_avg_mrr = sum([self.direct_avg_mrr * n, mrr]) / i
 
                 self.set_progress_bar(pbar)
 
