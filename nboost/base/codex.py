@@ -1,6 +1,6 @@
-from .types import *
 from .base import StatefulBase
-from typing import Tuple
+from typing import Tuple, List
+from .types import *
 
 
 class BaseCodex(StatefulBase):
