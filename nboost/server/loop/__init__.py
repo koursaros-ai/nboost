@@ -15,6 +15,7 @@ class LoopServer(BaseServer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.routes = None
+        self.server = None
         self.not_found_handler = None
 
     def get_handler(self, path: str, method: str):
@@ -27,15 +28,15 @@ class LoopServer(BaseServer):
         self.routes = routes
         self.not_found_handler = not_found_handler
 
-    @staticmethod
-    async def pipe(reader, writer, start: bytes = None):
+    async def pipe(self, reader, writer, start: bytes = None):
         try:
             if start:
                 writer.write(start)
             while not reader.at_eof():
                 writer.write(await reader.read(2048))
         finally:
-            writer.close()
+            if not self.loop.is_closed():
+                writer.close()
 
     async def open_server_connection(self):
         return await asyncio.open_connection(self.ext_host, self.ext_port)
@@ -62,9 +63,9 @@ class LoopServer(BaseServer):
                 handler = self.get_handler(path, method)
                 should_proxy = False
 
-            # except ValueError as e:
-            #     self.logger.info('Could not parse http request.')
-            #     should_proxy = True
+            except ValueError:
+                self.logger.info('Could not parse http request.')
+                should_proxy = True
             except PathNotFoundError:
                 self.logger.info('<No handler found>')
                 should_proxy = True
@@ -81,10 +82,11 @@ class LoopServer(BaseServer):
                 await self.not_found_handler(proxy)
 
         finally:
-            client_writer.close()
+            if not self.loop.is_closed():
+                client_writer.close()
 
     async def run_app(self):
-        await asyncio.start_server(self.handle_client, self.host, self.port)
+        self.server = await asyncio.start_server(self.handle_client, self.host, self.port)
 
     async def ask(self, req):
         """ Make the magnified request to the server api. """
@@ -103,4 +105,4 @@ class LoopServer(BaseServer):
         await ctx
 
     async def close(self):
-        pass
+        self.server.close()

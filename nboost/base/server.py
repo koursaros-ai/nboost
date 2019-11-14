@@ -77,5 +77,6 @@ class BaseServer(StatefulBase, Thread):
     def stop(self):
         self.logger.critical('STOPPING PROXY')
         asyncio.run_coroutine_threadsafe(self.close(), self.loop).result()
-        self.loop.call_soon_threadsafe(self.loop.stop)
+        if not self.loop.is_closed():
+            self.loop.call_soon_threadsafe(self.loop.stop)
         self.logger.critical('CLOSED: %s' % self.id)

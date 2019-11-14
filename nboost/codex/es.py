@@ -112,7 +112,7 @@ class ESCodex(BaseCodex):
     def pluck(self, req: Request) -> Tuple[Qid, List[Cid]]:
         body = JSON.loads(req.body) if req.body else {}
         if '_nboost' in body:
-            qid = body['_nboost']
+            qid = Qid(body['_nboost'], 'utf8')
         elif b'_nboost' in req.params:
             qid = req.params[b'_nboost']
         else:
@@ -129,7 +129,7 @@ class ESCodex(BaseCodex):
         else:
             raise ValueError('_id not found')
 
-        return Qid(qid, 'utf8'), cids
+        return Qid(qid), cids
 
     def ack(self, qid: Qid, cids: List[Cid]) -> Response:
         cids = [cid.decode() for cid in cids]

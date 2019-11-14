@@ -36,6 +36,7 @@ class TestESCodex(unittest.TestCase):
         self.assertEqual(choices[0].body, b'trying out Elasticsearch')
 
         TestModel().rank(query, choices)
+        query.ident = b'10'
         codex.pack(topk, query_res, query, choices)
 
         train_req = Request(b'POST', b'/train', {b'_nboost': b'10', b'_id': b'20'}, version, {}, b'')
