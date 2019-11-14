@@ -4,7 +4,6 @@ from collections import defaultdict
 import time
 from nboost.base.helpers import *
 from nboost import PKG_PATH
-import pathlib
 
 INDEX = 'ms_marco'
 ES_HOST = 'localhost'
