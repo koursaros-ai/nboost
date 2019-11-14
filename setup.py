@@ -34,7 +34,7 @@ setup(
     ],
     extras_require={
         'torch': ['torch', 'transformers'],
-        'tensorflow': ['tensorflow'],
+        'tf': ['tensorflow'],
         'all': ['torch', 'tensorflow', 'transformers'],
     },
     entry_points={'console_scripts': [
