@@ -121,7 +121,7 @@ class BertModel(BaseModel):
         bert_config = modeling.BertConfig.from_json_file(self.bert_config_file)
         assert self.max_seq_len <= bert_config.max_position_embeddings
 
-        run_config = tf.estimator.RunConfig(model_dir=self.data_dir)
+        run_config = tf.estimator.RunConfig(model_dir=str(self.data_dir))
 
         model_fn = self.model_fn_builder(
             bert_config=bert_config,
