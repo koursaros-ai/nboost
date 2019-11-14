@@ -37,7 +37,8 @@ setup(
     ],
     entry_points={'console_scripts': [
         'nboost=nboost.cli.__main__:main',
-        'nboost-tutorial=tutorials.cli:main'
+        'nboost-tutorial=nboost.tutorials.cli:main',
+        'nboost-benchmark=nboost.benchmarks.cli:main'
     ]},
     classifiers=[
         'Intended Audience :: Education',
