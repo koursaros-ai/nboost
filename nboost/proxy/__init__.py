@@ -1,4 +1,4 @@
-from typing import Type, Tuple, Any, List
+from typing import Type, Any
 from inspect import isawaitable
 from ..base import *
 import time
@@ -77,70 +77,70 @@ class Proxy(StatefulBase):
             return decorator
 
         @track
-        async def search(_1: Request) -> Response:
+        async def search(request: Request) -> Response:
             """The role of the search route is to take a request from the
             client, balloon it by the multipler and ask for that larger request
             from the search api, then filter the larger results with the
             model to return better results. """
 
             # Codex figures out how many results the client wants.
-            _2: Topk = await track(codex.topk)(_1)
+            topk = await track(codex.topk)(request)
 
             # Codex alters the request to make a larger one.
-            await track(codex.magnify)(_1, _2)
+            await track(codex.magnify)(request, topk)
 
             # The server asks the search api for the larger request.
-            _3: Response = await track(server.ask)(_1)
+            response = await track(server.ask)(request)
 
             # The codex parses out the query from the amplified req and res.
-            _4: Tuple[Query, List[Choice]] = await track(codex.parse)(_1, _3)
+            query, choices = await track(codex.parse)(request, response)
 
             # the model adds a rank to each of the choices
-            await track(model.rank)(*_4)
+            await track(model.rank)(query, choices)
 
             # the db saves the query and choices, and assigns query ids
             # and choice ids if they we're not previously assigned (for train)
-            await track(db.save)(*_4)
+            await track(db.save)(query, choices)
 
             # the codex formats the new (nboosted) response with the context
             # from the entire search pipeline.
-            await track(codex.pack)(_2, _3, *_4)
-            return _3
+            await track(codex.pack)(topk, response, query, choices)
+            return response
 
         @track
-        async def train(_1: Request) -> Response:
+        async def train(request: Request) -> Response:
             """The role of the train route is to receive a query id and choice
             id from the client and train the model to choose that one next
             time for lack of better words."""
 
             # Parse out the query id and choice id(s) from the client request.
-            _2: Tuple[Qid, List[Cid]] = await track(codex.pluck)(_1)
+            qid, cids = await track(codex.pluck)(request)
 
             # Db retrieves the content it saved during search(). It also
             # assigns a label to each choice based on the clients request.
-            _3: Tuple[Query, List[Choice]] = await track(db.get)(*_2)
-            await track(model.train)(*_3)
+            query, choices = await track(db.get)(qid, cids)
+            await track(model.train)(query, choices)
 
             # acknowledge that the request was sent to the model
-            _4: Response = await track(codex.ack)(*_2)
-            return _4
+            response = await track(codex.ack)(qid, cids)
+            return response
 
         @track
         async def status(_1: Request) -> Response:
             """Status() chains the state from each component in order to
             return a formatted dictionary for /status"""
-            _2: Dict = server.chain_state({})
-            _3: Dict = codex.chain_state(_2)
-            _4: Dict = model.chain_state(_3)
-            _5: Dict = db.chain_state(_4)
-            _6: Response = codex.pulse(_5)
-            return _6
+            state = server.chain_state({})
+            state = codex.chain_state(state)
+            state = model.chain_state(state)
+            state = db.chain_state(state)
+            state = codex.pulse(state)
+            return state
 
         @track
         async def not_found(_1: Any) -> Any:
             """What to do when none of the paths given to the server match
             the path requested by the client."""
-            _2: Any = await track(server.forward)(_1)
+            _2 = await track(server.forward)(_1)
             return _2
 
         # create functional routes for the server
