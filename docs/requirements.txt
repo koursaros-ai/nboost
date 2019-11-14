@@ -1,0 +1,5 @@
+requests
+aiohttp
+termcolor
+elasticsearch
+tqdm
