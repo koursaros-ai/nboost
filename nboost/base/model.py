@@ -3,6 +3,7 @@ from .. import MODEL_MAP, PKG_PATH
 from .base import StatefulBase
 from .types import *
 from pathlib import Path
+from typing import List
 
 
 class BaseModel(StatefulBase):
