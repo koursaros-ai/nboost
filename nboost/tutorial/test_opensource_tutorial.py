@@ -1,5 +1,5 @@
 from nboost.cli import create_proxy
-from tutorials.cli import main
+from nboost.tutorial.cli import main
 import subprocess
 import unittest
 import requests
