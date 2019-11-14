@@ -2,7 +2,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from nboost.cli import add_default_args
 from nboost.proxy import Proxy
 from statistics import mean
-from benchmarks import api
+from nboost.benchmark import api
 from typing import List
 import termcolor
 import requests
