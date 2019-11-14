@@ -3,13 +3,13 @@
 Welcome to nboost's documentation!
 ==================================
 
-.. automodule::nboost
-    :members:
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+    modules.rst
 
+.. automodule:: nboost
+    :members:
 
 Indices and tables
 ==================
