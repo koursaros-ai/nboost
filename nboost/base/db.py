@@ -1,6 +1,6 @@
 from .base import StatefulBase
 from .types import *
-from typing import Tuple
+from typing import Tuple, List
 
 
 class BaseDb(StatefulBase):
