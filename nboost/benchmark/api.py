@@ -41,10 +41,10 @@ def msmarco(args) -> Benchmarker:
                     pbar.update(1)
 
     try:
-        if proxy_es.count(index=index)['count'] < 8 * 10 ** 6:
+        if direct_es.count(index=index)['count'] < 8 * 10 ** 6:
             raise elasticsearch.exceptions.NotFoundError
     except elasticsearch.exceptions.NotFoundError:
-        es_bulk_index(proxy_es, stream_msmarco_full())
+        es_bulk_index(direct_es, stream_msmarco_full())
 
     # BENCHMARK MSMARCO
     benchmarker = Benchmarker()
