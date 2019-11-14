@@ -26,15 +26,16 @@ setup(
         'inference',
     ],
     install_requires=[
-        'torch',
-        'transformers',
         'termcolor',
         'aiohttp',
         'requests',
-        'tensorflow',
         'elasticsearch',
         'tqdm'
     ],
+    extras_require={
+        'torch': ['torch', 'transformers'],
+        'tf': ['tensorflow'],
+    },
     entry_points={'console_scripts': [
         'nboost=nboost.cli.__main__:main',
         'nboost-tutorial=nboost.tutorials.cli:main',
