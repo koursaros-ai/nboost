@@ -2,6 +2,9 @@ import csv, os
 from elasticsearch import Elasticsearch
 from collections import defaultdict
 import time
+from nboost.base.helpers import *
+from nboost import PKG_PATH
+import pathlib
 
 INDEX = 'ms_marco'
 ES_HOST = 'localhost'
@@ -56,5 +59,15 @@ def benchmark_ms_marco():
                     print("MRR: %s " % mrr)
 
 
+def download_ms_marco():
+    data_dir = PKG_PATH.joinpath('./.data')
+    data_dir.mkdir()
+    file = data_dir.joinpath('collectionandqueries.tar.gz')
+    download_file('https://msmarco.blob.core.windows.net/msmarcoranking/collectionandqueries.tar.gz',file)
+    extract_tar_gz(file, data_dir)
+    file.rmdir()
+
+
 if __name__ == '__main__':
-    benchmark_ms_marco()
+    download_ms_marco()
+    # benchmark_ms_marco()
