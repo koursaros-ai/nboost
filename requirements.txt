@@ -2,6 +2,6 @@ requests
 aiohttp
 termcolor
 elasticsearch
-tensorflow
+tensorflow==1.15
 torch
-transformers==1.14
+transformers
