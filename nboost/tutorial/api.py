@@ -1,6 +1,6 @@
+from nboost.base.helpers import es_bulk_index
 from elasticsearch import Elasticsearch
-from .helpers import es_bulk_index
-from tutorials import RESOURCES
+from nboost.tutorial import RESOURCES
 
 
 def another_tutorial(args):

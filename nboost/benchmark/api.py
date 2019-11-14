@@ -1,84 +1,78 @@
+from nboost.benchmark.benchmarker import Benchmarker
 from nboost.base.helpers import *
 from nboost import PKG_PATH
-from nboost.tutorial.helpers import es_bulk_index
-import os, csv
-from collections import defaultdict
-from elasticsearch import Elasticsearch
-import time
+import csv
 
-INDEX = 'ms_marco'
-DATA_PATH = '.'
-TOPK = 10
 REQUEST_TIMEOUT = 10000
 
 
-def msmarco(args):
-    download_ms_marco()
-    es = Elasticsearch(host=args.es_host, port=args.es_port, timeout=REQUEST_TIMEOUT)
-    es_bulk_index(es, stream_msmarco_full(INDEX))
-    qrels = set()
-    qid_count = defaultdict(int)
-    qids = set()
+def msmarco(args) -> Benchmarker:
+    index = 'ms_marco'
+    url = 'https://msmarco.blob.core.windows.net/msmarcoranking/collectionandqueries.tar.gz'
+    dataset_dir = PKG_PATH.joinpath('.cache/datasets/ms_marco')
+    tar_gz_path = dataset_dir.joinpath('collectionandqueries.tar.gz')
+    qrels_tsv_path = dataset_dir.joinpath('qrels.dev.small.tsv')
+    queries_tsv_path = dataset_dir.joinpath('queries.dev.tsv')
+    collections_tsv_path = dataset_dir.joinpath('collection.tsv')
 
-    with open(os.path.join(DATA_PATH, 'qrels.dev.small.tsv')) as fh:
-        data = csv.reader(fh, delimiter='\t')
-        for qid, _, doc_id, _ in data:
-            qrels.add((qid, doc_id))
-            qids.add(qid)
+    # DOWNLOAD MSMARCO
+    if not dataset_dir.exists():
+        dataset_dir.mkdir(parents=True, exist_ok=True)
 
-    with open(os.path.join(DATA_PATH, 'queries.dev.tsv')) as fh:
-        data = csv.reader(fh, delimiter='\t')
-        total = 0
-        for qid, query in data:
-            if not qid in qids:
-                continue
-            total += 1
-            res = timeit(es.search, index=INDEX, body={
-                "size": TOPK,
-                "query": {
-                    "match": {
-                        "passage": {
-                            "query": query
-                        }
-                    }
-                }
-            }, filter_path=['hits.hits._*'])
+    if not dataset_dir.exists():
+        print('Dowloading MSMARCO to %s' % tar_gz_path)
+        download_file(url, tar_gz_path)
+        print('Extracting MSMARCO')
+        extract_tar_gz(tar_gz_path, dataset_dir)
+        tar_gz_path.unlink()
 
-            for rank, hit in enumerate(res['hits']['hits']):
-                if (qid, hit['_id']) in qrels:
-                    qid_count[qid] = max(qid_count[qid], (1.0 / (float(rank + 1))))
-                    mrr = sum(qid_count.values()) / total
-                    print("MRR: %s " % mrr)
+    # INDEX MSMARCO
+    proxy_es = Elasticsearch(host=args.host, port=args.port, timeout=REQUEST_TIMEOUT)
+    direct_es = Elasticsearch(host=args.ext_host, port=args.ext_port, timeout=REQUEST_TIMEOUT)
+
+    def stream_msmarco_full():
+        print('Optimizing streamer...')
+        num_lines = sum(1 for line in collections_tsv_path.open())
+        with collections_tsv_path.open() as fh:
+            data = csv.reader(fh, delimiter='\t')
+            with tqdm(total=num_lines, desc='INDEXING MSMARCO') as pbar:
+                for ident, passage in data:
+                    body = dict(_index=index, _id=ident, _source={'passage': passage})
+                    yield body
+                    pbar.update(1)
+
+    try:
+        if proxy_es.count(index=index)['count'] < 8 * 10 ** 6:
+            raise elasticsearch.exceptions.NotFoundError
+    except elasticsearch.exceptions.NotFoundError:
+        es_bulk_index(proxy_es, stream_msmarco_full())
+
+    # BENCHMARK MSMARCO
+    benchmarker = Benchmarker()
+
+    def es_doc_id_producer(es: Elasticsearch):
+        def querier(query: str):
+            body = dict(size=args.topk, query={"match": {"passage": {"query": query}}})
+            res = es.search(index=index, body=body, filter_path=['hits.hits._*'])
+            doc_ids = [hit['_id'] for hit in res['hits']['hits']]
+            return doc_ids
+        return querier
+
+    benchmarker.add_doc_id_producers(
+        es_doc_id_producer(proxy_es),
+        es_doc_id_producer(direct_es)
+    )
+
+    with qrels_tsv_path.open() as file:
+        qrels = csv.reader(file, delimiter='\t')
+        for qid, _, doc_id, _ in qrels:
+            benchmarker.add_qrel(qid, doc_id)
+
+    with queries_tsv_path.open() as file:
+        queries = csv.reader(file, delimiter='\t')
+        for qid, query in queries:
+            benchmarker.add_query(qid, query)
+
+    return benchmarker
 
 
-def timeit(fn, *args, **kwargs):
-    start = time.time()
-    res = fn(*args, **kwargs)
-    print("took %s seconds to run %s" % (time.time() - start, fn.__name__))
-    return res
-
-
-def download_ms_marco():
-    data_dir = PKG_PATH.joinpath('./.ms_marco')
-    if not data_dir.exists():
-        data_dir.mkdir()
-        file = data_dir.joinpath('collectionandqueries.tar.gz')
-        download_file('https://msmarco.blob.core.windows.net/msmarcoranking/collectionandqueries.tar.gz',file)
-        extract_tar_gz(file, data_dir)
-        file.unlink()
-
-
-def stream_msmarco_full(index):
-    with open('collection.tsv') as fh:
-        data = csv.reader(fh, delimiter='\t')
-        for id, passage in data:
-            body = {
-                "_index": index,
-                "_id": id,
-                "_source": {
-                    "passage": passage,
-                }
-            }
-            if int(id) % 10000 == 0:
-                print(f'Sent {id}: {passage}.')
-            yield body

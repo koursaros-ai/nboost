@@ -1,4 +1,4 @@
-from typing import Type, Tuple, Any
+from typing import Type, Tuple, Any, List
 from inspect import isawaitable
 from ..base import *
 import time
@@ -153,7 +153,6 @@ class Proxy(StatefulBase):
         self.server = server
 
     def start(self):
-        self.logger.critical('STARTING SERVER')
         self.server.start()
         self.server.is_ready.wait()
 

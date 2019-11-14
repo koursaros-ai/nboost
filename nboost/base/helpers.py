@@ -1,3 +1,6 @@
+from elasticsearch import Elasticsearch
+import elasticsearch.helpers
+from typing import Generator
 from pathlib import Path
 from tqdm import tqdm
 import requests
@@ -26,3 +29,10 @@ def extract_tar_gz(path: Path, to_dir: Path):
     tar.extractall(path=str(to_dir))
     tar.close()
     fileobj.close()
+
+
+def es_bulk_index(es: Elasticsearch, g: Generator):
+    for ok, response in elasticsearch.helpers.streaming_bulk(es, actions=g):
+        if not ok:
+            # failure inserting
+            print(response)
