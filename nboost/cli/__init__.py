@@ -1,10 +1,10 @@
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from .. import __version__, CLASS_MAP, PKG_PATH
 from nboost.proxy import Proxy
 from pathlib import Path
 from typing import List
 import importlib
 import termcolor
-import argparse
 
 
 def import_class(module: str, name: str):
@@ -15,13 +15,7 @@ def import_class(module: str, name: str):
         raise ImportError('Cannot locate %s with name "%s"' % (module, name))
 
 
-def get_args(argv: List[str] = None):
-    version = termcolor.colored('NBoost (v%s)' % __version__, 'cyan', attrs=['underline'])
-    parser = argparse.ArgumentParser(
-        description='%s: is a scalable, search-api-boosting platform for '
-                    'developing and deploying SOTA models to improve the '
-                    'relevance of search results..' % version,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+def add_default_args(parser: ArgumentParser) -> ArgumentParser:
     parser.add_argument('--verbose', action='store_true', default=False, help='turn on detailed logging')
     parser.add_argument('--host', type=str, default='127.0.0.1', help='host of the proxy')
     parser.add_argument('--port', type=int, default=8000, help='port of the proxy')
@@ -40,6 +34,17 @@ def get_args(argv: List[str] = None):
     parser.add_argument('--codex', type=lambda x: import_class('codex', x), default='ESCodex', help='codex class')
     parser.add_argument('--model', type=lambda x: import_class('model', x), default='BertModel', help='model class')
     parser.add_argument('--db', type=lambda x: import_class('db', x), default='HashDb', help='db class')
+    return parser
+
+
+def get_args(argv: List[str] = None):
+    version = termcolor.colored('NBoost (v%s)' % __version__, 'cyan', attrs=['underline'])
+    parser = ArgumentParser(
+        description='%s: is a scalable, search-api-boosting platform for '
+                    'developing and deploying SOTA models to improve the '
+                    'relevance of search results..' % version,
+        formatter_class=ArgumentDefaultsHelpFormatter)
+    add_default_args(parser)
     args = parser.parse_args(argv)
     return args
 
