@@ -47,9 +47,6 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 <a href = '#contact'>Contact us to request domain-specific models or leave feedback</a>
 
 <h2 align="center">Overview</h2>
-<p align="center">
-<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/overview.svg?sanitize=true" alt="system overview">
-
 
 Fine-tuned Models                       | Domain              | Search Boost<sup>[4]</sup> | Scoring Speed
 --------------------------------------- | ------------------- | -------------------------- | -----
