@@ -19,8 +19,6 @@ def msmarco(args) -> Benchmarker:
     # DOWNLOAD MSMARCO
     if not dataset_dir.exists():
         dataset_dir.mkdir(parents=True, exist_ok=True)
-
-    if not dataset_dir.exists():
         print('Dowloading MSMARCO to %s' % tar_gz_path)
         download_file(url, tar_gz_path)
         print('Extracting MSMARCO')
