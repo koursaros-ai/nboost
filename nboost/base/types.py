@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict
 from enum import Enum
 from requests.structures import CaseInsensitiveDict
 
@@ -24,7 +24,7 @@ class Request:
                  version: bytes,
                  headers: Dict[bytes, bytes],
                  body: bytes):
-        self.method: bytes = method
+        self.method = method
         self.path = path
         self.params = params
         self.version = version
