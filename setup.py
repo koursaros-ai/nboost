@@ -32,7 +32,8 @@ setup(
         'aiohttp',
         'requests',
         'tensorflow',
-        'elasticsearch'
+        'elasticsearch',
+        'tqdm'
     ],
     entry_points={'console_scripts': [
         'nboost=nboost.cli.__main__:main',

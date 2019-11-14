@@ -5,3 +5,4 @@ elasticsearch
 tensorflow==1.15
 torch
 transformers
+tqdm
