@@ -66,7 +66,7 @@ def download_ms_marco():
         file = data_dir.joinpath('collectionandqueries.tar.gz')
         download_file('https://msmarco.blob.core.windows.net/msmarcoranking/collectionandqueries.tar.gz',file)
         extract_tar_gz(file, data_dir)
-        file.remove()
+        file.unlink()
 
 
 if __name__ == '__main__':
