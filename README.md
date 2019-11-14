@@ -31,7 +31,7 @@
   <a href="#overview">Overview</a> •
   <a href="#install-nboost">Install</a> •
   <a href="#getting-started">Getting Started</a> •
-  <a href="#documentation">Documentation</a> •
+  <a href="https://nboost.readthedocs.io/">Documentation</a> •
   <a href="#tutorial">Tutorial</a> •
   <a href="#contributing">Contributing</a> •
   <a href="./CHANGELOG.md">Release Notes</a> •
@@ -47,9 +47,6 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 <a href = '#contact'>Contact us to request domain-specific models or leave feedback</a>
 
 <h2 align="center">Overview</h2>
-<p align="center">
-<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/overview.svg?sanitize=true" alt="system overview">
-
 
 Fine-tuned Models                       | Domain              | Search Boost<sup>[4]</sup> | Scoring Speed
 --------------------------------------- | ------------------- | -------------------------- | -----
