@@ -1,4 +1,4 @@
-from typing import Tuple, Callable, Iterable, Any
+from typing import Tuple, Callable, Iterable, Any, List
 from threading import Thread, Event
 from .base import StatefulBase
 from .types import *
