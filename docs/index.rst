@@ -3,7 +3,7 @@
 Welcome to nboost's documentation!
 ==================================
 
-.. automodule::nboost.base
+.. automodule::nboost
     :members:
 
 .. toctree::
