@@ -1,5 +1,6 @@
 from nboost.base.helpers import *
 from nboost import PKG_PATH
+from nboost.tutorial.helpers import es_bulk_index
 import os, csv
 from collections import defaultdict
 from elasticsearch import Elasticsearch
@@ -11,10 +12,10 @@ TOPK = 10
 REQUEST_TIMEOUT = 10000
 
 
-
 def msmarco(args):
     download_ms_marco()
     es = Elasticsearch(host=args.es_host, port=args.es_port, timeout=REQUEST_TIMEOUT)
+    es_bulk_index(es, stream_msmarco_full(INDEX))
     qrels = set()
     qid_count = defaultdict(int)
     qids = set()
@@ -57,7 +58,6 @@ def timeit(fn, *args, **kwargs):
     return res
 
 
-
 def download_ms_marco():
     data_dir = PKG_PATH.joinpath('./.ms_marco')
     if not data_dir.exists():
@@ -66,3 +66,19 @@ def download_ms_marco():
         download_file('https://msmarco.blob.core.windows.net/msmarcoranking/collectionandqueries.tar.gz',file)
         extract_tar_gz(file, data_dir)
         file.unlink()
+
+
+def stream_msmarco_full(index):
+    with open('collection.tsv') as fh:
+        data = csv.reader(fh, delimiter='\t')
+        for id, passage in data:
+            body = {
+                "_index": index,
+                "_id": id,
+                "_source": {
+                    "passage": passage,
+                }
+            }
+            if int(id) % 10000 == 0:
+                print(f'Sent {id}: {passage}.')
+            yield body
