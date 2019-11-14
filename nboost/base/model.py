@@ -35,15 +35,11 @@ class BaseModel(StatefulBase):
                 if tar_gz_path.exists():
                     self.logger.info('Found model cache in %s' % tar_gz_path)
                 else:
-                    w = tar_gz_path.open('wb+')
                     self.logger.info('Downloading "%s" finetuned model.' % model_dir)
-                    download_file(url, w)
-                    w.close()
+                    download_file(url, tar_gz_path)
 
-                r = tar_gz_path.open('rb')
                 self.logger.info('Extracting "%s" from %s' % (model_dir, tar_gz_path))
-                extract_tar_gz(r, self.data_dir)
-                r.close()
+                extract_tar_gz(tar_gz_path, self.data_dir)
 
                 if not self.model_dir.exists():
                     raise NotADirectoryError('Could not download finetuned model '

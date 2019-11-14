@@ -1,11 +1,12 @@
-from typing import Union, BinaryIO
+from typing import BinaryIO
 from pathlib import Path
 import requests
 import tarfile
 from tqdm import tqdm
 
 
-def download_file(url: str, fileobj: BinaryIO):
+def download_file(url: str, path: Path):
+    fileobj: BinaryIO = path.open('wb+')
     response = requests.get(url=url, stream=True)
     content_length = response.headers.get('content-length')
 
@@ -17,9 +18,12 @@ def download_file(url: str, fileobj: BinaryIO):
             fileobj.write(data)
             pbar.update(4096)
         pbar.close()
+    fileobj.close()
 
 
-def extract_tar_gz(fileobj: BinaryIO, data_dir: Union[str, Path]):
+def extract_tar_gz(path: Path, to_dir: Path):
+    fileobj: BinaryIO = path.open('rb')
     tar = tarfile.open(fileobj=fileobj)
-    tar.extractall(path=str(data_dir))
+    tar.extractall(path=str(to_dir))
     tar.close()
+    fileobj.close()
