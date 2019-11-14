@@ -60,12 +60,13 @@ def benchmark_ms_marco():
 
 
 def download_ms_marco():
-    data_dir = PKG_PATH.joinpath('./.data')
-    data_dir.mkdir()
-    file = data_dir.joinpath('collectionandqueries.tar.gz')
-    download_file('https://msmarco.blob.core.windows.net/msmarcoranking/collectionandqueries.tar.gz',file)
-    extract_tar_gz(file, data_dir)
-    file.rmdir()
+    data_dir = PKG_PATH.joinpath('./.ms_marco')
+    if not data_dir.exists():
+        data_dir.mkdir()
+        file = data_dir.joinpath('collectionandqueries.tar.gz')
+        download_file('https://msmarco.blob.core.windows.net/msmarcoranking/collectionandqueries.tar.gz',file)
+        extract_tar_gz(file, data_dir)
+        file.remove()
 
 
 if __name__ == '__main__':
