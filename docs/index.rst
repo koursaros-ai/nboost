@@ -1,15 +1,11 @@
 
-
-Welcome to nboost's documentation!
-==================================
+Welcome to nboost documentation
+======
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-    modules.rst
+   :maxdepth: 4
 
-.. automodule:: nboost
-    :members:
+   nboost
 
 Indices and tables
 ==================
