@@ -1,6 +1,6 @@
 from urllib.parse import urlparse, parse_qsl, urlencode
 from http.client import responses
-from typing import Tuple
+from typing import Tuple, List
 from ...base import *
 import gzip
 

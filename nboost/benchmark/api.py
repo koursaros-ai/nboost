@@ -17,8 +17,8 @@ def msmarco(args):
     es = Elasticsearch(host=args.es_host, port=args.es_port, timeout=REQUEST_TIMEOUT)
     es_bulk_index(es, stream_msmarco_full(INDEX))
     qrels = set()
-    qid_count = defaultdict(int)
     qids = set()
+    qid_count = defaultdict(int)
 
     with open(os.path.join(DATA_PATH, 'qrels.dev.small.tsv')) as fh:
         data = csv.reader(fh, delimiter='\t')

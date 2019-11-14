@@ -1,7 +1,7 @@
 from pprint import pformat
 from ..base import *
 import json as JSON
-from typing import Tuple
+from typing import Tuple, List
 import gzip
 
 
