@@ -31,7 +31,7 @@
   <a href="#overview">Overview</a> •
   <a href="#install-nboost">Install</a> •
   <a href="#getting-started">Getting Started</a> •
-  <a href="#documentation">Documentation</a> •
+  <a href="https://nboost.readthedocs.io/">Documentation</a> •
   <a href="#tutorial">Tutorial</a> •
   <a href="#contributing">Contributing</a> •
   <a href="./CHANGELOG.md">Release Notes</a> •
