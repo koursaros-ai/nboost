@@ -1,15 +1,7 @@
-
-Welcome to nboost documentation
+nboost
 ======
 
 .. toctree::
    :maxdepth: 4
 
    nboost
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
