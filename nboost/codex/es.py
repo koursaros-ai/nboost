@@ -1,8 +1,7 @@
+from typing import Tuple, List
 from pprint import pformat
 from ..base import *
-import json as JSON
-from typing import Tuple, List
-import gzip
+from json.decoder import JSONDecodeError
 
 
 class ElasticsearchError(Exception):
@@ -10,7 +9,7 @@ class ElasticsearchError(Exception):
 
 
 class ESCodex(BaseCodex):
-    SEARCH = (rb'/.*/_search', [b'GET'])
+    SEARCH = ('/.*/_search', ['GET'])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,23 +22,23 @@ class ESCodex(BaseCodex):
         # try to get the nested size and otherwise default to 10
         try:
             # check request parameters
-            return Topk(req.params[b'size'])
+            return Topk(req.params['size'])
         except KeyError:
             pass
 
         # if not in params and no req body then return default
-        if req.body:
-            body = JSON.loads(req.body)
-        else:
+        try:
+            json = req.json
+        except JSONDecodeError:
             return Topk(10)
 
         try:
-            return Topk(body['size'])
+            return Topk(json['size'])
         except KeyError:
             pass
 
         try:
-            return Topk(body['collapse']['inner_hits']['size'])
+            return Topk(json['collapse']['inner_hits']['size'])
         except KeyError:
             pass
 
@@ -49,55 +48,60 @@ class ESCodex(BaseCodex):
     def magnify(self, req: Request, topk: Topk) -> None:
         mtopk = topk * self.multiplier
         topk_is_set = False
-        body = req.body
 
-        if body:
-            body = JSON.loads(req.body)
+        if req.body:
+            json = req.json
 
-            if 'size' in body:
-                body['size'] = mtopk
+            if 'size' in json:
+                json['size'] = mtopk
                 topk_is_set = True
 
             try:
                 # if it's in inner hits set to topk
-                _ = body['collapse']['inner_hits']['size']
-                body['collapse']['inner_hits']['size'] = mtopk
+                _ = json['collapse']['inner_hits']['size']
+                json['collapse']['inner_hits']['size'] = mtopk
                 topk_is_set = True
             except KeyError:
                 pass
 
-            req.body = JSON.dumps(body).encode()
+            req.json = json
 
         if not topk_is_set:
-            req.params[b'size'] = str(mtopk).encode()
+            req.params['size'] = str(mtopk)
 
     def parse(self, req: Request, res: Response) -> Tuple[Query, List[Choice]]:
         if res.status >= 400:
             raise ElasticsearchError(res.body)
 
-        if b'q' in req.params:
-            query = req.params[b'q'].split(b':')[-1]
-        elif req.body:
-            body = JSON.loads(req.body)
+        query = None
+
+        if 'q' in req.params:
+            query = req.params['q']
+            query = query[query.find(':') + 1:]
+
+        try:
+            json = req.json
             try:
-                query = body['query']['match'][self.field]
+                query = json['query']['match'][self.field]
                 if isinstance(query, dict):
                     query = query['query']
-                query = query.encode()
             except KeyError:
-                raise ValueError('Missing query')
+                pass
 
-        else:
+        except JSON.JSONDecodeError:
+            pass
+
+        if query is None:
             raise ValueError('Missing query')
 
-        hits = JSON.loads(res.body).get('hits', [])
+        hits = res.json.get('hits', [])
         choices = []
         for hit in hits.get('hits', []):
             choices += [Choice(
-                hit['_source'][self.field].encode(), ident=hit['_id']
+                hit['_source'][self.field].encode(), ident=hit['_id'].encode()
             )]
 
-        return Query(query), choices
+        return Query(query.encode()), choices
 
     def pack(self,
              topk: Topk,
@@ -110,36 +114,39 @@ class ESCodex(BaseCodex):
         res.body = JSON.dumps(body).encode()
 
     def pluck(self, req: Request) -> Tuple[Qid, List[Cid]]:
-        body = JSON.loads(req.body) if req.body else {}
+        body = req.json if req.body else {}
         if '_nboost' in body:
-            qid = Qid(body['_nboost'], 'utf8')
-        elif b'_nboost' in req.params:
-            qid = req.params[b'_nboost']
+            qid = body['_nboost']
+        elif '_nboost' in req.params:
+            qid = req.params['_nboost']
         else:
             raise ValueError('_nboost not found')
 
         if '_id' in body:
-            cids = [Cid(body['_id'], 'utf8')]
-        elif b'_id' in req.params:
-            cids = [Cid(req.params[b'_id'])]
+            cids = [body['_id']]
+        elif '_id' in req.params:
+            cids = [req.params['_id']]
         elif '_ids' in body:
-            cids = [Cid(cid) for cid in body['_ids']]
-        elif b'_ids' in req.params:
-            cids = [Cid(cid) for cid in req.params[b'_ids']]
+            cids = body['_ids']
+        elif '_ids' in req.params:
+            cids = req.params['_ids']
         else:
             raise ValueError('_id not found')
 
-        return Qid(qid), cids
+        return Qid(qid, 'utf8'), [Cid(cid, 'utf8') for cid in cids]
 
     def ack(self, qid: Qid, cids: List[Cid]) -> Response:
         cids = [cid.decode() for cid in cids]
-        body = JSON.dumps(dict(_nboost=qid.decode(), _ids=cids))
-        return Response(b'HTTP/1.1', 200, {}, body.encode())
+        response = Response()
+        response.json = dict(_nboost=qid.decode(), _ids=cids)
+        return response
 
     def catch(self, e: Exception) -> Response:
-        body = JSON.dumps(dict(error=repr(e), type=type(e).__name__)).encode()
-        return Response(b'HTTP/1.1', 500, {}, body)
+        response = Response()
+        response.json = dict(error=repr(e), type=type(e).__name__)
+        response.status = 500
+        return response
 
     def pulse(self, state: dict) -> Response:
-        return Response(b'HTTP/1.1', 200, {}, pformat(state).encode())
+        return Response(body=pformat(state).encode())
 

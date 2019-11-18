@@ -1,5 +1,4 @@
 from aiohttp import web, web_exceptions, client
-from urllib.parse import urlencode
 from typing import Callable
 from ..base import *
 import aiohttp
@@ -16,7 +15,7 @@ class AioHttpServer(BaseServer):
         self.app = web.Application(middlewares=[self.middleware])
         for path, methods, f in routes:
             for method in methods:
-                self.app.add_routes([web.route(method.decode(), path.decode(), f)])
+                self.app.add_routes([web.route(method, path, f)])
         self.not_found_handler = not_found_handler
 
     async def run_app(self):
@@ -33,9 +32,10 @@ class AioHttpServer(BaseServer):
     @staticmethod
     async def format_client_response(
             response: client.ClientResponse) -> Response:
-        headers = dict(response.headers)
-        headers['Content-Type'] = 'application/json'
-        return Response(headers, await response.read(), response.status)
+        return Response(
+            headers=dict(response.headers),
+            body=await response.read(),
+            status=response.status)
 
     @web.middleware
     async def middleware(self, request: web.BaseRequest,
@@ -43,12 +43,12 @@ class AioHttpServer(BaseServer):
         try:
             self.logger.info(request)
             req = Request(
-                request.method.encode(),
-                request.path.encode(),
-                dict(request.query),
-                ('HTTP/%s.%s' % request.version).encode(),
-                dict(request.headers),
-                await request.read())
+                method=request.method,
+                path=request.path,
+                params=dict(request.query),
+                headers=dict(request.headers),
+                body=await request.read())
+
             res = await handler(req)
             return web.Response(
                 headers=res.headers,
@@ -58,27 +58,14 @@ class AioHttpServer(BaseServer):
             return await self.not_found_handler(request)
 
     async def ask(self, req):
-        url = 'http://%s:%s%s?%s' % (
-            self.ext_host, self.ext_port, req.path, urlencode(req.params))
-        headers = dict(req.headers)
-        headers['Content-Type'] = 'application/json'
-
-        async with aiohttp.request(str(req.method), url, data=req.body,
-                                   headers=headers) as response:
+        async with aiohttp.request(
+                req.method,
+                'http://%s:%s%s' % (self.ext_host, self.ext_port, req.url),
+                data=req.body,
+                headers=req.headers) as response:
             return await self.format_client_response(response)
 
     async def forward(self, req: web.BaseRequest):
-        url = 'http://%s:%s' % (self.ext_host, self.ext_port)
+        url = 'http://%s:%s%s' % (self.ext_host, self.ext_port, req.url)
         raise web.HTTPTemporaryRedirect(url)
-        # async with aiohttp.ClientSession() as session:
-        #     headers = dict(req.headers)
-        #     headers['Content-Type'] = 'application/json'
-        #     async with session.request(
-        #             req.method,
-        #             url + req.path + '?' + req.query_string,
-        #             headers=headers,
-        #             data=await req.read()) as resp:
-        #
-        #         return web.Response(
-        #             status=resp.status,
-        #             body=await resp.content.read())
+

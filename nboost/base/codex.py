@@ -14,12 +14,12 @@ class BaseCodex(StatefulBase):
     Any other path/route will be proxied through. Paths/routes are defined as
     {path => route} below.
     """
-    SEARCH = (b'/search', [b'GET'])
-    TRAIN = (b'/train', [b'POST'])
-    STATUS = (b'/status', [b'GET'])
+    SEARCH = ('/search', ['GET'])
+    TRAIN = ('/train', ['POST'])
+    STATUS = ('/status', ['GET'])
 
     # for testing
-    ERROR = (b'/error', [b'POST'])
+    ERROR = ('/error', ['POST'])
 
     def __init__(self, multiplier: int = 10, field: str = None, **kwargs):
         super().__init__(**kwargs)

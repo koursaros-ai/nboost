@@ -1,8 +1,7 @@
-from urllib.parse import urlparse, parse_qsl, urlencode
-from http.client import responses
-from typing import Tuple, List
-from ...base import *
-import gzip
+from urllib.parse import parse_qsl
+from httptools import parse_url
+from ...base.types import *
+from typing import Union
 
 GZIP = b'gzip'
 CRLF = b'\r\n'
@@ -10,88 +9,62 @@ COLON = b': '
 SPACE = b' '
 QMARK = b'?'
 WILDCARD = b'*'
-ENCODING = b'content-encoding'
-CORS = b'access-control-allow-origin'
-LENGTH = b'content-length'
+ENCODING = b'Content-Encoding'
+ACCEPTS = b'Accept-Encoding'
+CORS = b'Access-Control-Allow-Origin'
+LENGTH = b'Content-Length'
+HTTP1_1 = b'HTTP/1.1'
 
 
-def parse_http_message(b: bytes) -> Tuple[bytes, dict, bytes]:
-    """Returns the first line, headers, and body"""
-    idx = b.find(CRLF * 2)
-    body = b[idx + len(CRLF * 2):]
-    prebody = b[:idx].split(CRLF)
-    headers = list(reversed(prebody))
-    first_line = headers.pop()
-    headers = dict([h.split(COLON) for h in headers])
-    return first_line, headers, body
+class HttpProtocol:
+    def __init__(self, msg: Union[Request, Response]):
+        self.msg = msg
+        self.complete = False
+
+    def on_message_begin(self):
+        pass
+
+    def on_url(self, url: bytes):
+        url = parse_url(url)
+        self.msg.path = url.path.decode()
+        query = url.query
+        self.msg.params = dict(parse_qsl(query.decode())) if query else {}
+
+    def on_header(self, name: bytes, value: bytes):
+        self.msg.headers[name.decode()] = value.decode()
+
+    def on_headers_complete(self):
+        pass
+
+    def on_body(self, body: bytes):
+        self.msg.body += body
+
+    def on_message_complete(self):
+        self.complete = True
+
+    def on_chunk_header(self):
+        pass
+
+    def on_chunk_complete(self):
+        pass
+
+    def on_status(self, status: bytes):
+        pass
 
 
-def format_http_message(first_line: bytes, headers: dict, body: bytes) -> bytes:
-    """Formats http message into bytes. Field names are lowercased."""
-    headers = CRLF.join([k.lower()+COLON+v for k, v in headers.items()])
-    return first_line + CRLF + headers + CRLF * 2 + body
+def prepare_request(request: Request) -> bytes:
+    return '{method} {url} {version}{headers}\r\n\r\n'.format(
+        method=request.method,
+        url=request.url,
+        version=request.version,
+        headers=''.join('\r\n%s: %s'%(k,v)for k,v in request.headers.items())
+    ).encode() + request.body
 
 
-# REQUESTS
-
-def parse_start_line(start_line: bytes) -> List[bytes]:
-    """Parse start line of http request to method, target, version"""
-    return start_line.split()
-
-
-def format_start_line(method: bytes, path: bytes, params: dict, version: bytes) -> bytes:
-    """Format start line for http requests"""
-    target = path
-    if params:
-        target += QMARK + urlencode(params).encode()
-    return method + SPACE + target + SPACE + version
-
-
-def bytes_to_request(b: bytes) -> Request:
-    start_line, headers, body = parse_http_message(b)
-    method, target, version = parse_start_line(start_line)
-    url = urlparse(target)
-    path = url.path
-    params = dict(parse_qsl(url.query))
-
-    return Request(method, path, params, version, headers, body)
-
-
-def request_to_bytes(req: Request) -> bytes:
-    start_line = format_start_line(req.method, req.path, req.params, req.version)
-    return format_http_message(start_line, req.headers, req.body)
-
-
-# RESPONSES
-
-def parse_status_line(status_line: bytes) -> Tuple[bytes, int]:
-    """Parse the status line of an http response to version and status"""
-    status_line = status_line.split()
-    return status_line[0], int(status_line[1])
-
-
-def format_status_line(version: bytes, status: int):
-    return version + SPACE + str(status).encode() + SPACE + responses[status].encode()
-
-
-def bytes_to_response(b: bytes) -> Response:
-    first_line, headers, body = parse_http_message(b)
-    version, status = parse_status_line(first_line)
-
-    if headers.get(ENCODING, None) == GZIP:
-        body = gzip.decompress(body)
-
-    return Response(version, status, headers, body)
-
-
-def response_to_bytes(res: Response) -> bytes:
-    status_line = format_status_line(res.version, res.status)
-    body = res.body
-
-    res.headers[CORS] = WILDCARD
-    res.headers[LENGTH] = str(len(body)).encode()
-
-    if res.headers.get(ENCODING, None) == GZIP:
-        body = gzip.compress(body)
-
-    return format_http_message(status_line, res.headers, body)
+def prepare_response(response: Response) -> bytes:
+    return '{version} {status} {reason}{headers}\r\n\r\n'.format(
+        version=response.version,
+        status=response.status,
+        reason=response.reason,
+        headers=''.join('\r\n%s: %s'%(k,v)for k,v in response.headers.items())
+    ).encode() + response.body

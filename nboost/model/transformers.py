@@ -15,6 +15,7 @@ class TransformersModel(BaseModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.download()
         self.train_steps = 0
         self.checkpoint_steps = 500
         self.model_ckpt = str(self.model_dir.name)

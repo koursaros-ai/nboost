@@ -1,6 +1,7 @@
 from typing import Type, Any
 from inspect import isawaitable
 from ..base import *
+import functools
 import time
 
 
@@ -59,6 +60,7 @@ class Proxy(StatefulBase):
             cls = self.__class__.__name__ if is_proxy else f.__self__.__class__.__name__
             ident = (cls, f.__name__)
 
+            @functools.wraps(f)
             async def decorator(*args):
                 try:
                     start = time.perf_counter()
@@ -137,10 +139,11 @@ class Proxy(StatefulBase):
             return state
 
         @track
-        async def not_found(_1: Any) -> Any:
+        async def not_found(*_1: Any) -> Any:
             """What to do when none of the paths given to the server match
             the path requested by the client."""
-            _2 = await track(server.forward)(_1)
+            # pass the context from the server to forward()
+            _2 = await track(server.forward)(*_1)
             return _2
 
         # create functional routes for the server

@@ -34,7 +34,7 @@ class BaseServer(StatefulBase, Thread):
         return dict(ext_host=self.ext_host, ext_port=self.ext_port)
 
     def create_app(self,
-                   routes: Iterable[Tuple[bytes, List[bytes], Callable]],
+                   routes: Iterable[Tuple[str, List[str], Callable]],
                    not_found_handler: Callable):
         """function to run a web server given a dictionary of routes. Instead
         of handling 404 cases within the server, call the not_found handlers
@@ -62,12 +62,12 @@ class BaseServer(StatefulBase, Thread):
         """ Make the magnified request to the server api. """
         raise NotImplementedError
 
-    async def forward(self, req: Any) -> Any:
+    async def forward(self, *context: Any) -> Any:
         """ forward a request to the external host """
         raise NotImplementedError
 
     def run(self):
-        self.logger.critical('STARTING PROXY')
+        self.logger.critical('STARTING SERVER')
         self.loop.run_until_complete(self.run_app())
         self.is_ready.set()
         self.logger.critical('LISTENING: %s' % self.id)
@@ -75,7 +75,7 @@ class BaseServer(StatefulBase, Thread):
         self.is_ready.clear()
 
     def stop(self):
-        self.logger.critical('STOPPING PROXY')
+        self.logger.critical('STOPPING SERVER')
         asyncio.run_coroutine_threadsafe(self.close(), self.loop).result()
         if not self.loop.is_closed():
             self.loop.call_soon_threadsafe(self.loop.stop)

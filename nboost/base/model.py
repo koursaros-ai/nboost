@@ -21,6 +21,7 @@ class BaseModel(StatefulBase):
         self.data_dir = data_dir
         self.model_dir = data_dir.joinpath(model_dir).absolute()
 
+    def download(self):
         # make sure data directory exists
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
@@ -29,17 +30,17 @@ class BaseModel(StatefulBase):
         else:
             self.logger.info('Did not find model cache in %s' % self.model_dir)
 
-            if model_dir in MODEL_MAP:
-                url = MODEL_MAP[model_dir]
+            if self.model_dir in MODEL_MAP:
+                url = MODEL_MAP[self.model_dir]
 
                 tar_gz_path = self.data_dir.joinpath(Path(url).name)
                 if tar_gz_path.exists():
                     self.logger.info('Found model cache in %s' % tar_gz_path)
                 else:
-                    self.logger.info('Downloading "%s" finetuned model.' % model_dir)
+                    self.logger.info('Downloading "%s" finetuned model.' % self.model_dir)
                     download_file(url, tar_gz_path)
 
-                self.logger.info('Extracting "%s" from %s' % (model_dir, tar_gz_path))
+                self.logger.info('Extracting "%s" from %s' % (self.model_dir, tar_gz_path))
                 extract_tar_gz(tar_gz_path, self.data_dir)
 
                 if not self.model_dir.exists():
@@ -48,11 +49,7 @@ class BaseModel(StatefulBase):
             else:
                 self.logger.warning('Could not find finetuned model "%s" in '
                                     '%s. Falling back to pytorch/tf resolution' % (
-                                    model_dir, MODEL_MAP.keys()))
-
-    def post_start(self):
-        """ Executes after the process forks """
-        pass
+                                    self.model_dir, MODEL_MAP.keys()))
 
     def state(self):
         return dict(lr=self.lr, data_dir=self.data_dir)

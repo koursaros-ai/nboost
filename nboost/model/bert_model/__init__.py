@@ -10,6 +10,7 @@ class BertModel(BaseModel):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.download()
 
         self.output_q = Queue()
         self.input_q = Queue()

@@ -11,14 +11,16 @@ class TestAioHttpServer(unittest.TestCase):
         server = AioHttpServer(port=6000, ext_port=5900, verbose=True)
 
         async def get_stuff(req):
-            return Response(b'HTTP/1.1', 200, {}, JSON.dumps(dict(heres='stuff')).encode())
+            response = Response()
+            response.json = dict(heres='stuff')
+            return response
 
         async def send_stuff(req):
-            return Response(b'HTTP/1.1', 200, {}, b'I got ' + req.body)
+            return Response(body=b'I got ' + req.body)
 
         server.create_app([
-            (b'/get_stuff', [b'GET'], get_stuff),
-            (b'/send_stuff', [b'POST'], send_stuff),
+            ('/get_stuff', ['GET'], get_stuff),
+            ('/send_stuff', ['POST'], send_stuff),
         ], not_found_handler=lambda x: print(x))
 
         server.start()
@@ -30,6 +32,7 @@ class TestAioHttpServer(unittest.TestCase):
 
         res = requests.post('http://localhost:6000/send_stuff', data=b'an avocado')
         self.assertTrue(res.ok)
+        print(res.content)
 
         server.stop()
         server.join()

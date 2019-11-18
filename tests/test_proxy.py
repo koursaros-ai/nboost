@@ -15,14 +15,14 @@ class TestProxy(unittest.TestCase):
         server = AioHttpServer(port=9500, verbose=True)
 
         async def search(req):
-            return Response(b'HTTP/1.1', 200, {}, result_json)
+            return Response(body=result_json)
 
         async def only_on_server(req):
-            return Response(b'HTTP/1.1', 200, {}, req.body)
+            return Response(body=req.body)
 
         server.create_app([
-            (b'/mock_index/_search', [b'GET'], search),
-            (b'/only_on_server', [b'POST'], only_on_server),
+            ('/mock_index/_search', ['GET'], search),
+            ('/only_on_server', ['POST'], only_on_server),
         ], not_found_handler=lambda x: x)
 
         proxy = create_proxy([
