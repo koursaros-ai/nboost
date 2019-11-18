@@ -30,7 +30,8 @@ setup(
         'aiohttp',
         'requests',
         'elasticsearch',
-        'tqdm'
+        'tqdm',
+        'httptools'
     ],
     extras_require={
         'torch': ['torch', 'transformers'],
