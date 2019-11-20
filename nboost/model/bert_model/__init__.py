@@ -183,15 +183,14 @@ class BertModel(BaseModel):
             return candidates
 
     def rank(self, query, choices):
-        import pdb
-        pdb.set_trace()
+        actual_length = len(choices)
         candidates = self.pad(choices)
         self.input_q.put((query, choices))
 
-        results = [self.output_q.get() for _ in range(len(candidates))][:len(choices)]
+        results = [self.output_q.get() for _ in range(len(candidates))][:actual_length]
         log_probs, labels = zip(*results)
         log_probs = np.stack(log_probs).reshape(-1, 2)
         scores = log_probs[:, 1]
-        assert len(scores) == len(choices)
+        assert len(scores) == actual_length
         return scores.argsort()[::-1]
 
