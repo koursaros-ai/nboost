@@ -190,5 +190,6 @@ class BertModel(BaseModel):
         log_probs, labels = zip(*results)
         log_probs = np.stack(log_probs).reshape(-1, 2)
         scores = log_probs[:, 1]
+        assert len(scores) == len(choices)
         return scores.argsort()[::-1]
 
