@@ -15,12 +15,10 @@ class BertModel(BaseModel):
         self.output_q = Queue()
         self.input_q = Queue()
 
-        ckpts = self.model_dir.glob('*.ckpt.*')
-        if not len(list(ckpts)) > 0:
+        ckpts = list(self.model_dir.glob('*.ckpt.*'))
+        if not len(ckpts) > 0:
             raise FileNotFoundError("Tensorflow model not found")
-        import pdb
-        pdb.set_trace()
-        self.checkpoint = str(list(ckpts)[0]).split('.ckpt')[0] + '.ckpt'
+        self.checkpoint = str(ckpts[0]).split('.ckpt')[0] + '.ckpt'
         self.vocab_file = str(self.model_dir.joinpath('vocab.txt'))
         self.bert_config_file = str(self.model_dir.joinpath('bert_config.json'))
 
