@@ -42,6 +42,8 @@ class ESProtocol(BaseProtocol):
             if not self.topk:
                 self.topk = 10
                 self.request.url.query['size'] = str(self.topk * self.multiplier)
+            else:
+                self.request.body = JSON.dumps(json).encode()
 
             try:
                 self.query = json['query']['match'][self.field]
