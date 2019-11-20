@@ -30,7 +30,7 @@ class BaseModel:
         else:
             self.logger.info('Did not find model cache in %s' % self.model_dir)
 
-            if self.model_dir in MODEL_MAP:
+            if self.model_dir.name in MODEL_MAP:
                 url = MODEL_MAP[self.model_dir.name]
 
                 tar_gz_path = self.data_dir.joinpath(Path(url).name)
