@@ -1,164 +1,205 @@
-from typing import Type, Any
-from inspect import isawaitable
+from threading import Thread, Event, get_ident
+from httptools import HttpParserError, HttpRequestParser, HttpResponseParser
+from typing import Type
 from ..base import *
-import functools
+import socket
+import json
 import time
 
 
-class Proxy(StatefulBase):
-    def __init__(self,
-                 server: Type[BaseServer] = BaseServer,
-                 model: Type[BaseModel] = BaseModel,
-                 codex: Type[BaseCodex] = BaseCodex,
-                 db: Type[BaseDb] = BaseDb,
-                 **kwargs):
-        """The proxy object is the core of NBoost. It has four components:
-        the model, server, db, and codex. The role of the proxy is to
-        construct each component and create the route callback(search,
-        train, status, not_found, and error).
+class SocketServer(Thread):
+    def __init__(self, host: str = 'localhost', port: int = 8000,
+                 backlog: int = 100, workers: int = 10, **kwargs):
+        super().__init__()
+        self.address = (host, port)
+        self.backlog = backlog
+        self.workers = workers
+        self.is_ready = Event()
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.logger = set_logger(self.__class__.__name__)
 
-        Each route callback is assigned a url path by the codex and then
-        handed to the server to execute when it receives the respective url
-        path request.The following __init__ contains the main executed
-        functions in nboost.
+    def worker(self):
+        ident = get_ident()
+        try:
+            while True:
+                client_socket, address = self.sock.accept()
+                self.logger.info('{}: Request {}:{}'.format(ident, *address))
+                self.loop(client_socket)
+
+        except (ConnectionAbortedError, OSError):
+            self.logger.info('Stopping worker %s' % get_ident())
+
+    def loop(self, client_socket: socket.socket) -> None:
+        raise NotImplementedError
+
+    def run(self):
+        self.sock.bind(self.address)
+        self.sock.listen(self.backlog)
+        self.logger.info('Starting %s workers...' % self.workers)
+        self.logger.critical('Listening on %s:%s...' % self.address)
+        threads = []
+
+        try:
+            for i in range(self.workers):
+                t = Thread(target=self.worker)
+                t.start()
+                threads.append(t)
+
+            self.is_ready.set()
+
+            for t in threads:
+                t.join()
+
+        finally:
+            self.sock.close()
+
+    def close(self):
+        self.sock.close()
+        self.join()
+
+
+class Proxy(SocketServer):
+    def __init__(self, model: Type[BaseModel], protocol: Type[BaseProtocol],
+                 uhost: str = 'localhost', uport: int = 9200,
+                 bufsize: int = 2048, multiplier: int = 5, field: str = 'text',
+                 **kwargs):
+        """The proxy object is the core of NBoost.
+        The following __init__ contains the main executed functions in nboost.
 
         :param host: virtual host of the server.
         :param port: server port.
-        :param ext_host: host of the external search api.
-        :param ext_port: search api port.
-        :param lr: learning rate of the model.
-        :param model_ckpt: checkpoint for loading initial model
-        :param max_seq_len: max combined token length
-        :param batch_size: batch size for running through rerank model
-        :param data_dir: data directory to cache the model.
+        :param uhost: host of the external search api.
+        :param uport: search api port.
         :param multiplier: the factor to multiply the search request by. For
             example, in the case of Elasticsearch if the client requests 10
             results and the multiplier is 6, then the model should receive 60
             results to rank and refine down to 10 (better) results.
         :param field: a tag for the field in the search api result that the
             model should rank results by.
-        :param server: uninitialized server class
         :param model: uninitialized model class
-        :param codex: uninitialized codex class
-        :param db: uninitialized db class
+        :param protocol: uninitialized protocol class
         """
-        super().__init__(**kwargs)
+        super().__init__()
         self.kwargs = kwargs
+        self.uhost = uhost
+        self.uport = uport
+        self.bufsize = bufsize
+        self.multiplier = multiplier
+        self.field = field
+        self.logger = set_logger(model.__name__)
 
         # pass command line arguments to instantiate each component
-        server = server(**kwargs)
-        model = model(**kwargs)
-        codex = codex(**kwargs)
-        db = db(**kwargs)
+        self.model = model(**kwargs)
+        self.Protocol = protocol
 
-        def track(f: Any):
-            """Tags and times each component for benchmarking purposes. The
-            data generated by track() is sent to the db who decides what to do
-            with it (e.g. log, add to /status, etc...)"""
+        # for status requests
+        self.status = dict(bench={}, description='NBoost, for search ranking.')
 
-            is_proxy = False if hasattr(f, '__self__') else True
-            cls = self.__class__.__name__ if is_proxy else f.__self__.__class__.__name__
-            ident = (cls, f.__name__)
+    def loop(self, client_socket: socket.socket):
+        protocol = self.Protocol(self.multiplier, self.field)
+        request_handler = RequestHandler(protocol)
+        response_handler = ResponseHandler(protocol)
+        server_socket = socket.socket()
+        time_context = TimeContext(self.status['bench'])
+        unhandled = None
 
-            @functools.wraps(f)
-            async def decorator(*args):
-                try:
-                    start = time.perf_counter()
-                    res = f(*args)
-                    ret = await res if isawaitable(res) else res
-                    ms = (time.perf_counter() - start) * 1000
-                    db.lap(ms, *ident)
-                except Exception as e:
-                    # reraise if not proxy to escape route
-                    if not is_proxy:
-                        raise e
+        with time_context('server_connect'):
+            server_socket.connect((self.uhost, self.uport))
 
-                    self.logger.error(repr(e), exc_info=True)
-                    ret = codex.catch(e)
-                return ret
-            return decorator
+        try:
+            with time_context('client_recv'):
+                while not request_handler.is_done:
+                    request_handler.feed(client_socket.recv(self.bufsize))
 
-        @track
-        async def search(request: Request) -> Response:
-            """The role of the search route is to take a request from the
-            client, balloon it by the multipler and ask for that larger request
-            from the search api, then filter the larger results with the
-            model to return better results. """
+            self.logger.info(protocol.request)
 
-            # Codex figures out how many results the client wants.
-            topk = await track(codex.topk)(request)
+            with time_context('server_send'):
+                request = protocol.request.prepare()
+                server_socket.send(request)
 
-            # Codex alters the request to make a larger one.
-            await track(codex.magnify)(request, topk)
+            with time_context('server_recv'):
+                while not response_handler.is_done:
+                    response_handler.feed(server_socket.recv(self.bufsize))
 
-            # The server asks the search api for the larger request.
-            response = await track(server.ask)(request)
+            with time_context('model_rank'):
+                ranks = self.model.rank(protocol.query, protocol.choices)
 
-            # The codex parses out the query from the amplified req and res.
-            query, choices = await track(codex.parse)(request, response)
+            protocol.on_rank(ranks)
+            response = protocol.response.prepare()
 
-            # the model adds a rank to each of the choices
-            await track(model.rank)(query, choices)
+            with time_context('client_send'):
+                client_socket.send(response)
 
-            # the db saves the query and choices, and assigns query ids
-            # and choice ids if they we're not previously assigned (for train)
-            await track(db.save)(query, choices)
+        except HttpParserError as e:
+            if isinstance(e.__context__, StatusRequest):
+                self.logger.info(protocol.request)
+                protocol.response.body = json.dumps(self.status, indent=2).encode()
+                response = protocol.response.prepare()
+                client_socket.send(response)
 
-            # the codex formats the new (nboosted) response with the context
-            # from the entire search pipeline.
-            await track(codex.pack)(topk, response, query, choices)
-            return response
+            elif isinstance(e.__context__, UnknownRequest):
+                self.logger.info(protocol.request)
+                proxy_request_handler = BaseHandler(HttpRequestParser)
+                proxy_request_handler.feed(request_handler.buffer)
+                proxy_response_handler = BaseHandler(HttpResponseParser)
 
-        @track
-        async def train(request: Request) -> Response:
-            """The role of the train route is to receive a query id and choice
-            id from the client and train the model to choose that one next
-            time for lack of better words."""
+                with time_context('proxy_send'):
+                    server_socket.send(request_handler.buffer)
+                    while not proxy_request_handler.is_done:
+                        data = client_socket.recv(self.bufsize)
+                        proxy_request_handler.feed(data)
+                        server_socket.send(data)
 
-            # Parse out the query id and choice id(s) from the client request.
-            qid, cids = await track(codex.pluck)(request)
+                with time_context('proxy_recv'):
+                    while not proxy_response_handler.is_done:
+                        data = server_socket.recv(self.bufsize)
+                        proxy_response_handler.feed(data)
+                        client_socket.send(data)
 
-            # Db retrieves the content it saved during search(). It also
-            # assigns a label to each choice based on the clients request.
-            query, choices = await track(db.get)(qid, cids)
-            await track(model.train)(query, choices)
+                server_socket.close()
+            else:
+                self.logger.error(repr(e.__context__), exc_info=True)
+                unhandled = e.__context__
 
-            # acknowledge that the request was sent to the model
-            response = await track(codex.ack)(qid, cids)
-            return response
+        except Exception as e:
+            self.logger.error(repr(e), exc_info=True)
+            unhandled = e
 
-        @track
-        async def status(_1: Request) -> Response:
-            """Status() chains the state from each component in order to
-            return a formatted dictionary for /status"""
-            state = server.chain_state({})
-            state = codex.chain_state(state)
-            state = model.chain_state(state)
-            state = db.chain_state(state)
-            state = codex.pulse(state)
-            return state
+        finally:
+            if unhandled:
+                protocol.on_error(unhandled)
+                response = protocol.response.prepare()
+                client_socket.send(response)
 
-        @track
-        async def not_found(*_1: Any) -> Any:
-            """What to do when none of the paths given to the server match
-            the path requested by the client."""
-            # pass the context from the server to forward()
-            _2 = await track(server.forward)(*_1)
-            return _2
+            if client_socket:
+                client_socket.close()
+            if server_socket:
+                server_socket.close()
 
-        # create functional routes for the server
-        server.create_app([
-            codex.SEARCH + (search,),
-            codex.TRAIN + (train,),
-            codex.STATUS + (status,),
-        ], not_found_handler=not_found)
 
-        self.server = server
+class TimeContext:
+    """Records the time within a with() context and stores the latency (in ms)
+     within a record (dict)"""
+    def __init__(self, record: dict):
+        self.record = record
+        self.last = None
+        self.key = None
 
-    def start(self):
-        self.server.start()
-        self.server.is_ready.wait()
+    def __call__(self, key: str):
+        self.key = key
+        return self
 
-    def close(self):
-        self.server.stop()
-        self.server.join()
+    def __enter__(self):
+        self.last = time.perf_counter()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        r = self.record.get(self.key, dict(avg=0, trips=0))
+        avg, trips = r['avg'], r['trips']
+        avg *= trips
+        avg += (time.perf_counter() - self.last) * 1000
+        trips += 1
+        avg /= trips
+        self.record[self.key] = dict(avg=avg, trips=trips)
+
+

@@ -27,7 +27,6 @@ def main(argv: List[str] = None):
 
     proxy = Proxy(**vars(args))
     proxy.start()
-
     # execute dataset dependencies
     benchmarker = getattr(api, args.dataset)(args)
     benchmarker.benchmark()
