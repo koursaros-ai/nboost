@@ -24,7 +24,7 @@ class ESProtocol(BaseProtocol):
 
     def on_request_message_complete(self):
         try:
-            json = JSON.loads(self.request.body)
+            json = JSON.loads(self.request.body.decode())
 
             try:
                 self.topk = json['size']
@@ -61,7 +61,7 @@ class ESProtocol(BaseProtocol):
             self.error = ElasticsearchError(self.request.body)
 
     def on_response_message_complete(self):
-        self.response.body = JSON.loads(self.response.body)
+        self.response.body = JSON.loads(self.response.body.decode())
         hits = self.response.body.get('hits', [])
         self.choices = [hit['_source'][self.field] for hit in hits['hits']]
 
