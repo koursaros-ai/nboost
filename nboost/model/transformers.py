@@ -53,8 +53,8 @@ class TransformersModel(BaseModel):
 
         self.weight = 1.0
 
-    async def train(self, query, choices):
-        input_ids, attention_mask, token_type_ids = await self.encode(query, choices)
+    def train(self, query, choices):
+        input_ids, attention_mask, token_type_ids = self.encode(query, choices)
 
         if self.model_config.num_labels == 1:
             labels = torch.tensor(labels, dtype=torch.float).to(self.device, non_blocking=True)
@@ -77,10 +77,10 @@ class TransformersModel(BaseModel):
         if self.weight < 1.0:
             self.weight += self.lr*0.1
         if self.train_steps % self.checkpoint_steps == 0:
-            await self.save()
+            self.save()
 
-    async def rank(self, query, choices):
-        input_ids, attention_mask, token_type_ids = await self.encode(query, choices)
+    def rank(self, query, choices):
+        input_ids, attention_mask, token_type_ids = self.encode(query, choices)
 
         with torch.no_grad():
             if self.distilbert:
@@ -94,17 +94,11 @@ class TransformersModel(BaseModel):
                 scores = np.squeeze(scores[:,1])
             if len(logits) == 1:
                 scores = [scores]
-            es_ranks = np.arange(len(scores))
-            model_ranks = np.argsort(scores)[::-1]
-            avg_rank = self.weight*model_ranks + (1-self.weight)*es_ranks
-            self.logger.info(self.weight)
-            for i, rank in enumerate(np.argsort(avg_rank)):
-                choices[i].rank = int(rank)
+            return np.argsort(scores)[::-1]
 
-    async def encode(self, query, choices):
+    def encode(self, query, choices):
         inputs = [self.tokenizer.encode_plus(
-            query.body.decode(), choice.body.decode(), add_special_tokens=True
-        ) for choice in choices]
+            query, choice, add_special_tokens=True) for choice in choices]
 
         max_len = min(max(len(t['input_ids']) for t in inputs), self.max_seq_len)
         input_ids = [t['input_ids'][:max_len] +
@@ -120,7 +114,7 @@ class TransformersModel(BaseModel):
 
         return input_ids, attention_mask, token_type_ids
 
-    async def save(self):
+    def save(self):
         self.logger.info('Saving model')
         os.makedirs(self.data_dir, exist_ok=True)
         self.rerank_model.save_pretrained(self.data_dir)
