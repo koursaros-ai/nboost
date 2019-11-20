@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/banner.png?raw=true" alt="Nboost">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/nboost-logo.jpg?raw=true" alt="Nboost">
 </p>
 
 <p align="center">
