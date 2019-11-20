@@ -64,8 +64,6 @@ class ESProtocol(BaseProtocol):
         self.response.body = JSON.loads(self.response.body.decode())
         hits = self.response.body.get('hits', [])
         self.choices = [hit['_source'][self.field] for hit in hits['hits']]
-        import pdb
-        pdb.set_trace()
 
     def on_rank(self, ranks: List[int]):
         self.response.body['_nboost'] = True
