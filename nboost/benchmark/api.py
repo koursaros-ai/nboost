@@ -53,7 +53,6 @@ def msmarco(args) -> Benchmarker:
     def es_doc_id_producer(es: Elasticsearch):
         def querier(query: str):
             body = dict(size=args.topk, query={"match": {"passage": {"query": query}}})
-            print('ES:', body)
             res = es.search(index=index, body=body, filter_path=['hits.hits._*'])
             doc_ids = [hit['_id'] for hit in res['hits']['hits']]
             return doc_ids

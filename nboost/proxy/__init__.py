@@ -24,7 +24,7 @@ class SocketServer(Thread):
         try:
             while True:
                 client_socket, address = self.sock.accept()
-                self.logger.info('{}: Request {}:{}'.format(ident, *address))
+                self.logger.debug('{}: Request {}:{}'.format(ident, *address))
                 self.loop(client_socket)
 
         except (ConnectionAbortedError, OSError):
@@ -112,7 +112,7 @@ class Proxy(SocketServer):
                 while not request_handler.is_done:
                     request_handler.feed(client_socket.recv(self.bufsize))
 
-            self.logger.info(protocol.request)
+            self.logger.debug(protocol.request)
 
             with time_context('server_send'):
                 request = protocol.request.prepare()
@@ -133,13 +133,13 @@ class Proxy(SocketServer):
 
         except HttpParserError as e:
             if isinstance(e.__context__, StatusRequest):
-                self.logger.info(protocol.request)
+                self.logger.debug(protocol.request)
                 protocol.response.body = json.dumps(self.status, indent=2).encode()
                 response = protocol.response.prepare()
                 client_socket.send(response)
 
             elif isinstance(e.__context__, UnknownRequest):
-                self.logger.info(protocol.request)
+                self.logger.debug(protocol.request)
                 proxy_request_handler = BaseHandler(HttpRequestParser)
                 proxy_request_handler.feed(request_handler.buffer)
                 proxy_response_handler = BaseHandler(HttpResponseParser)

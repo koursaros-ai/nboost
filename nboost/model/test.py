@@ -1,7 +1,10 @@
 from ..base import *
+import random
 
 
 class TestModel(BaseModel):
     def rank(self, query, choices):
-        return list(range(len(choices)))
+        ranks = list(range(len(choices)))
+        random.shuffle(ranks)
+        return ranks
 

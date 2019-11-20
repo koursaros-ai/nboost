@@ -61,7 +61,6 @@ class ESProtocol(BaseProtocol):
             self.error = ElasticsearchError(self.request.body)
 
     def on_response_message_complete(self):
-        print(self.response.body)
         self.response.body = JSON.loads(self.response.body)
         hits = self.response.body.get('hits', [])
         self.choices = [hit['_source'][self.field] for hit in hits['hits']]

@@ -37,6 +37,11 @@ class Benchmarker:
         if self.proxied_doc_id_producer is None:
             raise RuntimeError('Must add a doc_id producers to benchmark...')
 
+        # filter queries without relations
+        for qid in list(self.queries):
+            if qid not in self.qrels:
+                self.queries.pop(qid)
+
         if rows == -1:
             rows = len(self.queries)
 
@@ -44,9 +49,6 @@ class Benchmarker:
             i = 0
             for _ in range(rows):
                 qid, query = self.queries.popitem()
-
-                if qid not in self.qrels:
-                    continue
 
                 i += 1
                 n = i - 1
@@ -58,11 +60,9 @@ class Benchmarker:
                 _3 = time.perf_counter() * 1000
 
                 ms = _2 - _1
-                print(ms)
                 self.proxy_avg_ms = sum([self.proxy_avg_ms * n, ms]) / i
 
                 ms = _3 - _2
-                print(ms)
                 self.direct_avg_ms = sum([self.direct_avg_ms * n, ms]) / i
 
                 mrr = self.calculate_mrr(qid, proxied_doc_ids)
