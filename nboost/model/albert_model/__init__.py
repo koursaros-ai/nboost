@@ -20,8 +20,9 @@ class AlbertModel(BaseModel):
         if not len(ckpts) > 0:
             raise FileNotFoundError("Tensorflow model not found")
         self.checkpoint = str(ckpts[0]).split('.ckpt')[0] + '.ckpt'
-        self.vocab_file = str(self.model_dir.joinpath('vocab.txt'))
-        self.bert_config_file = str(self.model_dir.joinpath('bert_config.json'))
+        self.vocab_file = str(self.model_dir.joinpath('vocab/30k-clean.vocab'))
+        self.spm_model_file = str(self.model_dir.joinpath('vocab/30k-clean.model'))
+        self.bert_config_file = str(self.model_dir.joinpath('config.json'))
 
         model_thread = Thread(target=self.run_model)
         model_thread.start()
@@ -143,7 +144,8 @@ class AlbertModel(BaseModel):
             self.output_q.put((item["log_probs"], item["label_ids"]))
 
     def feature_generator(self):
-        tokenizer = tokenization.FullTokenizer(vocab_file=self.vocab_file, do_lower_case=True)
+        tokenizer = tokenization.FullTokenizer(vocab_file=self.vocab_file,
+                    spm_model_file=self.spm_model_file, do_lower_case=True)
         while True:
             query, candidates = self.input_q.get()
             query = tokenization.convert_to_unicode(query)
