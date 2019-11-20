@@ -183,6 +183,8 @@ class BertModel(BaseModel):
             return candidates
 
     def rank(self, query, choices):
+        import pdb
+        pdb.set_trace()
         candidates = self.pad(choices)
         self.input_q.put((query, choices))
 

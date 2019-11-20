@@ -123,8 +123,6 @@ class Proxy(SocketServer):
                     response_handler.feed(server_socket.recv(self.bufsize))
 
             with time_context('model_rank'):
-                import pdb
-                pdb.set_trace()
                 ranks = self.model.rank(protocol.query, protocol.choices)
 
             protocol.on_rank(ranks)
