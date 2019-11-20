@@ -40,7 +40,7 @@
 
 <h2 align="center">What is it</h2>
 
-⚡**NBoost** is a scalable, search-api-boosting proxy for developing and deploying SOTA models to improve the relevance of search results.
+⚡**NBoost** is a scalable, search-api-boosting proxy for developing and deploying state-of-the-art models to improve the relevance of search results.
 
 <p align="center">
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/nboost.jpg?sanitize=true" width="70%">
