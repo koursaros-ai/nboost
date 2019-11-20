@@ -14,6 +14,10 @@ class UnknownRequest(Exception):
     pass
 
 
+class MissingQuery(Exception):
+    pass
+
+
 class URL:
     """Parsed URL: scheme://netloc/path;params?query#fragment"""
 

@@ -1,6 +1,6 @@
 from json.decoder import JSONDecodeError
+from ..base.types import MissingQuery
 from ..base import BaseProtocol
-from ..base.types import URL
 from typing import List
 import json as JSON
 
@@ -54,7 +54,7 @@ class ESProtocol(BaseProtocol):
             pass
 
         if self.query is None:
-            raise ValueError('Missing query')
+            raise MissingQuery('Missing query')
 
     def on_response_status(self, status: int):
         if status >= 400:

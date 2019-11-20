@@ -51,7 +51,7 @@ RESPONSE += DATA
 
 
 class TestServer(SocketServer):
-    def loop(self, client_socket):
+    def loop(self, client_socket, address):
         client_socket.send(RESPONSE)
         client_socket.close()
 

@@ -52,7 +52,7 @@ class ColoredFormatter(logging.Formatter):
     MAPPING = {
         'DEBUG': dict(color='green', on_color=None),
         'INFO': dict(color='cyan', on_color=None),
-        'WARNING': dict(color='yellow', on_color='on_grey'),
+        'WARNING': dict(color='yellow', on_color=None),
         'ERROR': dict(color='grey', on_color='on_red'),
         'CRITICAL': dict(color='grey', on_color='on_blue'),
     }

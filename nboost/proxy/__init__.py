@@ -1,10 +1,10 @@
-from threading import Thread, Event, get_ident
 from httptools import HttpParserError, HttpRequestParser, HttpResponseParser
-from typing import Type
+from typing import Type, List, Tuple
+from threading import Thread, Event
+from abc import abstractmethod
 from ..base import *
 import socket
 import json
-import time
 
 
 class SocketServer(Thread):
@@ -20,38 +20,36 @@ class SocketServer(Thread):
         self.logger = set_logger(self.__class__.__name__)
 
     def worker(self):
-        ident = get_ident()
         try:
             while True:
-                client_socket, address = self.sock.accept()
-                self.logger.debug('{}: Request {}:{}'.format(ident, *address))
-                self.loop(client_socket)
+                self.loop(*self.sock.accept())
 
         except (ConnectionAbortedError, OSError):
-            self.logger.info('Stopping worker %s' % get_ident())
+            pass
 
-    def loop(self, client_socket: socket.socket) -> None:
-        raise NotImplementedError
+    @abstractmethod
+    def loop(self, client_socket: socket.socket, address: Tuple[str, int]):
+        pass
 
     def run(self):
         self.sock.bind(self.address)
         self.sock.listen(self.backlog)
-        self.logger.info('Starting %s workers...' % self.workers)
-        self.logger.critical('Listening on %s:%s...' % self.address)
         threads = []
 
         try:
-            for i in range(self.workers):
+            self.logger.info('Starting %s workers...' % self.workers)
+            for _ in range(self.workers):
                 t = Thread(target=self.worker)
                 t.start()
                 threads.append(t)
 
             self.is_ready.set()
-
+            self.logger.critical('Listening on %s:%s...' % self.address)
             for t in threads:
                 t.join()
 
         finally:
+            self.logger.critical('Closing %s:%s...' % self.address)
             self.sock.close()
 
     def close(self):
@@ -60,10 +58,12 @@ class SocketServer(Thread):
 
 
 class Proxy(SocketServer):
+    time_context = TimeContext()
+
     def __init__(self, model: Type[BaseModel], protocol: Type[BaseProtocol],
                  uhost: str = 'localhost', uport: int = 9200,
                  bufsize: int = 2048, multiplier: int = 5, field: str = 'text',
-                 **kwargs):
+                 verbose: bool = False, **kwargs):
         """The proxy object is the core of NBoost.
         The following __init__ contains the main executed functions in nboost.
 
@@ -82,124 +82,115 @@ class Proxy(SocketServer):
         """
         super().__init__()
         self.kwargs = kwargs
-        self.uhost = uhost
-        self.uport = uport
+        self.uaddress = (uhost, uport)
         self.bufsize = bufsize
         self.multiplier = multiplier
         self.field = field
-        self.logger = set_logger(model.__name__)
+        self.logger = set_logger(model.__name__, verbose=verbose)
 
         # pass command line arguments to instantiate each component
-        self.model = model(**kwargs)
+        self.model = model(verbose=verbose, **kwargs)
         self.Protocol = protocol
 
-        # for status requests
-        self.status = dict(bench={}, description='NBoost, for search ranking.')
+    def connect_sockets(self, handler: BaseHandler,
+                        in_socket: socket.socket,
+                        out_socket: socket.socket = None,
+                        buffer: dict = None):
+        while not handler.is_done:
+            data = in_socket.recv(self.bufsize)
+            if buffer is not None:
+                buffer['data'] += data
+            if out_socket is not None:
+                out_socket.send(data)
+            handler.feed(data)
 
-    def loop(self, client_socket: socket.socket):
-        protocol = self.Protocol(self.multiplier, self.field)
-        request_handler = RequestHandler(protocol)
-        response_handler = ResponseHandler(protocol)
+    @time_context
+    def proxy_send(self, client_socket, server_socket, buffer: dict):
+        handler = BaseHandler(HttpRequestParser)
+        server_socket.send(buffer['data'])
+        handler.feed(buffer['data'])
+        self.connect_sockets(handler, client_socket, server_socket)
+
+    @time_context
+    def proxy_recv(self, client_socket, server_socket):
+        handler = BaseHandler(HttpResponseParser)
+        self.connect_sockets(handler, server_socket, client_socket)
+
+    @time_context
+    def client_recv(self, client_socket: socket.socket,
+                    handler: RequestHandler, buffer: dict):
+        self.connect_sockets(handler, client_socket, buffer=buffer)
+
+    @time_context
+    def server_recv(self, server_socket, handler: ResponseHandler):
+        self.connect_sockets(handler, server_socket)
+
+    @time_context
+    def server_send(self, server_socket, request: Request):
+        server_socket.send(request.prepare())
+
+    @time_context
+    def client_send(self, client_socket, response: Response):
+        client_socket.send(response.prepare())
+
+    @time_context
+    def model_rank(self, query: str, choices: List[str]) -> List[int]:
+        return self.model.rank(query, choices)
+
+    @time_context
+    def server_connect(self) -> socket.socket:
         server_socket = socket.socket()
-        time_context = TimeContext(self.status['bench'])
-        unhandled = None
+        server_socket.connect(self.uaddress)
+        return server_socket
 
-        with time_context('server_connect'):
-            server_socket.connect((self.uhost, self.uport))
+    @property
+    def status(self) -> dict:
+        return dict(bench=self.time_context.record,
+                    description='NBoost, for search ranking.')
+
+    def loop(self, client_socket, address):
+        protocol = self.Protocol(self.multiplier, self.field)
+        server_socket = self.server_connect()
+        buffer = dict(data=bytes())
+        exc = None
 
         try:
-            with time_context('client_recv'):
-                while not request_handler.is_done:
-                    request_handler.feed(client_socket.recv(self.bufsize))
-
-            self.logger.debug(protocol.request)
-
-            with time_context('server_send'):
-                request = protocol.request.prepare()
-                server_socket.send(request)
-
-            with time_context('server_recv'):
-                while not response_handler.is_done:
-                    response_handler.feed(server_socket.recv(self.bufsize))
-
-            with time_context('model_rank'):
-                ranks = self.model.rank(protocol.query, protocol.choices)
-
+            self.client_recv(client_socket, RequestHandler(protocol), buffer)
+            self.server_send(server_socket, protocol.request)
+            self.server_recv(server_socket, ResponseHandler(protocol))
+            ranks = self.model_rank(protocol.query, protocol.choices)
             protocol.on_rank(ranks)
-            response = protocol.response.prepare()
-
-            with time_context('client_send'):
-                client_socket.send(response)
 
         except HttpParserError as e:
-            if isinstance(e.__context__, StatusRequest):
-                self.logger.debug(protocol.request)
-                protocol.response.body = json.dumps(self.status, indent=2).encode()
-                response = protocol.response.prepare()
-                client_socket.send(response)
+            exc = e.__context__
 
-            elif isinstance(e.__context__, UnknownRequest):
-                self.logger.debug(protocol.request)
-                proxy_request_handler = BaseHandler(HttpRequestParser)
-                proxy_request_handler.feed(request_handler.buffer)
-                proxy_response_handler = BaseHandler(HttpResponseParser)
+        except Exception as e:
+            exc = e
 
-                with time_context('proxy_send'):
-                    server_socket.send(request_handler.buffer)
-                    while not proxy_request_handler.is_done:
-                        data = client_socket.recv(self.bufsize)
-                        proxy_request_handler.feed(data)
-                        server_socket.send(data)
-
-                with time_context('proxy_recv'):
-                    while not proxy_response_handler.is_done:
-                        data = server_socket.recv(self.bufsize)
-                        proxy_response_handler.feed(data)
-                        client_socket.send(data)
-
-                server_socket.close()
+        try:
+            log = '{}:{}: {}'.format(*address, protocol.request)
+            if exc is None:
+                self.logger.debug(log)
             else:
-                self.logger.error(repr(e.__context__), exc_info=True)
-                unhandled = e.__context__
+                self.logger.warning('%s: %s' % (type(exc).__name__, log))
+                raise exc
+        except StatusRequest:
+            protocol.response.body = json.dumps(self.status, indent=2).encode()
+
+        except (UnknownRequest, MissingQuery):
+            self.proxy_send(client_socket, server_socket, buffer)
+            self.proxy_recv(client_socket, server_socket)
 
         except Exception as e:
             self.logger.error(repr(e), exc_info=True)
-            unhandled = e
+            protocol.on_error(e)
 
         finally:
-            if unhandled:
-                protocol.on_error(unhandled)
-                response = protocol.response.prepare()
-                client_socket.send(response)
-
-            if client_socket:
-                client_socket.close()
-            if server_socket:
-                server_socket.close()
+            self.client_send(client_socket, protocol.response)
+            client_socket.close()
+            server_socket.close()
 
 
-class TimeContext:
-    """Records the time within a with() context and stores the latency (in ms)
-     within a record (dict)"""
-    def __init__(self, record: dict):
-        self.record = record
-        self.last = None
-        self.key = None
 
-    def __call__(self, key: str):
-        self.key = key
-        return self
-
-    def __enter__(self):
-        self.last = time.perf_counter()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        r = self.record.get(self.key, dict(avg=0, trips=0))
-        avg, trips = r['avg'], r['trips']
-        avg *= trips
-        avg += (time.perf_counter() - self.last) * 1000
-        trips += 1
-        avg /= trips
-        self.record[self.key] = dict(avg=avg, trips=trips)
 
 
