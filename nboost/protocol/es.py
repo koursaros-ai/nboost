@@ -68,6 +68,8 @@ class ESProtocol(BaseProtocol):
     def on_rank(self, ranks: List[int]):
         self.response.body['_nboost'] = True
         hits = self.response.body['hits']
+        import pdb
+        pdb.set_trace()
         hits['hits'] = [hits['hits'][rank] for rank in ranks][:self.topk]
         self.response.body = JSON.dumps(self.response.body).encode()
 
