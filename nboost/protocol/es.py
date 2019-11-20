@@ -25,8 +25,6 @@ class ESProtocol(BaseProtocol):
     def on_request_message_complete(self):
         try:
             json = JSON.loads(self.request.body.decode())
-            import pdb
-            pdb.set_trace()
 
             try:
                 self.topk = json['size']
@@ -44,6 +42,8 @@ class ESProtocol(BaseProtocol):
             if not self.topk:
                 self.topk = 10
                 self.request.url.query['size'] = str(self.topk * self.multiplier)
+            else:
+                self.request.body = JSON.dumps(json).encode()
 
             try:
                 self.query = json['query']['match'][self.field]
@@ -53,8 +53,6 @@ class ESProtocol(BaseProtocol):
                 pass
 
         except JSONDecodeError:
-            import pdb
-            pdb.set_trace()
             pass
 
         if self.query is None:
