@@ -40,6 +40,10 @@
 
 <h2 align="center">What is it</h2>
 
+<p align="center">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/nboost.jpg?sanitize=true">
+</p>
+
 ⚡**NBoost** is a scalable, search-api-boosting proxy for developing and deploying SOTA models to improve the relevance of search results.
  
 Nboost leverages finetuned models to produce domain-specific neural search engines. The platform can also improve other downstream tasks requiring ranked input, such as question answering.
