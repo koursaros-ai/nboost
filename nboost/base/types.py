@@ -1,88 +1,73 @@
-from typing import Dict
-from enum import Enum
 from requests.structures import CaseInsensitiveDict as CID
-from urllib.parse import urlencode
+from urllib.parse import urlparse, parse_qsl, urlunparse, urlencode
 from http.client import responses
-import json as JSON
-import gzip
+from typing import Dict
 
 HTTP1_1 = 'HTTP/1.1'
 
 
-class Route(Enum):
-    """Used as keys for the route dictionary created by the proxy."""
-    SEARCH = 0
-    TRAIN = 1
-    STATUS = 2
-    NOT_FOUND = 3
-    ERROR = 4
+class StatusRequest(Exception):
+    pass
 
 
-class HttpMessage:
-    def __init__(self,
-                 version: str = HTTP1_1,
-                 headers: Dict[str, str] = None,
-                 body: bytes = bytes()):
-        self.version = version
-        self.headers = CID(headers)
-        self.body = bytes(body)
-
-    @property
-    def json(self) -> dict:
-        return JSON.loads(self.body)
-
-    @json.setter
-    def json(self, value: dict):
-        self.body = JSON.dumps(value).encode()
-
-    @property
-    def is_gzip(self) -> bool:
-        return self.headers.get('content-encoding', None) == 'gzip'
-
-    def gzip(self):
-        self.body = gzip.compress(self.body)
-
-    def ungzip(self):
-        self.body = gzip.decompress(self.body)
+class UnknownRequest(Exception):
+    pass
 
 
-class Request(HttpMessage):
-    """The object that the server/codex must pack all requests into. This is
-    necessary to support multiple search apis."""
-    __slots__ = ['method', 'path', 'params', 'version', 'headers', 'body']
+class URL:
+    """Parsed URL: scheme://netloc/path;params?query#fragment"""
 
-    def __init__(self,
-                 version: str = HTTP1_1,
-                 headers: Dict[str, str] = None,
-                 body: bytes = bytes(),
-                 method: str = None,
-                 path: str = None,
-                 params: Dict[str, str] = None):
-        super().__init__(version, headers, body)
-        self.method = method
-        self.path = path
-        self.params = dict(params) if params else {}
+    def __init__(self, url: bytes):
+        url = urlparse(url.decode())
+        self.scheme = url.scheme  # type: str
+        self.netloc = url.netloc  # type: str
+        self.path = url.path  # type: str
+        self.params = url.params  # type: str
+        self.query = dict(parse_qsl(url.query)) if url.query else {}  # type: Dict[str, str]
+        self.fragment = url.fragment  # type: str
 
     def __repr__(self):
-        return '<Request %s %s>' % (self.path, self.method)
-
-    @property
-    def url(self) -> str:
-        return self.path + '?' + urlencode(self.params) if self.params else ''
+        return urlunparse((self.scheme, self.netloc, self.path, self.params,
+                           urlencode(self.params), self.fragment))
 
 
-class Response(HttpMessage):
+class Request:
+    """The object that the server must pack all requests into. This is
+    necessary to support multiple search apis."""
+    __slots__ = ['method', 'url', 'params', 'version', 'headers', 'body',
+                 'topk']
+
+    def __init__(self):
+        self.version = HTTP1_1
+        self.headers = CID()
+        self.url = None  # type: URL
+        self.body = bytes()
+        self.method = str()
+        self.params = dict()
+
+    def __repr__(self):
+        return '<Request %s %s>' % (self.url, self.method)
+
+    def prepare(self) -> bytes:
+        self.headers['content-length'] = str(len(self.body))
+        headers = ''.join(
+            '\r\n%s: %s' % (k, v) for k, v in self.headers.items())
+        return '{method} {url} {version}{headers}\r\n\r\n'.format(
+            method=self.method, url=str(self.url), version=self.version,
+            headers=headers
+        ).encode() + self.body
+
+
+class Response:
     """The object that each response must be packed into before sending. Same
     reason as the Request object. """
     __slots__ = ['version', 'status', 'headers', 'body']
 
-    def __init__(self,
-                 version: str = HTTP1_1,
-                 status: int = 200,
-                 headers: Dict[str, str] = None,
-                 body: bytes = bytes()):
-        super().__init__(version, headers, body)
-        self.status = int(status)
+    def __init__(self):
+        self.version = HTTP1_1
+        self.status = 200
+        self.headers = CID()
+        self.body = bytes()
 
     def __repr__(self):
         return '<Response %s %s>' % (self.status, self.reason)
@@ -91,41 +76,10 @@ class Response(HttpMessage):
     def reason(self):
         return responses[self.status]
 
-
-class Qid(bytes):
-    """An id for a query"""
-
-
-class Query:
-    """A query from the client """
-    __slots__ = ['body', 'ident']
-
-    def __init__(self, body: bytes, ident: Qid = Qid()):
-        self.body = bytes(body)
-        self.ident = Qid(ident)
-
-
-class Cid(bytes):
-    """An id for a choice"""
-
-
-class Choice:
-    """A list of candidates returned by the search api. Each one may have
-     a label which is a list of floats representing the forward pass value for
-     a respective list of choice. Also a rank, representing it's ranks for a
-    respective list of choices."""
-    __slots__ = ['body', 'ident', 'rank', 'label']
-
-    def __init__(self,
-                 body: bytes,
-                 ident: Cid = None,
-                 rank: int = None,
-                 label: float = None):
-        self.body = bytes(body) if body else bytes()
-        self.ident = None if ident is None else Cid(ident)
-        self.rank = None if rank is None else int(rank)
-        self.label = None if label is None else float(label)
-
-
-class Topk(int):
-    """Number of results the client requested"""
+    def prepare(self) -> bytes:
+        self.headers['content-length'] = str(len(self.body))
+        return '{version} {status} {reason}{headers}\r\n\r\n'.format(
+            version=self.version, status=self.status, reason=self.reason,
+            headers=''.join(
+                '\r\n%s: %s' % (k, v) for k, v in self.headers.items())
+        ).encode() + self.body

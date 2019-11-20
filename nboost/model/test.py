@@ -4,11 +4,7 @@ import random
 
 class TestModel(BaseModel):
     def rank(self, query, choices):
-        # random ranking
-        ranks = list(range(0, len(choices)))
+        ranks = list(range(len(choices)))
         random.shuffle(ranks)
-        for i, rank in enumerate(ranks):
-            choices[i].rank = rank
+        return ranks
 
-    def train(self, query, choices):
-        pass

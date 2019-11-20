@@ -27,7 +27,7 @@ def msmarco(args) -> Benchmarker:
 
     # INDEX MSMARCO
     proxy_es = Elasticsearch(host=args.host, port=args.port, timeout=REQUEST_TIMEOUT)
-    direct_es = Elasticsearch(host=args.ext_host, port=args.ext_port, timeout=REQUEST_TIMEOUT)
+    direct_es = Elasticsearch(host=args.uhost, port=args.uport, timeout=REQUEST_TIMEOUT)
 
     def stream_msmarco_full():
         print('Optimizing streamer...')
@@ -44,6 +44,7 @@ def msmarco(args) -> Benchmarker:
         if direct_es.count(index=index)['count'] < 8 * 10 ** 6:
             raise elasticsearch.exceptions.NotFoundError
     except elasticsearch.exceptions.NotFoundError:
+        print('Indexing %s' % collections_tsv_path)
         es_bulk_index(direct_es, stream_msmarco_full())
 
     # BENCHMARK MSMARCO
@@ -62,11 +63,13 @@ def msmarco(args) -> Benchmarker:
         es_doc_id_producer(direct_es)
     )
 
+    print('Reading %s' % qrels_tsv_path)
     with qrels_tsv_path.open() as file:
         qrels = csv.reader(file, delimiter='\t')
         for qid, _, doc_id, _ in qrels:
             benchmarker.add_qrel(qid, doc_id)
 
+    print('Reading %s' % queries_tsv_path)
     with queries_tsv_path.open() as file:
         queries = csv.reader(file, delimiter='\t')
         for qid, query in queries:

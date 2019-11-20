@@ -1,74 +1,101 @@
+from nboost.proxy import SocketServer
 from nboost.cli import create_proxy
-from nboost.server.aio import AioHttpServer
-from nboost.base.types import *
-import unittest
 import requests
 import json as JSON
-from tests import RESOURCES
+import unittest
+
+DATA = JSON.dumps({
+    "took": 5,
+    "timed_out": False,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 1,
+            "relation": "eq"
+        },
+        "max_score": 1.3862944,
+        "hits": [
+            {
+                "_index": "twitter",
+                "_type": "_doc",
+                "_id": "0",
+                "_score": 1.3862944,
+                "_source": {
+                    "date": "2009-11-15T14:12:12",
+                    "likes": 0,
+                    "message": "trying out Elasticsearch",
+                    "user": "kimchy"
+                }
+            }, {
+                "_index": "twitter",
+                "_type": "_doc",
+                "_id": "0",
+                "_score": 1.3862944,
+                "_source": {
+                    "date": "2009-11-15T14:12:12",
+                    "likes": 0,
+                    "message": "second choice",
+                    "user": "kimchy"
+                }
+            }
+        ]
+    }
+}).encode()
+RESPONSE = b'HTTP/1.1 200 OK\r\nContent-Length: %s\r\n\r\n' % str(len(DATA)).encode()
+RESPONSE += DATA
+
+
+class TestServer(SocketServer):
+    def loop(self, client_socket):
+        client_socket.send(RESPONSE)
+        client_socket.close()
 
 
 class TestProxy(unittest.TestCase):
     def test_default_proxy(self):
 
-        query_json = RESOURCES.joinpath('es_query.json').read_bytes()
-        result_json = RESOURCES.joinpath('es_result.json').read_bytes()
-        server = AioHttpServer(port=9500, verbose=True)
-
-        async def search(req):
-            return Response(body=result_json)
-
-        async def only_on_server(req):
-            return Response(body=req.body)
-
-        server.create_app([
-            ('/mock_index/_search', ['GET'], search),
-            ('/only_on_server', ['POST'], only_on_server),
-        ], not_found_handler=lambda x: x)
-
+        server = TestServer(port=9500, verbose=True)
         proxy = create_proxy([
             '--port', '8000',
             '--model', 'TestModel',
             '--field', 'message',
-            '--ext_port', '9500',
+            '--uport', '9500',
             '--verbose'
         ])
         proxy.start()
         server.start()
+        proxy.is_ready.wait()
         server.is_ready.wait()
 
         # search
-        params = dict(size=5, q='test query')
+        params = dict(size=5, q='test:test query')
 
         proxy_res = requests.get('http://localhost:8000/mock_index/_search', params=params)
         print(proxy_res.content)
         proxy_json = proxy_res.json()
         self.assertTrue(proxy_res.ok)
-        self.assertIsInstance(proxy_json['_nboost'], str)
+        self.assertIn('_nboost', proxy_json)
 
         server_res = requests.get('http://localhost:9500/mock_index/_search', params=params)
         print(server_res.content)
         self.assertTrue(server_res.ok)
 
-        # train
-        json = JSON.dumps(
-            dict(_id=proxy_json['hits']['hits'][0]['_id'],
-                 _nboost=proxy_json['_nboost'])
-        )
-
-        train_res = requests.post('http://localhost:8000/train', data=json)
-        self.assertTrue(train_res.ok)
-
-        # test fallback
+        # fallback
         fallback_res = requests.post('http://localhost:8000/only_on_server',
                                      data=b'hello there my friend')
         print('fallback:', fallback_res.content)
         self.assertTrue(fallback_res.ok)
 
-        # test status
-        status_res = requests.get('http://localhost:8000/status')
+        # status
+        status_res = requests.get('http://localhost:8000/nboost')
         self.assertTrue(status_res.ok)
         print(status_res.content.decode())
         # time.sleep(30)
 
         proxy.close()
-        server.stop()
+        server.close()

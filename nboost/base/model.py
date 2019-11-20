@@ -1,12 +1,11 @@
 from .helpers import download_file, extract_tar_gz
 from .. import MODEL_MAP, PKG_PATH
-from .base import StatefulBase
-from .types import *
 from pathlib import Path
 from typing import List
+from ..base import set_logger
 
 
-class BaseModel(StatefulBase):
+class BaseModel:
     def __init__(self,
                  lr: float = 10e-3,
                  model_dir: str = 'bert_marco',
@@ -20,6 +19,7 @@ class BaseModel(StatefulBase):
         self.model_dir = model_dir
         self.data_dir = data_dir
         self.model_dir = data_dir.joinpath(model_dir).absolute()
+        self.logger = set_logger(model_dir)
 
     def download(self):
         # make sure data directory exists
@@ -54,11 +54,7 @@ class BaseModel(StatefulBase):
     def state(self):
         return dict(lr=self.lr, data_dir=self.data_dir)
 
-    def train(self, query: Query, choices: List[Choice]) -> None:
-        """ train """
-        raise NotImplementedError
-
-    def rank(self, query: Query, choices: List[Choice]) -> None:
+    def rank(self, query: str, choices: List[str]) -> List[int]:
         """
         assign relative ranks to each choice
         """

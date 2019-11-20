@@ -6,16 +6,9 @@ PKG_PATH = Path(__file__).parent
 
 # component => class => module
 CLASS_MAP = {
-    'codex': {
+    'protocol': {
         'TestCodex': 'test',
-        'ESCodex': 'es'
-    },
-    'db': {
-        'HashDb': 'hash'
-    },
-    'server': {
-        'AioHttpServer': 'aio',
-        'LoopServer': 'loop'
+        'ESProtocol': 'es'
     },
     'model': {
         'TestModel': 'test',
