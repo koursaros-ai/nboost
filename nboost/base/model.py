@@ -8,7 +8,7 @@ from ..base import set_logger
 class BaseModel:
     def __init__(self,
                  lr: float = 10e-3,
-                 model_dir: str = 'bert_marco',
+                 model_dir: str = 'bert-base-uncased-msmarco',
                  data_dir: Path = PKG_PATH.joinpath('.cache'),
                  max_seq_len: int = 128,
                  batch_size: int = 4, **kwargs):
@@ -31,7 +31,7 @@ class BaseModel:
             self.logger.info('Did not find model cache in %s' % self.model_dir)
 
             if self.model_dir in MODEL_MAP:
-                url = MODEL_MAP[self.model_dir]
+                url = MODEL_MAP[self.model_dir.name]
 
                 tar_gz_path = self.data_dir.joinpath(Path(url).name)
                 if tar_gz_path.exists():
