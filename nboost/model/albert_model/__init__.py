@@ -148,9 +148,9 @@ class AlbertModel(BaseModel):
                     spm_model_file=self.spm_model_file, do_lower_case=True)
         while True:
             next = self.input_q.get()
+            query, candidates = next
             if not next:
                 break
-            query, candidates = next
 
             query = tokenization.convert_to_unicode(query)
             query_token_ids = bert_tokenization.convert_to_bert_input(
@@ -202,5 +202,5 @@ class AlbertModel(BaseModel):
         return scores.argsort()[::-1]
 
     def close(self):
-        self.output_q.put(None)
+        self.input_q.put(None)
         self.model_thread.join()
