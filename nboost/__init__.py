@@ -24,3 +24,10 @@ MODEL_MAP = {
     "bert-base-uncased-msmarco": "https://storage.googleapis.com/koursaros/bert-base-uncased-msmarco.tar.gz",
     "albert-tiny-uncased-msmarco": "https://storage.googleapis.com/koursaros/albert-tiny-uncased-msmarco.tar.gz"
 }
+
+# image => directory
+IMAGE_MAP = {
+    'alpine': '../Dockerfiles/alpine/Dockerfile',
+    'tf': '../Dockerfiles/tf/Dockerfile',
+    'torch': '../Dockerfiles/torch/Dockerfile'
+}
