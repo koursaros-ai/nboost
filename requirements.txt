@@ -1,5 +1,4 @@
 requests
-aiohttp
 termcolor
 elasticsearch
 tensorflow==1.15
