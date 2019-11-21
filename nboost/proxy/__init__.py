@@ -195,7 +195,9 @@ class Proxy(SocketServer):
             server_socket.close()
             self.model.close()
 
-
-
+    def close(self):
+        self.logger.info('Closing model...')
+        self.model.close()
+        super().close()
 
 

@@ -1,5 +1,4 @@
 from nboost.model.bert_model import BertModel
-from nboost.base.types import *
 from tests import RESOURCES
 import unittest
 
@@ -19,3 +18,6 @@ class TestTransformersModel(unittest.TestCase):
     def test_rank(self):
         self.model.rank(self.query, self.choices)
         self.assertIsInstance(self.choices, list)
+
+    def tearDown(self) -> None:
+        self.model.close()
