@@ -147,7 +147,10 @@ class AlbertModel(BaseModel):
         tokenizer = tokenization.FullTokenizer(vocab_file=self.vocab_file,
                     spm_model_file=self.spm_model_file, do_lower_case=True)
         while True:
-            query, candidates = self.input_q.get()
+            next = self.input_q.get()
+            if not next:
+                break
+            query, candidates = next
 
             query = tokenization.convert_to_unicode(query)
             query_token_ids = bert_tokenization.convert_to_bert_input(
