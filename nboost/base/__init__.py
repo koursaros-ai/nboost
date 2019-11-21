@@ -10,5 +10,5 @@ from .types import *
 
 __all__=['RequestHandler', 'ResponseHandler', 'BaseHandler', 'BaseProtocol',
          'set_logger', 'BaseModel', 'Request', 'Response', 'URL',
-         'StatusRequest', 'UnknownRequest', 'MissingQuery', 'TimeContext']
+         'TimeContext']
 

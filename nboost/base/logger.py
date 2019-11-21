@@ -1,10 +1,13 @@
-import termcolor
-import logging
-import copy
+"""Logger for NBoost classes"""
+
 import os
+import copy
+import logging
+import termcolor
 
 
 def set_logger(context, verbose=False):
+    """Return colored logger with specified context name and debug=verbose"""
     if os.name == 'nt':  # for Windows
         return NTLogger(context, verbose)
 
@@ -30,25 +33,25 @@ def set_logger(context, verbose=False):
 
 
 class NTLogger:
+    """Windows support for logger"""
     def __init__(self, context, verbose):
         self.context = context
         self.verbose = verbose
+        self.info = self.format_msg('I:%s:%s')
+        self.debug = self.format_msg('D:%s:%s')
+        self.error = self.format_msg('E:%s:%s')
+        self.warning = self.format_msg('W:%s:%s')
 
-    def info(self, msg, **kwargs):
-        print('I:%s:%s' % (self.context, msg), flush=True)
-
-    def debug(self, msg, **kwargs):
-        if self.verbose:
-            print('D:%s:%s' % (self.context, msg), flush=True)
-
-    def error(self, msg, **kwargs):
-        print('E:%s:%s' % (self.context, msg), flush=True)
-
-    def warning(self, msg, **kwargs):
-        print('W:%s:%s' % (self.context, msg), flush=True)
+    def format_msg(self, string_format: str):
+        """Format incoming logging messages with a given format"""
+        def func(msg: str, **_):
+            """Function to replace incoming stream"""
+            print(string_format % (self.context, msg), flush=True)
+        return func
 
 
 class ColoredFormatter(logging.Formatter):
+    """Format log levels with color"""
     MAPPING = {
         'DEBUG': dict(color='green', on_color=None),
         'INFO': dict(color='cyan', on_color=None),
@@ -61,11 +64,8 @@ class ColoredFormatter(logging.Formatter):
     SUFFIX = '\033[0m'
 
     def format(self, record):
-        cr = copy.copy(record)
-        seq = self.MAPPING.get(cr.levelname, self.MAPPING['INFO'])  # default white
-        cr.msg = termcolor.colored(cr.msg, **seq)
-        return super().format(cr)
-
-
-
-
+        """Add log ansi colors"""
+        crecord = copy.copy(record)
+        seq = self.MAPPING.get(crecord.levelname, self.MAPPING['INFO'])
+        crecord.msg = termcolor.colored(crecord.msg, **seq)
+        return super().format(crecord)

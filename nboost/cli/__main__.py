@@ -1,7 +1,9 @@
+"""__main__ cli entrypoint"""
 from . import create_proxy
 
 
 def main():
+    """Entrypoint for nboost"""
     proxy = create_proxy()
     try:
         proxy.start()
