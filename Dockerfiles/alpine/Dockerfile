@@ -4,5 +4,6 @@ LABEL maintainer="colethienes@gmail.com"
 
 RUN pip install --upgrade pip
 RUN pip install nboost
+RUN apk add --no-cache g++
 
 ENTRYPOINT ["nboost"]
