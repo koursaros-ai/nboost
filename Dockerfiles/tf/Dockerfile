@@ -6,4 +6,6 @@ RUN apt-get update && apt-get install -y git
 RUN pip install --upgrade pip
 RUN pip install nboost[tf]
 
+ENTRYPOINT ['nboost']
+
 
