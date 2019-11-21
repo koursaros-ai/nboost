@@ -1,6 +1,6 @@
 from httptools import HttpParserError, HttpRequestParser, HttpResponseParser
 from typing import Type, List, Tuple
-from threading import Thread, Event
+from threading import Thread, Event, get_ident
 from abc import abstractmethod
 from ..base import *
 import socket
@@ -25,7 +25,7 @@ class SocketServer(Thread):
                 self.loop(*self.sock.accept())
 
         except (ConnectionAbortedError, OSError):
-            pass
+            self.logger.info('Closing worker %s...' % get_ident())
 
     @abstractmethod
     def loop(self, client_socket: socket.socket, address: Tuple[str, int]):
