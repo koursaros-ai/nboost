@@ -6,6 +6,7 @@ Subpackages
 
 .. toctree::
 
+   nboost.model.albert_model
    nboost.model.bert_model
 
 Submodules

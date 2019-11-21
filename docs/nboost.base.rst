@@ -4,26 +4,10 @@ nboost.base package
 Submodules
 ----------
 
-nboost.base.base module
------------------------
+nboost.base.handler module
+--------------------------
 
-.. automodule:: nboost.base.base
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-nboost.base.codex module
-------------------------
-
-.. automodule:: nboost.base.codex
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-nboost.base.db module
----------------------
-
-.. automodule:: nboost.base.db
+.. automodule:: nboost.base.handler
    :members:
    :undoc-members:
    :show-inheritance:
@@ -36,6 +20,14 @@ nboost.base.helpers module
    :undoc-members:
    :show-inheritance:
 
+nboost.base.logger module
+-------------------------
+
+.. automodule:: nboost.base.logger
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 nboost.base.model module
 ------------------------
 
@@ -44,10 +36,10 @@ nboost.base.model module
    :undoc-members:
    :show-inheritance:
 
-nboost.base.server module
--------------------------
+nboost.base.protocol module
+---------------------------
 
-.. automodule:: nboost.base.server
+.. automodule:: nboost.base.protocol
    :members:
    :undoc-members:
    :show-inheritance:
