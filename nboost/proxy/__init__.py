@@ -34,7 +34,7 @@ class SocketServer(Thread):
 
         except (ConnectionAbortedError, OSError):
             self.logger.info('Closing worker %s...', get_ident())
-            self.logger.debug(exc_info=True)
+            self.logger.debug('', exc_info=True)
 
     def loop(self, client_socket: socket.socket, address: Tuple[str, int]):
         """Loop for each worker to execute when it receives client conn"""
@@ -163,7 +163,10 @@ class Proxy(SocketServer):
     def server_connect(self) -> socket.socket:
         """Connect proxied server socket"""
         server_socket = socket.socket()
-        server_socket.connect(self.uaddress)
+        try:
+            server_socket.connect(self.uaddress)
+        except ConnectionRefusedError:
+            self.logger.error("Couldn't connect to %s:%s...", *self.uaddress)
         return server_socket
 
     @property
@@ -214,6 +217,11 @@ class Proxy(SocketServer):
             self.client_send(client_socket, protocol.response)
             client_socket.close()
             server_socket.close()
+
+    def run(self):
+        """Same as socket server run() but logs"""
+        super().run()
+        self.logger.critical('Upstream host is %s:%s', *self.uaddress)
 
     def close(self):
         """Close the proxy server and model"""
