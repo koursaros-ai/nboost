@@ -4,14 +4,11 @@ from nboost import __version__, PKG_PATH, IMAGE_MAP
 from nboost.base.logger import set_logger
 import subprocess
 
-REPO = 'koursaros/nboost'
-
-CONTEXT = {
-    image: dict(
-        path=PKG_PATH.joinpath(path).absolute(),
-        tag='%s:%s-%s' % (REPO, __version__, image)
-    ) for image, path in IMAGE_MAP.items()
-}
+REGISTRY = 'koursaros/nboost'
+VERSION_TAG = '%s:%s-{image}' % (REGISTRY, __version__)
+LATEST_TAG = '%s:latest-{image}' % REGISTRY
+BUILD = 'docker build -t %s -t %s {path}' % (VERSION_TAG, LATEST_TAG)
+PUSH = 'docker push %s' % REGISTRY
 
 
 def execute(command: str):
@@ -23,14 +20,14 @@ def execute(command: str):
 
 def build():
     """Build dockerfiles"""
-    for ctx in CONTEXT.values():
-        execute('docker build -t %s %s' % (ctx['tag'], ctx['path']))
+    for image, path in IMAGE_MAP.items():
+        path = PKG_PATH.joinpath(path).absolute()
+        execute(BUILD.format(image=image, path=path))
 
 
 def push():
     """Push images"""
-    for ctx in CONTEXT.values():
-        execute('docker push %s' % ctx['tag'])
+    execute(PUSH)
 
 
 if __name__ == "__main__":
