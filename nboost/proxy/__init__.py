@@ -34,6 +34,7 @@ class SocketServer(Thread):
 
         except (ConnectionAbortedError, OSError):
             self.logger.info('Closing worker %s...', get_ident())
+            self.logger.debug(exc_info=True)
 
     def loop(self, client_socket: socket.socket, address: Tuple[str, int]):
         """Loop for each worker to execute when it receives client conn"""
