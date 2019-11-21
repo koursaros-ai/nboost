@@ -53,6 +53,10 @@ class SocketServer(Thread):
 
     def close(self):
         self.logger.info('Closing %s:%s...' % self.address)
+        try:
+            self.sock.shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass
         self.sock.close()
         self.join()
 
