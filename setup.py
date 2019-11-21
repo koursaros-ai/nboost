@@ -18,7 +18,6 @@ setup(
     url='https://github.com/koursaros-ai/nboost',
     # download_url='https://github.com/koursaros-ai/nboost/archive/0.0.1.tar.gz',
     keywords=[
-        'aiohttp',
         'elasticsearch',
         'distributed',
         'cloud-native',
@@ -27,7 +26,6 @@ setup(
     ],
     install_requires=[
         'termcolor',
-        'aiohttp',
         'requests',
         'elasticsearch',
         'tqdm',
@@ -35,7 +33,7 @@ setup(
     ],
     extras_require={
         'torch': ['torch', 'transformers'],
-        'tf': ['tensorflow', 'sentencepiece'],
+        'tf': ['tensorflow==1.15', 'sentencepiece'],
         'all': ['torch', 'tensorflow', 'transformers'],
     },
     entry_points={'console_scripts': [
