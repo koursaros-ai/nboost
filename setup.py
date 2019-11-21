@@ -35,7 +35,7 @@ setup(
     ],
     extras_require={
         'torch': ['torch', 'transformers'],
-        'tf': ['tensorflow'],
+        'tf': ['tensorflow', 'sentencepiece'],
         'all': ['torch', 'tensorflow', 'transformers'],
     },
     entry_points={'console_scripts': [
