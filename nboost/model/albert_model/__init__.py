@@ -5,7 +5,6 @@ import tensorflow as tf
 from . import modeling, tokenization
 from ..bert_model import tokenization as bert_tokenization
 from ...base import *
-import time
 
 
 class AlbertModel(BaseModel):
@@ -150,15 +149,12 @@ class AlbertModel(BaseModel):
         while True:
             query, candidates = self.input_q.get()
 
-            start = time.time()
             query = tokenization.convert_to_unicode(query)
             query_token_ids = bert_tokenization.convert_to_bert_input(
                 text=query, max_seq_length=self.max_seq_len, tokenizer=tokenizer,
                 add_cls=True)
-            print('TOOK %s seconds to encode query' % (time.time() - start))
 
             for i, doc_text in enumerate(candidates):
-                start = time.time()
                 doc_token_id = bert_tokenization.convert_to_bert_input(
                     text=tokenization.convert_to_unicode(doc_text),
                     max_seq_length=self.max_seq_len - len(query_token_ids),
@@ -181,7 +177,6 @@ class AlbertModel(BaseModel):
                     "input_mask": input_mask,
                     "label_ids": 0
                 }
-                print('TOOK %s seconds to encode candidate' % (time.time() - start))
                 yield features
 
     def pad(self, candidates):
