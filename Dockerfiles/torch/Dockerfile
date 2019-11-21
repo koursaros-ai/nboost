@@ -5,3 +5,5 @@ LABEL maintainer="colethienes@gmail.com"
 RUN apt-get update && apt-get install -y git
 RUN pip install --upgrade pip
 RUN pip install nboost[torch]
+
+ENTRYPOINT ["nboost"]
