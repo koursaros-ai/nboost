@@ -24,13 +24,13 @@ def execute(command: str):
 def build():
     """Build dockerfiles"""
     for ctx in CONTEXT.values():
-        execute('echo docker build -t %s %s' % (ctx['tag'], ctx['path']))
+        execute('docker build -t %s %s' % (ctx['tag'], ctx['path']))
 
 
 def push():
     """Push images"""
     for ctx in CONTEXT.values():
-        execute('echo docker push %s' % ctx['tag'])
+        execute('docker push %s' % ctx['tag'])
 
 
 if __name__ == "__main__":
