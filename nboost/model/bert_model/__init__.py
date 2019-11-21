@@ -198,5 +198,5 @@ class BertModel(BaseModel):
         return scores.argsort()[::-1]
 
     def close(self):
-        self.output_q.put(None)
+        self.input_q.put(None)
         self.model_thread.join()

@@ -150,6 +150,7 @@ class AlbertModel(BaseModel):
             next = self.input_q.get()
             if not next:
                 break
+
             query, candidates = next
 
             query = tokenization.convert_to_unicode(query)
@@ -202,5 +203,5 @@ class AlbertModel(BaseModel):
         return scores.argsort()[::-1]
 
     def close(self):
-        self.output_q.put(None)
+        self.input_q.put(None)
         self.model_thread.join()

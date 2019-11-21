@@ -213,7 +213,6 @@ class Proxy(SocketServer):
             self.client_send(client_socket, protocol.response)
             client_socket.close()
             server_socket.close()
-            self.model.close()
 
     def close(self):
         """Close the proxy server and model"""
