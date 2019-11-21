@@ -49,10 +49,10 @@ class SocketServer(Thread):
                 t.join()
 
         finally:
-            self.logger.critical('Closing %s:%s...' % self.address)
-            self.sock.close()
+            self.logger.critical('Closed %s:%s...' % self.address)
 
     def close(self):
+        self.logger.info('Closing %s:%s...' % self.address)
         self.sock.close()
         self.join()
 
