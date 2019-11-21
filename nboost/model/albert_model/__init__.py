@@ -24,8 +24,8 @@ class AlbertModel(BaseModel):
         self.spm_model_file = str(self.model_dir.joinpath('vocab/30k-clean.model'))
         self.bert_config_file = str(self.model_dir.joinpath('config.json'))
 
-        model_thread = Thread(target=self.run_model)
-        model_thread.start()
+        self.model_thread = Thread(target=self.run_model)
+        self.model_thread.start()
 
     @staticmethod
     def create_model(bert_config, input_ids, input_mask, segment_ids,
@@ -198,3 +198,6 @@ class AlbertModel(BaseModel):
         assert len(scores) == actual_length
         return scores.argsort()[::-1]
 
+    def close(self):
+        self.output_q.put(None)
+        self.model_thread.join()

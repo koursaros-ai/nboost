@@ -22,8 +22,8 @@ class BertModel(BaseModel):
         self.vocab_file = str(self.model_dir.joinpath('vocab.txt'))
         self.bert_config_file = str(self.model_dir.joinpath('bert_config.json'))
 
-        model_thread = Thread(target=self.run_model)
-        model_thread.start()
+        self.model_thread = Thread(target=self.run_model)
+        self.model_thread.start()
 
     @staticmethod
     def create_model(bert_config, input_ids, input_mask, segment_ids,
@@ -144,7 +144,10 @@ class BertModel(BaseModel):
     def feature_generator(self):
         tokenizer = tokenization.FullTokenizer(vocab_file=self.vocab_file, do_lower_case=True)
         while True:
-            query, candidates = self.input_q.get()
+            next = self.input_q.get()
+            if not next:
+                break
+            query, candidates = next
             query = tokenization.convert_to_unicode(query)
             query_token_ids = tokenization.convert_to_bert_input(
                 text=query, max_seq_length=self.max_seq_len, tokenizer=tokenizer,
@@ -194,3 +197,6 @@ class BertModel(BaseModel):
         assert len(scores) == actual_length
         return scores.argsort()[::-1]
 
+    def close(self):
+        self.output_q.put(None)
+        self.model_thread.join()
