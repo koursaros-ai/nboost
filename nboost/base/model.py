@@ -60,4 +60,7 @@ class BaseModel:
         """
         raise NotImplementedError
 
+    def close(self):
+        pass
+
 

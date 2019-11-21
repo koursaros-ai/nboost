@@ -193,6 +193,7 @@ class Proxy(SocketServer):
             self.client_send(client_socket, protocol.response)
             client_socket.close()
             server_socket.close()
+            self.model.close()
 
 
 
