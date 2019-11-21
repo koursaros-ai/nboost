@@ -1,5 +1,5 @@
 requests
-aiohttp
+httptools
 termcolor
 elasticsearch
 tqdm
