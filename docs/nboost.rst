@@ -7,12 +7,11 @@ Subpackages
 .. toctree::
 
    nboost.base
+   nboost.benchmark
    nboost.cli
-   nboost.codex
-   nboost.db
    nboost.model
+   nboost.protocol
    nboost.proxy
-   nboost.server
    nboost.tutorial
 
 Module contents

@@ -1,13 +1,13 @@
-nboost.db package
-=================
+nboost.protocol package
+=======================
 
 Submodules
 ----------
 
-nboost.db.hash module
----------------------
+nboost.protocol.es module
+-------------------------
 
-.. automodule:: nboost.db.hash
+.. automodule:: nboost.protocol.es
    :members:
    :undoc-members:
    :show-inheritance:
@@ -16,7 +16,7 @@ nboost.db.hash module
 Module contents
 ---------------
 
-.. automodule:: nboost.db
+.. automodule:: nboost.protocol
    :members:
    :undoc-members:
    :show-inheritance:
