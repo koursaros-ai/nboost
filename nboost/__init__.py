@@ -27,7 +27,7 @@ MODEL_MAP = {
 
 # image => directory
 IMAGE_MAP = {
-    'alpine': '../Dockerfiles/alpine/Dockerfile',
-    'tf': '../Dockerfiles/tf/Dockerfile',
-    'torch': '../Dockerfiles/torch/Dockerfile'
+    'alpine': '../Dockerfiles/alpine',
+    'tf': '../Dockerfiles/tf',
+    'torch': '../Dockerfiles/torch'
 }
