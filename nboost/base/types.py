@@ -1,25 +1,17 @@
-from requests.structures import CaseInsensitiveDict as CID
-from urllib.parse import urlparse, parse_qsl, urlunparse, urlencode
+"""Base types for NBoost"""
+
 from http.client import responses
 from typing import Dict
+from urllib.parse import urlparse, parse_qsl, urlunparse, urlencode
+from requests.structures import CaseInsensitiveDict as CID
+
 
 HTTP1_1 = 'HTTP/1.1'
 
 
-class StatusRequest(Exception):
-    pass
-
-
-class UnknownRequest(Exception):
-    pass
-
-
-class MissingQuery(Exception):
-    pass
-
-
 class URL:
-    """Parsed URL: scheme://netloc/path;params?query#fragment"""
+    """scheme://netloc/path;params?query#fragment"""
+    __slots__ = ['scheme', 'netloc', 'path', 'params', 'query', 'fragment']
 
     def __init__(self, url: bytes):
         url = urlparse(url.decode())
@@ -38,8 +30,7 @@ class URL:
 class Request:
     """The object that the server must pack all requests into. This is
     necessary to support multiple search apis."""
-    __slots__ = ['method', 'url', 'params', 'version', 'headers', 'body',
-                 'topk']
+    __slots__ = ['method', 'url', 'params', 'version', 'headers', 'body']
 
     def __init__(self):
         self.version = HTTP1_1
@@ -53,6 +44,7 @@ class Request:
         return '<Request %s %s>' % (self.url, self.method)
 
     def prepare(self) -> bytes:
+        """Prepare the request for socket transmission"""
         self.headers['content-length'] = str(len(self.body))
         headers = ''.join(
             '\r\n%s: %s' % (k, v) for k, v in self.headers.items())
@@ -78,9 +70,11 @@ class Response:
 
     @property
     def reason(self):
+        """Third argument in response status line"""
         return responses[self.status]
 
     def prepare(self) -> bytes:
+        """Prepare the response for socket transmission"""
         self.headers['content-length'] = str(len(self.body))
         return '{version} {status} {reason}{headers}\r\n\r\n'.format(
             version=self.version, status=self.status, reason=self.reason,

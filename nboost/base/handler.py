@@ -2,7 +2,8 @@ from httptools import HttpRequestParser, HttpResponseParser
 from .protocol import BaseProtocol
 from abc import abstractmethod
 from typing import Union, Type
-from .types import URL, StatusRequest, UnknownRequest
+from .types import URL
+from .exceptions import StatusRequest, UnknownRequest
 import re
 
 PARSERS_CLASSES = Union[Type[HttpRequestParser], Type[HttpResponseParser]]

@@ -1,5 +1,5 @@
 from json.decoder import JSONDecodeError
-from ..base.types import MissingQuery
+from ..base.exceptions import MissingQuery
 from ..base import BaseProtocol
 from typing import List
 import json as JSON

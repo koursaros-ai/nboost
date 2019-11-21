@@ -1,3 +1,4 @@
+"""General nboost package parameters"""
 from pathlib import Path
 
 __version__ = '0.0.1-rc-1'
@@ -22,4 +23,11 @@ CLASS_MAP = {
 MODEL_MAP = {
     "bert-base-uncased-msmarco": "https://storage.googleapis.com/koursaros/bert-base-uncased-msmarco.tar.gz",
     "albert-tiny-uncased-msmarco": "https://storage.googleapis.com/koursaros/albert-tiny-uncased-msmarco.tar.gz"
+}
+
+# image => directory
+IMAGE_MAP = {
+    'alpine': '../Dockerfiles/alpine',
+    'tf': '../Dockerfiles/tf',
+    'torch': '../Dockerfiles/torch'
 }
