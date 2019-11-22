@@ -5,6 +5,7 @@ from typing import List
 from ..base import set_logger
 from .. import MODEL_MAP, PKG_PATH
 from .helpers import download_file, extract_tar_gz
+import os
 
 
 class BaseModel:
@@ -18,9 +19,11 @@ class BaseModel:
         self.lr = lr
         self.max_seq_len = max_seq_len
         self.batch_size = batch_size
-        self.model_dir = model_dir
         self.data_dir = data_dir
-        self.model_dir = data_dir.joinpath(model_dir).absolute()
+        if not os.path.exists(model_dir):
+            self.model_dir = data_dir.joinpath(model_dir).absolute()
+        else:
+            self.model_dir = Path(model_dir)
         self.logger = set_logger(model_dir)
 
     def download(self):
