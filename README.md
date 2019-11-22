@@ -43,7 +43,7 @@
 ⚡**NBoost** is a scalable, search-api-boosting proxy for developing and deploying state-of-the-art models to improve the relevance of search results.
 
 <p align="center">
-<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/overview.svg?sanitize=true" width="70%">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/overview.svg?sanitize=true" width="100%">
 </p>
 
 Nboost leverages finetuned models to produce domain-specific neural search engines. The platform can also improve other downstream tasks requiring ranked input, such as question answering.
