@@ -10,7 +10,7 @@ from ..base import set_logger, BaseModel, BaseProtocol
 from ..base.handler import BaseHandler, RequestHandler, ResponseHandler
 from ..base.helpers import TimeContext
 from ..base.types import Request, Response
-from ..base.exceptions import StatusRequest, UnknownRequest, MissingQuery
+from ..base.exceptions import *
 
 
 class SocketServer(Thread):
@@ -32,7 +32,7 @@ class SocketServer(Thread):
             while True:
                 self.loop(*self.sock.accept())
 
-        except (ConnectionAbortedError, OSError):
+        except OSError:
             self.logger.info('Closing worker %s...', get_ident())
             self.logger.debug('', exc_info=True)
 
@@ -162,12 +162,12 @@ class Proxy(SocketServer):
     @time_context
     def server_connect(self) -> socket.socket:
         """Connect proxied server socket"""
-        server_socket = socket.socket()
         try:
+            server_socket = socket.socket()
             server_socket.connect(self.uaddress)
+            return server_socket
         except ConnectionRefusedError:
-            self.logger.error("Couldn't connect to %s:%s...", *self.uaddress)
-        return server_socket
+            raise UpstreamConnectionError(*self.uaddress)
 
     @property
     def status(self) -> dict:
@@ -176,13 +176,15 @@ class Proxy(SocketServer):
                     description='NBoost, for search ranking.')
 
     def loop(self, client_socket, address):
-        """Main ioloop for reranking server results to the client"""
+        """Main ioloop for reranking server results to the client. Exceptions
+        raised in the http parser must be reraised from __context__ because
+        they are caught by the MagicStack implementation"""
         protocol = self.protocol()
-        server_socket = self.server_connect()
         buffer = dict(data=bytes())
         exception = None
 
         try:
+            server_socket = self.server_connect()
             self.client_recv(client_socket, RequestHandler(protocol), buffer)
             self.server_send(server_socket, protocol.request)
             self.server_recv(server_socket, ResponseHandler(protocol))
@@ -202,12 +204,17 @@ class Proxy(SocketServer):
             else:
                 self.logger.warning('%s: %s', type(exception).__name__, log)
                 raise exception
+
         except StatusRequest:
             protocol.response.body = json.dumps(self.status, indent=2).encode()
 
         except (UnknownRequest, MissingQuery):
             self.proxy_send(client_socket, server_socket, buffer)
             self.proxy_recv(client_socket, server_socket)
+
+        except UpstreamConnectionError as exc:
+            self.logger.error("Couldn't connect to server %s:%s...", *exc.args)
+            protocol.on_error(exc)
 
         except Exception as exc:
             self.logger.error(repr(exc), exc_info=True)
