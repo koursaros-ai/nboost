@@ -73,10 +73,10 @@ class TestProxy(unittest.TestCase):
         server.is_ready.wait()
 
         # search
-        params = dict(size=5, q='test:test query')
+        params = dict(size=5, q='test:test query', pretty='')
 
         proxy_res = requests.get('http://localhost:8000/mock_index/_search', params=params)
-        print(proxy_res.content)
+        print(proxy_res.text)
         proxy_json = proxy_res.json()
         self.assertTrue(proxy_res.ok)
         self.assertIn('_nboost', proxy_json)
@@ -95,7 +95,6 @@ class TestProxy(unittest.TestCase):
         status_res = requests.get('http://localhost:8000/nboost')
         self.assertTrue(status_res.ok)
         print(status_res.content.decode())
-        # time.sleep(30)
 
         # invalid host
         proxy.uaddress = ('localhost', 2000)

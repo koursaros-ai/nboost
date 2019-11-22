@@ -11,9 +11,11 @@ HTTP1_1 = 'HTTP/1.1'
 
 class URL:
     """scheme://netloc/path;params?query#fragment"""
-    __slots__ = ['scheme', 'netloc', 'path', 'params', 'query', 'fragment']
+    __slots__ = ['scheme', 'netloc', 'path', 'params', 'query',
+                 'fragment', 'raw']
 
     def __init__(self, url: bytes):
+        self.raw = url
         url = urlparse(url.decode())
         self.scheme = url.scheme  # type: str
         self.netloc = url.netloc  # type: str
@@ -24,8 +26,7 @@ class URL:
         self.fragment = url.fragment  # type: str
 
     def __repr__(self):
-        return urlunparse((self.scheme, self.netloc, self.path, self.params,
-                           urlencode(self.params), self.fragment))
+        return self.raw.decode()
 
 
 class Request:
