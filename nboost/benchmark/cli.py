@@ -6,6 +6,8 @@ from typing import List
 import termcolor
 import requests
 
+DATASETS = ['MsMarco']
+
 
 def main(argv: List[str] = None):
     name = termcolor.colored('NBoost Benchmarker', 'cyan', attrs=['underline'])
@@ -17,8 +19,8 @@ def main(argv: List[str] = None):
         formatter_class=ArgumentDefaultsHelpFormatter)
 
     add_default_args(parser)
-    parser.add_argument('--rows', action='store', default=100, help='number of rows for benchmarking')
-    parser.add_argument('--dataset', type=str, required=True, choices=['msmarco'])
+    parser.add_argument('--rows', type=int, default=-1, help='number of rows for benchmarking')
+    parser.add_argument('--dataset', type=str, required=True, choices=DATASETS)
     parser.add_argument('--topk', type=int, default=10)
     args = parser.parse_args(argv)
 
@@ -31,7 +33,7 @@ def main(argv: List[str] = None):
     benchmarker = getattr(api, args.dataset)(args)
     benchmarker.benchmark()
 
-    print(requests.get('http://localhost:9000/status').text)
+    print(requests.get('http://localhost:8000/nboost').text)
     print()
     proxy.close()
     print('DONE')

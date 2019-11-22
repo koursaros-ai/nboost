@@ -98,6 +98,8 @@ class Proxy(SocketServer):
         self.kwargs = kwargs
         self.uaddress = (uhost, uport)
         self.bufsize = bufsize
+        self.topk_stats = dict(avg=0.0, trips=0)
+        self.choices_stats = dict(avg=0.0, trips=0)
         self.logger = set_logger(model.__name__, verbose=verbose)
 
         # pass command line arguments to instantiate each component
@@ -154,8 +156,19 @@ class Proxy(SocketServer):
         client_socket.send(response.prepare())
 
     @time_context
-    def model_rank(self, query: str, choices: List[str]) -> List[int]:
+    def model_rank(self, topk, query: str, choices: List[str]) -> List[int]:
         """Rank the query and choices and return the argsorted indices"""
+        self.topk_stats['avg'] = self.time_context.mean(
+            self.topk_stats['avg'],
+            topk, self.topk_stats['trips']
+        )
+        self.choices_stats['avg'] = self.time_context.mean(
+            self.choices_stats['avg'],
+            len(choices), self.choices_stats['trips']
+        )
+        self.topk_stats['trips'] += 1
+        self.choices_stats['trips'] += 1
+
         return self.model.rank(query, choices)
 
     @time_context
@@ -169,7 +182,9 @@ class Proxy(SocketServer):
     @property
     def status(self) -> dict:
         """Return status dictionary in the case of a status request"""
-        return dict(bench=self.time_context.record,
+        return dict(topk=self.topk_stats, choices=self.choices_stats,
+                    multiplier=self.protocol().multiplier,
+                    times=self.time_context.record,
                     description='NBoost, for search ranking.')
 
     def loop(self, client_socket, address):
@@ -186,7 +201,7 @@ class Proxy(SocketServer):
             self.client_recv(client_socket, RequestHandler(protocol), buffer)
             self.server_send(server_socket, protocol.request)
             self.server_recv(server_socket, ResponseHandler(protocol))
-            ranks = self.model_rank(protocol.query, protocol.choices)
+            ranks = self.model_rank(protocol.topk, protocol.query, protocol.choices)
             protocol.on_rank(ranks)
 
         except HttpParserError as exc:

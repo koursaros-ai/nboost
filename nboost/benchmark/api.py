@@ -1,80 +1,93 @@
+import elasticsearch
+import csv
 from nboost.benchmark.benchmarker import Benchmarker
 from nboost.base.helpers import *
 from nboost import PKG_PATH
-import csv
-
 
 REQUEST_TIMEOUT = 10000
 
 
-def msmarco(args) -> Benchmarker:
-    index = 'ms_marco'
-    url = 'https://msmarco.blob.core.windows.net/msmarcoranking/collectionandqueries.tar.gz'
-    dataset_dir = PKG_PATH.joinpath('.cache/datasets/ms_marco')
-    tar_gz_path = dataset_dir.joinpath('collectionandqueries.tar.gz')
-    qrels_tsv_path = dataset_dir.joinpath('qrels.dev.small.tsv')
-    queries_tsv_path = dataset_dir.joinpath('queries.dev.tsv')
-    collections_tsv_path = dataset_dir.joinpath('collection.tsv')
+class MsMarco(Benchmarker):
+    """MSMARCO dataset benchmarker"""
+    INDEX = 'ms_marco'
+    URL = ('https://msmarco.blob.core.windows.net'
+           '/msmarcoranking/collectionandqueries.tar.gz')
+    DATASET_DIR = PKG_PATH.joinpath('.cache/datasets/ms_marco')
+    TAR_GZ_PATH = DATASET_DIR.joinpath('collectionandqueries.tar.gz')
+    QRELS_TSV_PATH = DATASET_DIR.joinpath('qrels.dev.small.tsv')
+    QUERIES_TSV_PATH = DATASET_DIR.joinpath('queries.dev.tsv')
+    COLLECTIONS_TSV_PATH = DATASET_DIR.joinpath('collection.tsv')
 
-    # DOWNLOAD MSMARCO
-    if not dataset_dir.exists():
-        dataset_dir.mkdir(parents=True, exist_ok=True)
-        print('Dowloading MSMARCO to %s' % tar_gz_path)
-        download_file(url, tar_gz_path)
-        print('Extracting MSMARCO')
-        extract_tar_gz(tar_gz_path, dataset_dir)
-        tar_gz_path.unlink()
+    def __init__(self, args):
+        super().__init__(args)
 
-    # INDEX MSMARCO
-    proxy_es = Elasticsearch(host=args.host, port=args.port, timeout=REQUEST_TIMEOUT)
-    direct_es = Elasticsearch(host=args.uhost, port=args.uport, timeout=REQUEST_TIMEOUT)
+        # DOWNLOAD MSMARCO
+        if not self.DATASET_DIR.exists():
+            self.DATASET_DIR.mkdir(parents=True, exist_ok=True)
+            self.logger.info('Dowloading MSMARCO to %s' % self.TAR_GZ_PATH)
+            download_file(self.URL, self.TAR_GZ_PATH)
+            self.logger.info('Extracting MSMARCO')
+            extract_tar_gz(self.TAR_GZ_PATH, self.DATASET_DIR)
+            self.TAR_GZ_PATH.unlink()
 
-    def stream_msmarco_full():
-        print('Optimizing streamer...')
-        num_lines = sum(1 for line in collections_tsv_path.open())
-        with collections_tsv_path.open() as fh:
+        self.proxy_es = Elasticsearch(
+            host=self.args.host,
+            port=self.args.port,
+            timeout=REQUEST_TIMEOUT)
+        self.direct_es = Elasticsearch(
+            host=self.args.uhost,
+            port=self.args.uport,
+            timeout=REQUEST_TIMEOUT)
+
+        # INDEX MSMARCO
+        try:
+            if self.direct_es.count(index=self.INDEX)['count'] < 8 * 10 ** 6:
+                raise elasticsearch.exceptions.NotFoundError
+        except elasticsearch.exceptions.NotFoundError:
+            self.logger.info('Indexing %s' % self.COLLECTIONS_TSV_PATH)
+            es_bulk_index(self.direct_es, self.stream_msmarco_full())
+
+        self.logger.info('Reading %s' % self.QRELS_TSV_PATH)
+        with self.QRELS_TSV_PATH.open() as file:
+            qrels = csv.reader(file, delimiter='\t')
+            for qid, _, doc_id, _ in qrels:
+                self.add_qrel(qid, doc_id)
+
+        self.logger.info('Reading %s' % self.QUERIES_TSV_PATH)
+        with self.QUERIES_TSV_PATH.open() as file:
+            queries = csv.reader(file, delimiter='\t')
+            for qid, query in queries:
+                self.add_query(qid, query)
+
+    def stream_msmarco_full(self):
+        self.logger.info('Optimizing streamer...')
+        num_lines = sum(1 for _ in self.COLLECTIONS_TSV_PATH.open())
+        with self.COLLECTIONS_TSV_PATH.open() as fh:
             data = csv.reader(fh, delimiter='\t')
             with tqdm(total=num_lines, desc='INDEXING MSMARCO') as pbar:
                 for ident, passage in data:
-                    body = dict(_index=index, _id=ident, _source={'passage': passage})
+                    body = dict(_index=self.INDEX,
+                                _id=ident, _source={'passage': passage})
                     yield body
-                    pbar.update(1)
+                    pbar.update()
 
-    try:
-        if direct_es.count(index=index)['count'] < 8 * 10 ** 6:
-            raise elasticsearch.exceptions.NotFoundError
-    except elasticsearch.exceptions.NotFoundError:
-        print('Indexing %s' % collections_tsv_path)
-        es_bulk_index(direct_es, stream_msmarco_full())
+    def proxied_doc_id_producer(self, query: str):
+        return self.es_doc_id_producer(self.proxy_es, query)
 
-    # BENCHMARK MSMARCO
-    benchmarker = Benchmarker()
+    def direct_doc_id_producer(self, query: str):
+        return self.es_doc_id_producer(self.direct_es, query)
 
-    def es_doc_id_producer(es: Elasticsearch):
-        def querier(query: str):
-            body = dict(size=args.topk, query={"match": {"passage": {"query": query}}})
-            res = es.search(index=index, body=body, filter_path=['hits.hits._*'])
-            doc_ids = [hit['_id'] for hit in res['hits']['hits']]
-            return doc_ids
-        return querier
+    def es_doc_id_producer(self, es: Elasticsearch, query: str):
+        body = dict(
+            size=self.args.topk,
+            query={"match": {"passage": {"query": query}}})
 
-    benchmarker.add_doc_id_producers(
-        es_doc_id_producer(proxy_es),
-        es_doc_id_producer(direct_es)
-    )
+        res = es.search(
+            index=self.INDEX,
+            body=body,
+            filter_path=['hits.hits._*'])
 
-    print('Reading %s' % qrels_tsv_path)
-    with qrels_tsv_path.open() as file:
-        qrels = csv.reader(file, delimiter='\t')
-        for qid, _, doc_id, _ in qrels:
-            benchmarker.add_qrel(qid, doc_id)
-
-    print('Reading %s' % queries_tsv_path)
-    with queries_tsv_path.open() as file:
-        queries = csv.reader(file, delimiter='\t')
-        for qid, query in queries:
-            benchmarker.add_query(qid, query)
-
-    return benchmarker
+        doc_ids = [hit['_id'] for hit in res['hits']['hits']]
+        return doc_ids
 
 
