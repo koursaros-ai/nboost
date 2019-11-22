@@ -33,8 +33,7 @@ class SocketServer(Thread):
                 self.loop(*self.sock.accept())
 
         except OSError:
-            self.logger.info('Closing worker %s...', get_ident())
-            self.logger.debug('', exc_info=True)
+            self.logger.debug('Closing worker %s...', get_ident())
 
     def loop(self, client_socket: socket.socket, address: Tuple[str, int]):
         """Loop for each worker to execute when it receives client conn"""
@@ -160,12 +159,10 @@ class Proxy(SocketServer):
         return self.model.rank(query, choices)
 
     @time_context
-    def server_connect(self) -> socket.socket:
+    def server_connect(self, server_socket: socket.socket) -> None:
         """Connect proxied server socket"""
         try:
-            server_socket = socket.socket()
             server_socket.connect(self.uaddress)
-            return server_socket
         except ConnectionRefusedError:
             raise UpstreamConnectionError(*self.uaddress)
 
@@ -180,11 +177,12 @@ class Proxy(SocketServer):
         raised in the http parser must be reraised from __context__ because
         they are caught by the MagicStack implementation"""
         protocol = self.protocol()
+        server_socket = socket.socket()
         buffer = dict(data=bytes())
         exception = None
 
         try:
-            server_socket = self.server_connect()
+            self.server_connect(server_socket)
             self.client_recv(client_socket, RequestHandler(protocol), buffer)
             self.server_send(server_socket, protocol.request)
             self.server_recv(server_socket, ResponseHandler(protocol))
@@ -227,8 +225,8 @@ class Proxy(SocketServer):
 
     def run(self):
         """Same as socket server run() but logs"""
-        super().run()
         self.logger.critical('Upstream host is %s:%s', *self.uaddress)
+        super().run()
 
     def close(self):
         """Close the proxy server and model"""

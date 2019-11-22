@@ -97,5 +97,11 @@ class TestProxy(unittest.TestCase):
         print(status_res.content.decode())
         # time.sleep(30)
 
+        # invalid host
+        proxy.uaddress = ('localhost', 2000)
+        invalid_res = requests.get('http://localhost:8000')
+        print(invalid_res.content)
+        self.assertFalse(invalid_res.ok)
+
         proxy.close()
         server.close()
