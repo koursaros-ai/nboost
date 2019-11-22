@@ -14,6 +14,7 @@ class ESProtocol(BaseProtocol):
     SEARCH_METHODS = ['GET', 'POST']
 
     def on_request_url_and_method(self):
+        print(self.request.url.query)
         if 'size' in self.request.url.query:
             self.topk = int(self.request.url.query['size'])
             self.request.url.query['size'] = str(self.topk * self.multiplier)

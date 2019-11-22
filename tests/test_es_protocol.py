@@ -3,7 +3,7 @@ from nboost.protocol.es import ESProtocol
 import json as JSON
 import unittest
 
-REQUEST = b'GET /test/_search?q=message:testing&size=20 HTTP/1.1\r\n\r\n\r\n'
+REQUEST = b'GET /test/_search?pretty&q=message:testing&size=20 HTTP/1.1\r\n\r\n\r\n'
 
 DATA_2 = JSON.dumps({
     "from": 0, "size": 20,
@@ -81,6 +81,7 @@ class TestESCodex(unittest.TestCase):
         request_handler.feed(REQUEST)
         self.assertEqual(protocol.topk, 20)
         self.assertEqual(protocol.request.url.query['size'], '100')
+        self.assertIn('pretty', protocol.request.url.query)
         self.assertEqual(protocol.query, 'testing')
 
     def test_response(self):

@@ -19,7 +19,8 @@ class URL:
         self.netloc = url.netloc  # type: str
         self.path = url.path  # type: str
         self.params = url.params  # type: str
-        self.query = dict(parse_qsl(url.query)) if url.query else {}  # type: Dict[str, str]
+        qsl = parse_qsl(url.query, keep_blank_values=True)
+        self.query = dict(qsl) if url.query else {}  # type: Dict[str, str]
         self.fragment = url.fragment  # type: str
 
     def __repr__(self):
