@@ -40,7 +40,7 @@
 
 <h2 align="center">What is it</h2>
 
-⚡**NBoost** is a scalable, search-api-boosting proxy for developing and deploying state-of-the-art models to improve the relevance of search results.
+⚡**NBoost** is a scalable, search-engine-boosting platform for developing and deploying state-of-the-art models to improve the relevance of search results.
 
 <p align="center">
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/overview.svg?sanitize=true" width="100%">
@@ -51,32 +51,37 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 <a href = '#contact'>Contact us to request domain-specific models or leave feedback</a>
 
 <h2 align="center">Overview</h2>
+<center>
 
-Fine-tuned Models                       | Domain              | Search Boost<sup>[4]</sup> | Scoring Speed
---------------------------------------- | ------------------- | -------------------------- | -----
-`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a>| <a href ='http://www.msmarco.org/'>bing queries</a> | **0.301** vs 0.173 (1.8x)  | ~5 ms/rank<a href='#footnotes'><sup>[3]</sup></a>
-`albert-tiny-msmarco` <i>(coming soon)</i>| -  | - | ~0.7ms /rank <a href='#footnotes'><sup>[3]</sup></a>
+Fine-tuned Models                       | Domain              | Search Boost<sup>[4]</sup> | Speed
+--------------------------------------- | ------------------- | -------------------------- | -------------
+`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a>| <a href ='http://www.msmarco.org/'>bing queries</a> | **0.302** vs 0.173 (1.8x)  | 301 ms/query<a href='#footnotes'><sup>[3]</sup></a>
+`biobert-base-uncased-pubmed` <i>(coming soon)</i>| <a href ='http://bioasq.org/'>medicine</a>  | - | -
+`bert-tiny-uncased` <i>(coming soon)</i>| -  | - | -
+`albert-tiny-uncased-msmarco` <i>(coming soon)</i>| -  | - | ~50ms/query <a href='#footnotes'><sup>[3]</sup></a>
 
-To download and run nboost with one of these fine-tuned models run 
+</center>
 
-`nboost --model_dir=<model> --ext_host=<es_host>`
+These cutting edge models have as much as **doubled** search relevance. While assessing performance, there is often a tradeoff between model accuracy and speed, so we benchmark both of these factors above. This leaderboard is a work in progress, and we intend on releasing more cutting edge models!
 
 <sup>[4]</sup> <a href = 'https://en.wikipedia.org/wiki/Mean_reciprocal_rank'>Mean Reciprocal Rank </a> compared to BM25, the default for Elasticsearch. Reranking top 100.
 
 <h2 align="center">Install NBoost</h2>
 
 There are two ways to get NBoost, either as a Docker image or as a PyPi package. **For cloud users, we highly recommend using NBoost via Docker**. 
-> 🚸 Tensorflow, and Pytorch are not part of the "barebone" NBoost installation. Depending on your model, you may have to install them in advance.
+> 🚸 Depending on your model, you should install the respective Tensorflow or Pytorch dependencies. We package them below.
 
 For installing NBoost, follow the table below.
+<center>
 
-Dependency      | 🐳 Docker                             | 📦 pypi
---------------- | ------------------------------------- | --------------------------
-**None**        | `koursaros/nboost:latest-alpine`      | `pip install nboost`
-**Pytorch**     | `koursaros/nboost:latest-torch`       | `pip install nboost[torch]`      
-**Tensorflow**  | `koursaros/nboost:latest-tf`          | `pip install nboost[tf]`
-**All**         | `koursaros/nboost:latest-all`         | `pip install nboost[all]` 
+Dependency      | 🐳 Docker                             | 📦 Pypi                     | 🚦Status
+--------------- | ------------------------------------- | --------------------------  | -------------
+**None**        | `koursaros/nboost:latest-alpine`      | `pip install nboost`        | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
+**Pytorch**     | `koursaros/nboost:latest-torch`       | `pip install nboost[torch]` | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
+**Tensorflow**  | `koursaros/nboost:latest-tf`          | `pip install nboost[tf]`    | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
+**All**         | `koursaros/nboost:latest-all`         | `pip install nboost[all]`   | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
 
+</center>
 
 Any way you install it, if you end up reading the following message after `$ nboost --help` or `$ docker run koursaros/nboost --help`, then you are ready to go!
 
