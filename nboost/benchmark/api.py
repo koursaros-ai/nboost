@@ -9,26 +9,33 @@ REQUEST_TIMEOUT = 10000
 
 class MsMarco(Benchmarker):
     """MSMARCO dataset benchmarker"""
-    INDEX = 'ms_marco'
-    URL = ('https://msmarco.blob.core.windows.net'
+    DEFAULT_URL = ('https://msmarco.blob.core.windows.net'
            '/msmarcoranking/collectionandqueries.tar.gz')
-    DATASET_DIR = PKG_PATH.joinpath('.cache/datasets/ms_marco')
-    TAR_GZ_PATH = DATASET_DIR.joinpath('collectionandqueries.tar.gz')
-    QRELS_TSV_PATH = DATASET_DIR.joinpath('qrels.dev.small.tsv')
-    QUERIES_TSV_PATH = DATASET_DIR.joinpath('queries.dev.tsv')
-    COLLECTIONS_TSV_PATH = DATASET_DIR.joinpath('collection.tsv')
+    BASE_DATASET_DIR = PKG_PATH.joinpath('.cache/datasets/ms_marco')
 
     def __init__(self, args):
         super().__init__(args)
+        if not args.url:
+            self.url = self.DEFAULT_URL
+        else:
+            self.url = args.url
+        archive_file = self.url.split('/')[-1]
+        archive_name = archive_file.split('.')[0]
+        self.dataset_dir = self.BASE_DATASET_DIR.joinpath(archive_name)
+        self.tar_gz_path = self.dataset_dir.joinpath(archive_file)
+        self.qrels_tsv_path = self.dataset_dir.joinpath('qrels.dev.small.tsv')
+        self.queries_tsv_path = self.dataset_dir.joinpath('queries.dev.tsv')
+        self.collections_tsv_path = self.dataset_dir.joinpath('collection.tsv')
+        self.index = 'ms_marco_' + archive_name
 
         # DOWNLOAD MSMARCO
-        if not self.DATASET_DIR.exists():
-            self.DATASET_DIR.mkdir(parents=True, exist_ok=True)
-            self.logger.info('Dowloading MSMARCO to %s' % self.TAR_GZ_PATH)
-            download_file(self.URL, self.TAR_GZ_PATH)
+        if not self.dataset_dir.exists():
+            self.dataset_dir.mkdir(parents=True, exist_ok=True)
+            self.logger.info('Dowloading MSMARCO to %s' % self.tar_gz_path)
+            download_file(self.url, self.tar_gz_path)
             self.logger.info('Extracting MSMARCO')
-            extract_tar_gz(self.TAR_GZ_PATH, self.DATASET_DIR)
-            self.TAR_GZ_PATH.unlink()
+            extract_tar_gz(self.tar_gz_path, self.dataset_dir)
+            self.tar_gz_path.unlink()
 
         self.proxy_es = Elasticsearch(
             host=self.args.host,
@@ -41,32 +48,32 @@ class MsMarco(Benchmarker):
 
         # INDEX MSMARCO
         try:
-            if self.direct_es.count(index=self.INDEX)['count'] < 8 * 10 ** 6:
+            if self.direct_es.count(index=self.index)['count'] < 8 * 10 ** 6:
                 raise elasticsearch.exceptions.NotFoundError
         except elasticsearch.exceptions.NotFoundError:
-            self.logger.info('Indexing %s' % self.COLLECTIONS_TSV_PATH)
+            self.logger.info('Indexing %s' % self.collections_tsv_path)
             es_bulk_index(self.direct_es, self.stream_msmarco_full())
 
-        self.logger.info('Reading %s' % self.QRELS_TSV_PATH)
-        with self.QRELS_TSV_PATH.open() as file:
+        self.logger.info('Reading %s' % self.qrels_tsv_path)
+        with self.qrels_tsv_path.open() as file:
             qrels = csv.reader(file, delimiter='\t')
             for qid, _, doc_id, _ in qrels:
                 self.add_qrel(qid, doc_id)
 
-        self.logger.info('Reading %s' % self.QUERIES_TSV_PATH)
-        with self.QUERIES_TSV_PATH.open() as file:
+        self.logger.info('Reading %s' % self.queries_tsv_path)
+        with self.queries_tsv_path.open() as file:
             queries = csv.reader(file, delimiter='\t')
             for qid, query in queries:
                 self.add_query(qid, query)
 
     def stream_msmarco_full(self):
         self.logger.info('Optimizing streamer...')
-        num_lines = sum(1 for _ in self.COLLECTIONS_TSV_PATH.open())
-        with self.COLLECTIONS_TSV_PATH.open() as fh:
+        num_lines = sum(1 for _ in self.collections_tsv_path.open())
+        with self.collections_tsv_path.open() as fh:
             data = csv.reader(fh, delimiter='\t')
             with tqdm(total=num_lines, desc='INDEXING MSMARCO') as pbar:
                 for ident, passage in data:
-                    body = dict(_index=self.INDEX,
+                    body = dict(_index=self.index,
                                 _id=ident, _source={'passage': passage})
                     yield body
                     pbar.update()
@@ -83,7 +90,7 @@ class MsMarco(Benchmarker):
             query={"match": {"passage": {"query": query}}})
 
         res = es.search(
-            index=self.INDEX,
+            index=self.index,
             body=body,
             filter_path=['hits.hits._*'])
 
