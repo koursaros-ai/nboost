@@ -44,7 +44,7 @@ def add_default_args(parser: ArgumentParser) -> ArgumentParser:
     parser.add_argument('--batch_size', type=int, default=4, help=BATCH_SIZE)
     parser.add_argument('--multiplier', type=int, default=5, help=MULTIPLIER)
     parser.add_argument('--workers', type=int, default=10, help=WORKERS)
-    parser.add_argument('--field', type=str, help=FIELD)
+    parser.add_argument('--field', type=str, required=True, help=FIELD)
     parser.add_argument('--protocol', type=lambda x: import_class('protocol', x), default='ESProtocol', help=PROTOCOL)
     parser.add_argument('--model', type=lambda x: import_class('model', x), default='BertModel', help=MODEL)
     return parser
