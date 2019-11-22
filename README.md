@@ -76,7 +76,7 @@ For installing NBoost, follow the table below.
 
 Dependency      | 🐳 Docker                             | 📦 Pypi                     | 🚦Status
 --------------- | ------------------------------------- | --------------------------  | -------------
-**None**        | `koursaros/nboost:latest-alpine`      | `pip install nboost`        | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
+**-**        | `koursaros/nboost:latest-alpine`      | `pip install nboost`        | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
 **Pytorch**     | `koursaros/nboost:latest-torch`       | `pip install nboost[torch]` | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
 **Tensorflow**  | `koursaros/nboost:latest-tf`          | `pip install nboost[tf]`    | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
 **All**         | `koursaros/nboost:latest-all`         | `pip install nboost[all]`   | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
@@ -92,8 +92,7 @@ Any way you install it, if you end up reading the following message after `$ nbo
 
 <h2 align="center">Getting Started</h2>
 
-- [Preliminaries](#preliminaries)
-  * [📡The Proxy](#the-proxy)
+- [The Proxy](#the-proxy)
 - [Setting up a Neural Proxy for Elasticsearch in 3 minutes](#Setting-up-a-Neural-Proxy-for-Elasticsearch-in-3-minutes)
   * [Setting up an Elasticsearch Server](#setting-up-an-elasticsearch-server)
   * [Deploying the proxy](#deploying-the-proxy)
@@ -103,13 +102,25 @@ Any way you install it, if you end up reading the following message after `$ nbo
 - [‍Take-home messages](#take-home-messages)
 
 
-### Preliminaries
+### 📡The Proxy
 
-Before we start, let me first introduce the most important concept, the **Proxy**.
+<center>
+<table>
+  <tr>
+  <td width="33%">
+      <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/rocket.svg?sanitize=true" alt="component overview">
+      </td>
+  <td>
+  <p>The <a href="http://nboost.readthedocs.io/en/latest/chapter/proxy.html">Proxy</a> is the core of NBoost. The proxy is essentially a wrapper to enable serving the **model**. It is able to understand incoming messages from specific search apis (i.e. Elasticsearch). When the proxy receives a message, it increases the amount of results the client is asking for so that the model can rerank a larger set and return the (hopefully) better results.</p>
+  <p>For instance, if a client asks for 10 results to do with the query "brown dogs" from Elasticsearch, then the proxy may increase the results request to 100 and filter down the best ten results for the client.</p>
+</td>
+  </tr>
+</table>
+</center>
 
-#### 📡The Proxy
+#### 
 
-The [**proxy**](http://nboost.readthedocs.io/en/latest/chapter/proxy.html) object is the core of NBoost. The proxy is essentially a wrapper to enable serving the **model**. It is able to understand incoming messages from specific search apis (i.e. Elasticsearch). When the proxy receives a message, it increases the amount of results the client is asking for so that the model can rerank a larger set and return the (hopefully) better results. For instance, if a client asks for 10 results to do with the query "brown dogs" from Elasticsearch, then the proxy may increase the results request to 100 and filter down the best ten results for the client.
+
 
 ### Setting up a Neural Proxy for Elasticsearch in 3 minutes
 
@@ -130,9 +141,9 @@ docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elastics
 #### Deploying the proxy
 Now we're ready to deploy our Neural Proxy! It is very simple to do this, simply run:
 ```bash
-nboost --ext_host localhost --ext_port 9200
+nboost --uhost localhost --uport 9200
 ```
-> 📢 The `--ext_host` and `--ext_port` should be the same as the Elasticsearch server above!
+> 📢 The `--uhost` and `--uport` should be the same as the Elasticsearch server above!
 
 If you get this message: `LISTENING: <host>:<port>`, then we're good to go.
 
