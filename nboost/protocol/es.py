@@ -71,7 +71,8 @@ class ESProtocol(BaseProtocol):
         self.response.body['_nboost'] = True
         hits = self.response.body['hits']
         hits['hits'] = [hits['hits'][rank] for rank in ranks][:self.topk]
-        self.response.body = JSON.dumps(self.response.body).encode()
+        jkwargs = dict(indent=2) if 'pretty' in self.request.url.query else {}
+        self.response.body = JSON.dumps(self.response.body, **jkwargs).encode()
 
     def on_error(self, e: Exception):
         self.response.body = JSON.dumps(dict(error=repr(e))).encode()

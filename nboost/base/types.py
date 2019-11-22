@@ -30,7 +30,7 @@ class URL:
 class Request:
     """The object that the server must pack all requests into. This is
     necessary to support multiple search apis."""
-    __slots__ = ['method', 'url', 'params', 'version', 'headers', 'body']
+    __slots__ = ['method', 'url', 'version', 'headers', 'body']
 
     def __init__(self):
         self.version = HTTP1_1
@@ -38,7 +38,6 @@ class Request:
         self.url = None  # type: URL
         self.body = bytes()
         self.method = str()
-        self.params = dict()
 
     def __repr__(self):
         return '<Request %s %s>' % (self.url, self.method)
