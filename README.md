@@ -111,7 +111,7 @@ Any way you install it, if you end up reading the following message after `$ nbo
       <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/rocket.svg?sanitize=true" alt="component overview">
       </td>
   <td>
-  <p>The <a href="http://nboost.readthedocs.io/en/latest/chapter/proxy.html">Proxy</a> is the core of NBoost. The proxy is essentially a wrapper to enable serving the **model**. It is able to understand incoming messages from specific search apis (i.e. Elasticsearch). When the proxy receives a message, it increases the amount of results the client is asking for so that the model can rerank a larger set and return the (hopefully) better results.</p>
+  <p>The <a href="http://nboost.readthedocs.io/en/latest/chapter/proxy.html">Proxy</a> is the core of NBoost. The proxy is essentially a wrapper to enable serving the model. It is able to understand incoming messages from specific search apis (i.e. Elasticsearch). When the proxy receives a message, it increases the amount of results the client is asking for so that the model can rerank a larger set and return the (hopefully) better results.</p>
   <p>For instance, if a client asks for 10 results to do with the query "brown dogs" from Elasticsearch, then the proxy may increase the results request to 100 and filter down the best ten results for the client.</p>
 </td>
   </tr>
@@ -143,19 +143,19 @@ Now we're ready to deploy our Neural Proxy! It is very simple to do this, simply
 ```bash
 nboost --uhost localhost --uport 9200
 ```
-> 📢 The `--uhost` and `--uport` should be the same as the Elasticsearch server above!
+> 📢 The `--uhost` and `--uport` should be the same as the Elasticsearch server above! Uhost and uport are short for upstream-host and upstream-port (referring to the upstream server).
 
-If you get this message: `LISTENING: <host>:<port>`, then we're good to go.
+If you get this message: `Listening: <host>:<port>`, then we're good to go!
 
 #### Indexing some data
 The proxy is set up so that there is no need to ever talk to the server directly from here on out. You can send index requests, stats requests, but only the search requests will be altered. For demonstration purposes, we will be indexing [a set of passages about open-source software](https://microsoft.github.io/TREC-2019-Deep-Learning/) through NBoost. You can add the index to your Elasticsearch server by running:
 ```bash
-nboost-tutorial opensource --host localhost --port 8000
+nboost-tutorial Travel --host localhost --port 8000
 ```` 
 
-Now let's test it out! Hit the proxy with:
+Now let's test it out! Go to your web browser and type in:
 ```bash
-curl "http://localhost:8000/opensource/_search?q=passage:what%20is%20mozilla%20firefox&pretty&size=2"
+curl "http://localhost:8000/travel/_search?pretty&q=passage:vegas&size=2"
 ```
 
 If the Elasticsearch result has the `_nboost` tag in it, congratulations it's working!
@@ -163,12 +163,11 @@ If the Elasticsearch result has the `_nboost` tag in it, congratulations it's wo
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/cli-help.svg?sanitize=true" alt="success installation of NBoost">
 </p>
 
-### Elastic made easy
-To increase the number of parallel proxies, simply increase `--workers`:
-> 🚧 Under construction.
+#### Elastic made easy
+To increase the number of parallel proxies, simply increase `--workers`. For a more robust deployment approach, you can distribute the proxy [via Docker Swarm or Kubernetes](#Deploying-a-proxy-via-Docker-Swarm/Kubernetes).
 
 ### Deploying a proxy via Docker Swarm/Kubernetes
-> 🚧 Under construction.
+> 🚧 Swarm yaml/Helm chart under construction...
 
 
 ### Take-home messages

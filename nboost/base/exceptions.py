@@ -5,6 +5,10 @@ class RequestException(Exception):
     """Exception when receiving client request"""
 
 
+class ResponseException(Exception):
+    """Upstream response contains error message"""
+
+
 class UpstreamConnectionError(ConnectionRefusedError):
     """Raised when the upstream host refuses connection"""
 

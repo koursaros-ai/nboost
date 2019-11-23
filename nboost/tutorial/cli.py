@@ -7,8 +7,8 @@ import termcolor
 
 def set_travel_parser(parser):
     """Travel tutorial args"""
-    parser.add_argument('--uhost', type=str, default='127.0.0.1', help='host of the proxy')
-    parser.add_argument('--uport', type=int, default=9200, help='port of the proxy')
+    parser.add_argument('--host', type=str, default='127.0.0.1', help='host of the proxy')
+    parser.add_argument('--port', type=int, default=9200, help='port of the proxy')
 
 
 def main(argv: List[str] = None):
