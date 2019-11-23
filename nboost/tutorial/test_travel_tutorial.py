@@ -5,8 +5,8 @@ import unittest
 import requests
 
 
-class TestProxy(unittest.TestCase):
-    def test_opensource_tutorial(self):
+class TestTravel(unittest.TestCase):
+    def test_travel_tutorial(self):
         subprocess.call('docker pull elasticsearch:7.4.2',
                         shell=True)
         subprocess.call('docker run -d -p 9200:9200 -p 9300:9300 '
@@ -14,24 +14,25 @@ class TestProxy(unittest.TestCase):
                         shell=True)
 
         proxy = create_proxy([
-            '--ext_host', 'localhost',
-            '--ext_port', '9200',
+            '--uhost', 'localhost',
+            '--uport', '9200',
             '--model', 'TestModel',
-            '--field', 'passage'
+            '--field', 'passage',
+            '--verbose'
         ])
         proxy.start()
 
         # dump es index
         main([
-            'opensource',
-            '--host', 'localhost',
-            '--port', '8000',
+            'Travel',
+            '--uhost', 'localhost',
+            '--uport', '8000',
         ])
 
         # search
-        params = dict(size=2, q='what is mozilla firefox')
+        params = dict(size=2, q='hotels in vegas, baby')
 
-        proxy_res = requests.get('http://localhost:8000/opensource/_search', params=params)
+        proxy_res = requests.get('http://localhost:8000/travel/_search', params=params)
         print(proxy_res.content)
         self.assertTrue(proxy_res.ok)
         self.assertIn('_nboost', proxy_res.json())

@@ -22,6 +22,7 @@ LR = 'learning rate of the model'
 MODEL_DIR = 'name or directory of the finetuned model'
 DATA_DIR = 'dir for model binary'
 MAX_SEQ_LEN = 'max combined token length'
+BUFSIZE = 'size of the http buffer'
 BATCH_SIZE = 'batch size for running through rerank model'
 MULTIPLIER = 'factor to increase results by'
 WORKERS = 'number of threads serving the proxy'
@@ -41,6 +42,7 @@ def add_default_args(parser: ArgumentParser) -> ArgumentParser:
     parser.add_argument('--model_dir', type=str, default='bert-base-uncased-msmarco', help=MODEL_DIR)
     parser.add_argument('--data_dir', type=Path, default=PKG_PATH.joinpath('.cache'), help=DATA_DIR)
     parser.add_argument('--max_seq_len', type=int, default=64, help=MAX_SEQ_LEN)
+    parser.add_argument('--bufsize', type=int, default=2048, help=BUFSIZE)
     parser.add_argument('--batch_size', type=int, default=4, help=BATCH_SIZE)
     parser.add_argument('--multiplier', type=int, default=5, help=MULTIPLIER)
     parser.add_argument('--workers', type=int, default=10, help=WORKERS)
