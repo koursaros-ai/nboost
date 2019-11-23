@@ -22,7 +22,7 @@ class BertModel(BaseModel):
         self.vocab_file = str(self.model_dir.joinpath('vocab.txt'))
         self.bert_config_file = str(self.model_dir.joinpath('bert_config.json'))
         if not verbose:
-            tf.logging.set_verbosity(tf.logging.WARNING)
+            tf.logging.set_verbosity(tf.logging.WARN)
         self.model_thread = Thread(target=self.run_model)
         self.model_thread.start()
 
