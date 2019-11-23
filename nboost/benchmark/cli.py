@@ -22,6 +22,7 @@ def main(argv: List[str] = None):
     parser.add_argument('--rows', type=int, default=-1, help='number of rows for benchmarking')
     parser.add_argument('--dataset', type=str, required=True, choices=DATASETS)
     parser.add_argument('--topk', type=int, default=10)
+    parser.add_argument('--url', default=None, type=str)
     args = parser.parse_args(argv)
 
     if args.dataset == 'msmarco':

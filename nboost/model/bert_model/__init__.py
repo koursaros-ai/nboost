@@ -15,7 +15,7 @@ class BertModel(BaseModel):
         self.output_q = Queue()
         self.input_q = Queue()
 
-        ckpts = list(self.model_dir.glob('*.ckpt.*'))
+        ckpts = list(self.model_dir.glob('*.ckpt*'))
         if not len(ckpts) > 0:
             raise FileNotFoundError("Tensorflow model not found")
         self.checkpoint = str(ckpts[0]).split('.ckpt')[0] + '.ckpt'
