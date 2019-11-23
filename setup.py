@@ -37,9 +37,9 @@ setup(
         'all': ['torch', 'tensorflow==1.15', 'transformers'],
     },
     entry_points={'console_scripts': [
-        'nboost=nboost.cli.__main__:main',
-        'nboost-tutorial=nboost.tutorial.cli:main',
-        'nboost-benchmark=nboost.benchmark.cli:main'
+        'nboost=nboost.__main__:main',
+        'nboost-tutorial=nboost.tutorial.__main__:main',
+        'nboost-benchmark=nboost.benchmark.__main__:main'
     ]},
     classifiers=[
         'Intended Audience :: Education',
