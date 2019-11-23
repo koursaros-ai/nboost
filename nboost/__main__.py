@@ -1,5 +1,5 @@
 """__main__ cli entrypoint"""
-from . import create_proxy
+from .cli import create_proxy
 
 
 def main():
