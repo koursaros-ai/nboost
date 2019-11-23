@@ -163,7 +163,7 @@ If the Elasticsearch result has the `_nboost` tag in it, congratulations it's wo
 What just happened? You asked for two results from Elasticsearch having to do with "vegas". The proxy intercepted this request, asked the Elasticsearch for 10 results, and the model picked the best two. Magic! 🔮 (statistics)
 
 <p align="center">
-<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/cli-help.svg?sanitize=true" alt="success installation of NBoost">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/travel-tutorial.svg?sanitize=true" alt="success installation of NBoost">
 </p>
 
 #### Elastic made easy
