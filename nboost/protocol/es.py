@@ -1,5 +1,5 @@
 from json.decoder import JSONDecodeError
-from ..base.exceptions import MissingQuery
+from ..base.exceptions import MissingQuery, ResponseException
 from ..base import BaseProtocol
 from typing import List
 import json as JSON
@@ -40,12 +40,6 @@ class ESProtocol(BaseProtocol):
             except KeyError:
                 pass
 
-            if not self.topk:
-                self.topk = 10
-                self.request.url.query['size'] = str(self.topk * self.multiplier)
-            else:
-                self.request.body = JSON.dumps(json).encode()
-
             try:
                 self.query = json['query']['match'][self.field]
                 if isinstance(self.query, dict):
@@ -53,8 +47,14 @@ class ESProtocol(BaseProtocol):
             except KeyError:
                 pass
 
+            self.request.body = JSON.dumps(json).encode()
+
         except JSONDecodeError:
             pass
+
+        if self.topk is None:
+            self.topk = 10
+            self.request.url.query['size'] = str(self.topk * self.multiplier)
 
         if self.query is None:
             raise MissingQuery('Missing query')
@@ -62,14 +62,22 @@ class ESProtocol(BaseProtocol):
     def on_response_message_complete(self):
         self.response.decode()
         self.response.body = JSON.loads(self.response.body.decode())
+
+        if 'error' in self.response.body:
+            self.response.body = JSON.dumps(self.response.body).encode()
+            self.response.encode()
+            raise ResponseException
+
         hits = self.response.body.get('hits', [])
         self.choices = [hit['_source'][self.field] for hit in hits['hits']]
 
     def on_rank(self, ranks: List[int]):
-        self.response.body['_nboost'] = True
+        self.response.body['_nboost'] = '⚡NBOOST'
         hits = self.response.body['hits']
         hits['hits'] = [hits['hits'][rank] for rank in ranks][:self.topk]
-        jkwargs = dict(indent=2) if 'pretty' in self.request.url.query else {}
+        jkwargs = {'ensure_ascii': False}
+        if 'pretty' in self.request.url.query:
+            jkwargs.update({'indent': 2})
         self.response.body = JSON.dumps(self.response.body, **jkwargs).encode()
         self.response.encode()
 

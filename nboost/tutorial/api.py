@@ -32,7 +32,7 @@ class Travel(Tutorial):
 
     def setup(self):
         """Creates a "travel" elasticsearch index from travel.txt"""
-        address = (self.args.uhost, self.args.uport)
+        address = (self.args.host, self.args.port)
         elastic = Elasticsearch(host=address[0], port=address[1])
 
         # attempt to reset index

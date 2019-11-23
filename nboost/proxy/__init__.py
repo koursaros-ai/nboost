@@ -225,6 +225,10 @@ class Proxy(SocketServer):
             self.proxy_send(client_socket, server_socket, buffer)
             self.proxy_recv(client_socket, server_socket)
 
+        except ResponseException:
+            # allow the body to be sent back to the client
+            pass
+
         except UpstreamConnectionError as exc:
             self.logger.error("Couldn't connect to server %s:%s...", *exc.args)
             protocol.on_error(exc)
