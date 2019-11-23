@@ -8,7 +8,7 @@ from ...base import *
 
 class BertModel(BaseModel):
 
-    def __init__(self, **kwargs):
+    def __init__(self, verbose=False, **kwargs):
         super().__init__(**kwargs)
         self.download()
 
@@ -21,7 +21,8 @@ class BertModel(BaseModel):
         self.checkpoint = str(ckpts[0]).split('.ckpt')[0] + '.ckpt'
         self.vocab_file = str(self.model_dir.joinpath('vocab.txt'))
         self.bert_config_file = str(self.model_dir.joinpath('bert_config.json'))
-
+        if not verbose:
+            tf.logging.set_verbosity(tf.logging.WARNING)
         self.model_thread = Thread(target=self.run_model)
         self.model_thread.start()
 
