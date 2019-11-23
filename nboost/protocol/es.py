@@ -23,6 +23,7 @@ class ESProtocol(BaseProtocol):
             self.query = q[q.find(':') + 1:]
 
     def on_request_message_complete(self):
+        self.request.body.decode()
         try:
             json = JSON.loads(self.request.body.decode())
 
@@ -58,11 +59,8 @@ class ESProtocol(BaseProtocol):
         if self.query is None:
             raise MissingQuery('Missing query')
 
-    def on_response_status(self, status: int):
-        if status >= 400:
-            self.error = ElasticsearchError(self.request.body)
-
     def on_response_message_complete(self):
+        self.response.decode()
         self.response.body = JSON.loads(self.response.body.decode())
         hits = self.response.body.get('hits', [])
         self.choices = [hit['_source'][self.field] for hit in hits['hits']]
@@ -73,8 +71,10 @@ class ESProtocol(BaseProtocol):
         hits['hits'] = [hits['hits'][rank] for rank in ranks][:self.topk]
         jkwargs = dict(indent=2) if 'pretty' in self.request.url.query else {}
         self.response.body = JSON.dumps(self.response.body, **jkwargs).encode()
+        self.response.encode()
 
     def on_error(self, e: Exception):
         self.response.body = JSON.dumps(dict(error=repr(e))).encode()
         self.response.status = 500
+        self.response.encode()
 

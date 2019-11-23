@@ -1,10 +1,10 @@
 """Base types for NBoost"""
 
 from http.client import responses
-from typing import Dict
+from typing import Dict, Union
 from urllib.parse import urlparse, parse_qsl, urlunparse, urlencode
 from requests.structures import CaseInsensitiveDict as CID
-
+import gzip
 
 HTTP1_1 = 'HTTP/1.1'
 
@@ -26,7 +26,8 @@ class URL:
         self.fragment = url.fragment  # type: str
 
     def __repr__(self):
-        return self.raw.decode()
+        return urlunparse((self.scheme, self.netloc, self.path, self.params,
+                           urlencode(self.query), self.fragment))
 
 
 class Request:
@@ -43,6 +44,14 @@ class Request:
 
     def __repr__(self):
         return '<Request %s %s>' % (self.url, self.method)
+
+    def decode(self):
+        """decode request"""
+        decode_msg(self)
+
+    def encode(self):
+        """encode request"""
+        encode_msg(self)
 
     def prepare(self) -> bytes:
         """Prepare the request for socket transmission"""
@@ -74,6 +83,14 @@ class Response:
         """Third argument in response status line"""
         return responses[self.status]
 
+    def decode(self):
+        """decode response"""
+        decode_msg(self)
+
+    def encode(self):
+        """encode response"""
+        encode_msg(self)
+
     def prepare(self) -> bytes:
         """Prepare the response for socket transmission"""
         self.headers['content-length'] = str(len(self.body))
@@ -82,3 +99,15 @@ class Response:
             headers=''.join(
                 '\r\n%s: %s' % (k, v) for k, v in self.headers.items())
         ).encode() + self.body
+
+
+def decode_msg(msg: Union[Request, Response]):
+    """Decode the message's body"""
+    if msg.headers.get('content-encoding', '') == 'gzip':
+        msg.body = gzip.decompress(msg.body)
+
+
+def encode_msg(msg: Union[Request, Response]):
+    """Encode the message's body"""
+    if msg.headers.get('content-encoding', '') == 'gzip':
+        msg.body = gzip.compress(msg.body)

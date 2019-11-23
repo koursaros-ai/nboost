@@ -1,39 +1,54 @@
-from nboost.base.helpers import es_bulk_index
 from elasticsearch import Elasticsearch
+from elasticsearch.helpers import streaming_bulk
+from elasticsearch.exceptions import TransportError
 from nboost.tutorial import RESOURCES
+from nboost.base.logger import set_logger
 
 
-def another_tutorial(args):
-    pass
+class Tutorial:
+    """Base Tutorial Object"""
+    def __init__(self, args):
+        self.args = args
+        self.logger = set_logger(self.__class__.__name__)
+
+    def setup(self):
+        """The tutorial cli runs this before running run()"""
+
+    def run(self):
+        """Main tutorial functionality"""
+
+    def cleanup(self):
+        """Cleanup the tutorial class"""
 
 
-def opensource(args):
-    """Creates an "opensource" elasticsearch index from opensource.txt"""
+class Travel(Tutorial):
+    """Elasticsearch support for a travel/hotels subset of MSMARCO"""
+    INDEX = 'travel'
+    FIELD = 'passage'
+    FILE = RESOURCES.joinpath('travel.txt')
+    MAPPING = {"properties": {FIELD: {"type": "text"}}}
+    SETTINGS = {"index": {"number_of_shards": 5, "number_of_replicas": 0}}
+    DICT = dict(mappings=MAPPING, settings=SETTINGS)
 
-    mappings = {"properties": {"passage": {"type": "text"}}}
-    settings = {"index": {"number_of_shards": 5, "number_of_replicas": 0}}
-    index = dict(mappings=mappings, settings=settings)
+    def setup(self):
+        """Creates a "travel" elasticsearch index from travel.txt"""
+        address = (self.args.uhost, self.args.uport)
+        elastic = Elasticsearch(host=address[0], port=address[1])
 
-    def stream_index():
-        with RESOURCES.joinpath('opensource.txt').open() as fh:
-            for passage in fh:
-                body = {
-                    "_index": 'opensource',
-                    "_source": {
-                        "passage": passage,
-                    }
-                }
-                yield body
+        # attempt to reset index
+        try:
+            response = elastic.indices.delete(self.INDEX)
+            self.logger.info(response)
+        except TransportError:
+            pass
 
-    es = Elasticsearch(host=args.host, port=args.port, timeout=10000)
+        self.logger.info('Creating travel index on %s:%s' % address)
+        response = elastic.indices.create(index=self.INDEX, body=self.DICT)
+        self.logger.info(response)
+        self.logger.info('Indexing %s' % self.FILE)
+        txt = self.FILE.open()
+        gen = (dict(_index=self.INDEX, _source={self.FIELD: x}) for x in txt)
 
-    if es.indices.exists('opensource'):
-        res = es.indices.delete(index='opensource')
-        print('Deleting opensource index')
-        print(res)
-    print('Creating opensource index on %s:%s' % (args.host, args.port))
-    res = es.indices.create(index='opensource', body=index)
-    print(res)
-
-    print('Indexing opensource.txt')
-    es_bulk_index(es, stream_index())
+        # empty iterator
+        list(streaming_bulk(elastic, actions=gen))
+        txt.close()

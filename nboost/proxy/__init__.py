@@ -93,7 +93,6 @@ class Proxy(SocketServer):
                  uhost: str = 'localhost', uport: int = 9200,
                  bufsize: int = 2048, multiplier: int = 5, field: str = 'text',
                  verbose: bool = False, **kwargs):
-
         super().__init__(**kwargs)
         self.kwargs = kwargs
         self.uaddress = (uhost, uport)
@@ -220,6 +219,7 @@ class Proxy(SocketServer):
 
         except StatusRequest:
             protocol.response.body = json.dumps(self.status, indent=2).encode()
+            protocol.response.encode()
 
         except (UnknownRequest, MissingQuery):
             self.proxy_send(client_socket, server_socket, buffer)

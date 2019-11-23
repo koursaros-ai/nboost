@@ -76,7 +76,7 @@ class TestProxy(unittest.TestCase):
         params = dict(size=5, q='test:test query', pretty='')
 
         proxy_res = requests.get('http://localhost:8000/mock_index/_search', params=params)
-        print(proxy_res.text)
+        print(proxy_res.content)
         proxy_json = proxy_res.json()
         self.assertTrue(proxy_res.ok)
         self.assertIn('_nboost', proxy_json)
