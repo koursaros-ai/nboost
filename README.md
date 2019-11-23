@@ -159,6 +159,9 @@ curl "http://localhost:8000/travel/_search?pretty&q=passage:vegas&size=2"
 ```
 
 If the Elasticsearch result has the `_nboost` tag in it, congratulations it's working!
+
+What just happened? You asked for two results from Elasticsearch having to do with "vegas". The proxy intercepted this request, asked the Elasticsearch for 10 results, and the model picked the best two. Magic! 🔮 (statistics)
+
 <p align="center">
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/cli-help.svg?sanitize=true" alt="success installation of NBoost">
 </p>
@@ -168,15 +171,6 @@ To increase the number of parallel proxies, simply increase `--workers`. For a m
 
 ### Deploying a proxy via Docker Swarm/Kubernetes
 > 🚧 Swarm yaml/Helm chart under construction...
-
-
-### Take-home messages
-
-Let's make a short recap of what we have learned. 
-
-- NBoost is *result-boosting-proxy*, there are four fundamental components: model, server, db and codex.
-- One can increase the number of concurrent proxies with `--workers` or by deploying more containers.
-- NBoost can be deployed using an orchestration engine to coordinate load-balancing. It supports Kubernetes, Docker Swarm,  or built-in multi-process/thread solution. 
 
 
 <h2 align="center">Documentation</h2>
