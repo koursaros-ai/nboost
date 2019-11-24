@@ -15,7 +15,7 @@ class URL:
                  'fragment', 'raw']
 
     def __init__(self, url: bytes):
-        self.raw = url
+        self.raw = url  # useful for debugging
         url = urlparse(url.decode())
         self.scheme = url.scheme  # type: str
         self.netloc = url.netloc  # type: str
