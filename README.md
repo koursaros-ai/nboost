@@ -77,7 +77,7 @@ Fine-tuned Models                       | Domain              | Search Boost<sup
 
 <sub>[4] <a href = 'https://en.wikipedia.org/wiki/Mean_reciprocal_rank'>MRR </a> compared to BM25, the default for Elasticsearch. Reranking top 50.</sub>
 
-These cutting edge models have as much as **doubled** search relevance. While assessing performance, there is often a tradeoff between model accuracy and speed, so we benchmark both of these factors above. This leaderboard is a work in progress, and we intend on releasing more cutting edge models!
+Using pre-trained language understanding models, you can boost search relevance metrics by nearly **2x** compared to just text search, with little to no extra configuration. While assessing performance, there is often a tradeoff between model accuracy and speed, so we benchmark both of these factors above. This leaderboard is a work in progress, and we intend on releasing more cutting edge models!
 
 <h2 align="center">Install NBoost</h2>
 
@@ -138,6 +138,14 @@ Any way you install it, if you end up reading the following message after `$ nbo
 ### Setting up a Neural Proxy for Elasticsearch in 3 minutes
 
 In this example we will set up a proxy to sit in between the client and Elasticsearch and boost the results!
+
+#### Installing NBoost with tensorflow
+
+Make sure you have Tensorflow 1.14-1.15 (with CUDA to run on GPU) to support the modelling functionality.
+
+```bash
+pip3 install nboost[tf]
+```
 
 #### Setting up an Elasticsearch Server
 > 🔔 If you already have an Elasticsearch server, you can move on to the next step!

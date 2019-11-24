@@ -46,11 +46,24 @@ class MsMarco(Benchmarker):
             port=self.args.uport,
             timeout=REQUEST_TIMEOUT)
 
+        collection_size = 0
+        with open(self.collections_tsv_path) as collection:
+            for _ in collection: collection_size += 1
+
         # INDEX MSMARCO
         try:
-            if self.direct_es.count(index=self.index)['count'] < 8 * 10 ** 6:
+            if self.direct_es.count(index=self.index)['count'] < collection_size:
                 raise elasticsearch.exceptions.NotFoundError
         except elasticsearch.exceptions.NotFoundError:
+            try:
+                self.direct_es.indices.create(index=self.index, body={
+                    'settings': {
+                        'index': {
+                            'number_of_shards': args.shards
+                        }
+                    }
+                })
+            except: pass
             self.logger.info('Indexing %s' % self.collections_tsv_path)
             es_bulk_index(self.direct_es, self.stream_msmarco_full())
 
