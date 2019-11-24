@@ -27,15 +27,16 @@
 </p>
 
 <p align="center">
-  <a href="#highlights">Highlights</a> •
+  <a href="#what-is-it">Highlights</a> •
   <a href="#overview">Overview</a> •
+  <a href="#benchmarks">Benchmarks</a> •
   <a href="#install-nboost">Install</a> •
   <a href="#getting-started">Getting Started</a> •
   <a href="https://nboost.readthedocs.io/">Documentation</a> •
-  <a href="#tutorial">Tutorial</a> •
+  <a href="#tutorials">Tutorials</a> •
   <a href="#contributing">Contributing</a> •
   <a href="./CHANGELOG.md">Release Notes</a> •
-  <a href="https://koursaros-ai.github.io/Live-Fact-Checking-Algorithms-in-the-Era-of-Fake-News/">Blog</a>  
+  <a href="https://koursaros-ai.github.io/">Blog</a>  
 </p>
 
 <h2 align="center">What is it</h2>
@@ -204,14 +205,9 @@ To increase the number of parallel proxies, simply increase `--workers`. For a m
 
 The official NBoost documentation is hosted on [nboost.readthedocs.io](http://nboost.readthedocs.io/). It is automatically built, updated and archived on every new release.
 
-<h2 align="center">Tutorial</h2>
+<h2 align="center">Tutorials</h2>
 
 > 🚧 Under construction.
-
-<h2 align="center">Benchmark</h2>
-
-We have setup `/benchmarks` to track the network/model latency over different NBoost versions.
-
 
 <h2 align="center">Contributing</h2>
 
