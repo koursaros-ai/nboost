@@ -55,7 +55,7 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 The workflow of NBoost is relatively simple. Take the graphic above, and imagine that the server in this case is Elasticsearch.
 
 <p align="center">
-<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/nboost.svg?sanitize=true" width="80%">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/conventional.svg?sanitize=true" width="80%">
 </p>
 
 In a **conventional search request**, the user asks for *10* results from Elasticsearch and gets *10* back from the server.
