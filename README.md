@@ -51,6 +51,19 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 <a href = '#contact'>Contact us to request domain-specific models or leave feedback</a>
 
 <h2 align="center">Overview</h2>
+
+<p align="center">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/flowchart.svg?sanitize=true" width="100%">
+</p>
+
+The workflow of NBoost is relatively simple. Take the graphic above, and imagine that the server in this case is Elasticsearch.
+
+In a **conventional search request**, the user asks for *10* results from Elasticsearch and gets *10* back from the server.
+
+In an **NBoost search request**, the user asks for *10* results from the proxy. Then, the proxy asks for *100* results from the Elasticsearch. When the server returns *100* results, the model picks the best *10* results and returns them to the user.
+
+<h2 align="center">Benchmarks</h2>
+
 <center>
 
 Fine-tuned Models                       | Domain              | Search Boost<sup>[4]</sup> | Speed
@@ -62,9 +75,9 @@ Fine-tuned Models                       | Domain              | Search Boost<sup
 
 </center>
 
-These cutting edge models have as much as **doubled** search relevance. While assessing performance, there is often a tradeoff between model accuracy and speed, so we benchmark both of these factors above. This leaderboard is a work in progress, and we intend on releasing more cutting edge models!
+<sub>[4] <a href = 'https://en.wikipedia.org/wiki/Mean_reciprocal_rank'>MRR </a> compared to BM25, the default for Elasticsearch. Reranking top 50.</sub>
 
-<sup>[4]</sup> <a href = 'https://en.wikipedia.org/wiki/Mean_reciprocal_rank'>Mean Reciprocal Rank </a> compared to BM25, the default for Elasticsearch. Reranking top 100.
+These cutting edge models have as much as **doubled** search relevance. While assessing performance, there is often a tradeoff between model accuracy and speed, so we benchmark both of these factors above. This leaderboard is a work in progress, and we intend on releasing more cutting edge models!
 
 <h2 align="center">Install NBoost</h2>
 
