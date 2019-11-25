@@ -1,7 +1,7 @@
 """General nboost package parameters"""
 from pathlib import Path
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 PKG_PATH = Path(__file__).parent
 

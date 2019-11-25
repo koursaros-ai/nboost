@@ -73,8 +73,8 @@ In an **NBoost search request**, the user asks for *10* results from the proxy. 
 
 Fine-tuned Models                       | Domain              | Search Boost<sup>[4]</sup> | Speed
 --------------------------------------- | ------------------- | -------------------------- | -------------
-`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a>| <a href ='http://www.msmarco.org/'>bing queries</a> | **0.302** vs 0.173 (1.8x)  | 301 ms/query<a href='#footnotes'><sup>[3]</sup></a>
-`biobert-base-uncased-pubmed` <i>(coming soon)</i>| <a href ='http://bioasq.org/'>medicine</a>  | - | -
+`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a>| <a href ='http://www.msmarco.org/'>bing queries</a> | **0.302** vs 0.173 (1.8x)  | ~300 ms/query<a href='#footnotes'><sup>[3]</sup></a>
+`biobert-base-uncased-msmarco` | <a href ='https://github.com/naver/biobert-pretrained'>pubmed</a>  | **0.171** vs 0.103 (1.66x) | ~300 ms/query<a href='#footnotes'><sup>[3]</sup></a>
 `bert-tiny-uncased` <i>(coming soon)</i>| -  | - | -
 `albert-tiny-uncased-msmarco` <i>(coming soon)</i>| -  | - | ~50ms/query <a href='#footnotes'><sup>[3]</sup></a>
 
