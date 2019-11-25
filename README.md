@@ -149,7 +149,7 @@ In this example we will set up a proxy to sit in between the client and Elastics
 If you want to run the example on a GPU, make sure you have Tensorflow 1.14-1.15 (with CUDA) to support the modelling functionality. However, if you want to just run it on a CPU, don't worry about it. For both cases, just run:
 
 ```bash
-pip3 install nboost[tf]
+pip install nboost[tf]
 ```
 
 
