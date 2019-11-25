@@ -180,7 +180,7 @@ The proxy is set up so that there is no need to ever talk to the server directly
 nboost-tutorial Travel --host localhost --port 8000
 ```` 
 
-Now let's test it out! Go to your web browser and type in:
+Now let's test it out! Hit the Elasticsearch with:
 ```bash
 curl "http://localhost:8000/travel/_search?pretty&q=passage:vegas&size=2"
 ```
