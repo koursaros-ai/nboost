@@ -174,7 +174,7 @@ nboost --uhost localhost --uport 9200 --field passage
 If you get this message: `Listening: <host>:<port>`, then we're good to go!
 
 #### Indexing some data
-The proxy is set up so that there is no need to ever talk to the server directly from here on out. You can send index requests, stats requests, but only the search requests will be altered. For demonstration purposes, we will be indexing [a set of passages about open-source software](https://microsoft.github.io/TREC-2019-Deep-Learning/) through NBoost. You can add the index to your Elasticsearch server by running:
+The proxy is set up so that there is no need to ever talk to the server directly from here on out. You can send index requests, stats requests, but only the search requests will be altered. For demonstration purposes, we will be indexing [a set of passages about traveling and hotels](https://microsoft.github.io/TREC-2019-Deep-Learning/) through NBoost. You can add the index to your Elasticsearch server by running:
 ```bash
 nboost-tutorial Travel --host localhost --port 8000
 ```` 
