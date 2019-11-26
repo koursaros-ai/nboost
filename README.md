@@ -69,6 +69,8 @@ In an **NBoost search request**, the user asks for *10* results from the proxy. 
 
 <h2 align="center">Benchmarks</h2>
 
+To use one of these fine-tuned models with nboost, run `nboost --model_dir bert-base-uncased-msmarco` for example, and it will download and cache automatically.
+
 <center>
 
 Fine-tuned Models                                                               | Dependency                                                                   | Domain                                                             | Search Boost<sup>[4]</sup>                       | Speed
