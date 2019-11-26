@@ -71,12 +71,12 @@ In an **NBoost search request**, the user asks for *10* results from the proxy. 
 
 <center>
 
-Fine-tuned Models                       | Domain              | Search Boost<sup>[4]</sup> | Speed
---------------------------------------- | ------------------- | -------------------------- | -------------
-`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a>| <a href ='http://www.msmarco.org/'>bing queries</a> | **0.302** vs 0.173 (1.8x)  | ~300 ms/query<a href='#footnotes'><sup>[3]</sup></a>
-`biobert-base-uncased-msmarco` | <a href ='https://github.com/naver/biobert-pretrained'>pubmed</a>  | **0.171** vs 0.103 (1.66x) | ~300 ms/query<a href='#footnotes'><sup>[3]</sup></a>
-`bert-tiny-uncased` <i>(coming soon)</i>| -  | - | -
-`albert-tiny-uncased-msmarco` <i>(coming soon)</i>| -  | - | ~50ms/query <a href='#footnotes'><sup>[3]</sup></a>
+Fine-tuned Models                                                                                                                                                      | Domain                                               | Search Boost<sup>[4]</sup> | Speed
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | -------------------------- | --------------------------
+`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a> <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> |  <a href ='http://www.msmarco.org/'>bing queries</a> | **0.302** vs 0.173 (1.8x)  | ~300 ms/query<a href='#footnotes'><sup>[3]</sup></a>
+`biobert-base-uncased-msmarco` <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='https://github.com/naver/biobert-pretrained'>pubmed</a>  | **0.171** vs 0.103 (1.66x) | ~300 ms/query<a href='#footnotes'><sup>[3]</sup></a>
+`bert-tiny-uncased`  <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> <i>(coming soon)</i> |  -  | - | -
+`albert-tiny-uncased-msmarco` <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> <i>(coming soon)</i> |  -  | - | ~50ms/query <a href='#footnotes'><sup>[3]</sup></a>
 
 </center>
 
@@ -94,9 +94,9 @@ For installing NBoost, follow the table below.
 
 Dependency      | 🐳 Docker                             | 📦 Pypi                     | 🚦Status
 --------------- | ------------------------------------- | --------------------------  | -------------
-**-**        | `koursaros/nboost:latest-alpine`      | `pip install nboost`        | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
+**Tensorflow** (*recommended*)  | `koursaros/nboost:latest-tf`          | `pip install nboost[tf]`    | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
+**-**        | `koursaros/nboost:latest-alpine`         | `pip install nboost`        | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
 **Pytorch**     | `koursaros/nboost:latest-torch`       | `pip install nboost[torch]` | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
-**Tensorflow**  | `koursaros/nboost:latest-tf`          | `pip install nboost[tf]`    | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
 **All**         | `koursaros/nboost:latest-all`         | `pip install nboost[all]`   | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
 
 </center>
