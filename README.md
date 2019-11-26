@@ -73,10 +73,10 @@ In an **NBoost search request**, the user asks for *10* results from the proxy. 
 
 Fine-tuned Models                                                               | Dependency                                                                   | Domain                                                             | Search Boost<sup>[4]</sup>                       | Speed
 ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------ | ----------
-`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a> | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> |  <a href ='http://www.msmarco.org/'>bing queries</a>               | **+80%** <sub><sup>(0.30 vs 0.17)</sup></sub>    | ~300 ms/query<a href='#footnotes'><sup>[3]</sup></a>
+`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a> | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://www.msmarco.org/'>bing queries</a>                | **+80%** <sub><sup>(0.30 vs 0.17)</sup></sub>    | ~300 ms/query<a href='#footnotes'><sup>[3]</sup></a>
 `biobert-base-uncased-msmarco`                                                  | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='https://github.com/naver/biobert-pretrained'>pubmed</a>  | **+66%** <sub><sup>(0.17 vs 0.10)</sup></sub>    | ~300 ms/query<a href='#footnotes'><sup>[3]</sup></a>
-`bert-tiny-uncased` <i>(coming soon)</i>                                        | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> |  -                                                                 | -                                                | -
-`albert-tiny-uncased` <i>(coming soon)</i>                                      | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> |  -                                                                 | -                                                | ~50ms/query <a href='#footnotes'><sup>[3]</sup></a>
+`bert-tiny-uncased` (*coming soon*)                                             | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> |  -                                                                 | -                                                | -
+`albert-tiny-uncased` (*coming soon*)                                           | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> |  -                                                                 | -                                                | ~50ms/query <a href='#footnotes'><sup>[3]</sup></a>
 
 </center>
 
@@ -92,12 +92,12 @@ There are two ways to get NBoost, either as a Docker image or as a PyPi package.
 For installing NBoost, follow the table below.
 <center>
 
-Dependency      | 🐳 Docker                             | 📦 Pypi                     | 🚦Status
---------------- | ------------------------------------- | --------------------------  | -------------
+Dependency                      | 🐳 Docker                             | 📦 Pypi                     | 🚦Status
+------------------------------- | ------------------------------------- | --------------------------  | -------------
 **Tensorflow** (*recommended*)  | `koursaros/nboost:latest-tf`          | `pip install nboost[tf]`    | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
-**-**        | `koursaros/nboost:latest-alpine`         | `pip install nboost`        | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
-**Pytorch**     | `koursaros/nboost:latest-torch`       | `pip install nboost[torch]` | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
-**All**         | `koursaros/nboost:latest-all`         | `pip install nboost[all]`   | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
+**Pytorch**                     | `koursaros/nboost:latest-torch`       | `pip install nboost[torch]` | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
+**All**                         | `koursaros/nboost:latest-all`         | `pip install nboost[all]`   | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
+**-** (*for testing*)           | `koursaros/nboost:latest-alpine`      | `pip install nboost`        | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
 
 </center>
 
