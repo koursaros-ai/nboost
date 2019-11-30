@@ -17,7 +17,8 @@ class BaseCodex:
         self.multiplier = multiplier
 
     def parse_query(self, request: Request) -> Tuple[Any, bytes]:
-        """Parse the field and query from the client request"""
+        """Parse the client request. Autodetect the field.
+        :return: Tuple[field, query]"""
 
     def multiply_request(self, request: Request) -> int:
         """Increase the size of the request and return topk"""
