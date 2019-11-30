@@ -1,3 +1,9 @@
 sphinx-argparse
 sphinxcontrib-apidoc
 sphinx-autodoc-typehints
+elasticsearch
+tqdm
+termcolor
+numpy
+tensorflow
+httptools
