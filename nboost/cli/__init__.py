@@ -3,12 +3,13 @@
 import importlib
 from pathlib import Path
 from typing import List
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 import termcolor
-from nboost import __version__, CLASS_MAP, PKG_PATH
+from nboost import CLASS_MAP, PKG_PATH
 from nboost.proxy import Proxy
+from nboost.__version__ import __doc__
 
-TAG = termcolor.colored('NBoost (v%s)' % __version__, 'cyan', attrs=['underline'])
+TAG = termcolor.colored('NBoost (v%s)' % __doc__, 'cyan', attrs=['underline'])
 DESCRIPTION = ('%s: is a scalable, search-api-boosting platform for '
                'developing and deploying SOTA models to improve the '
                'relevance of search results..' % TAG)
@@ -30,8 +31,9 @@ PROTOCOL = 'protocol class'
 MODEL = 'model class'
 
 
-def add_default_args(parser: ArgumentParser) -> ArgumentParser:
+def set_parser() -> ArgumentParser:
     """Add default nboost cli arguments to a given parser"""
+    parser = ArgumentParser(description=DESCRIPTION)
     parser.add_argument('--verbose', action='store_true', default=False, help=VERBOSE)
     parser.add_argument('--host', type=str, default='0.0.0.0', help=HOST)
     parser.add_argument('--port', type=int, default=8000, help=PORT)
@@ -61,15 +63,8 @@ def import_class(module: str, name: str):
     return getattr(importlib.import_module(file), name)
 
 
-def get_args(argv: List[str] = None) -> Namespace:
-    """Get default parsed arguments for the nboost cli"""
-    parser = ArgumentParser(description=DESCRIPTION)
-    add_default_args(parser)
-    args = parser.parse_args(argv)
-    return args
-
-
 def create_proxy(argv: List[str] = None):
     """Return proxy instance given a command line"""
-    args = get_args(argv)
+    parser = set_parser()
+    args = parser.parse_args(argv)
     return Proxy(**vars(args))
