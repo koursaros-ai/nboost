@@ -102,3 +102,9 @@ class TestESCodex(unittest.TestCase):
         request_handler.feed(REQUEST_3)
         self.assertEqual(protocol.topk, 100)
         self.assertEqual(protocol.query, 'this is a test')
+
+    def test_detect_field(self):
+        protocol = ESProtocol(multiplier=5)
+        request_handler = RequestHandler(protocol)
+        request_handler.feed(REQUEST)
+        self.assertEqual(protocol.field, 'message')

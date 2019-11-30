@@ -20,7 +20,7 @@ class ESProtocol(BaseProtocol):
 
         if 'q' in self.request.url.query:
             q = self.request.url.query['q']
-            self.query = q[q.find(':') + 1:]
+            self.field, self.query = q.split(':')
 
     def on_request_message_complete(self):
         self.request.body.decode()
@@ -41,7 +41,7 @@ class ESProtocol(BaseProtocol):
                 pass
 
             try:
-                self.query = json['query']['match'][self.field]
+                self.field, self.query = tuple(json['query']['match'].items())[0]
                 if isinstance(self.query, dict):
                     self.query = self.query['query']
             except KeyError:
