@@ -47,6 +47,11 @@ class ESProtocol(BaseProtocol):
             except KeyError:
                 pass
 
+            try:
+                self.query = json['query']['term'][self.field]
+            except KeyError:
+                pass
+
             self.request.body = JSON.dumps(json).encode()
 
         except JSONDecodeError:

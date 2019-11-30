@@ -1,12 +1,13 @@
 """Base types for NBoost"""
 
 from http.client import responses
-from typing import Dict, Union
+from typing import Dict, Union, List
 from urllib.parse import urlparse, parse_qsl, urlunparse, urlencode
 from requests.structures import CaseInsensitiveDict as CID
 import gzip
 
 HTTP1_1 = 'HTTP/1.1'
+CRLF = '\r\n'
 
 
 class URL:
@@ -111,3 +112,11 @@ def encode_msg(msg: Union[Request, Response]):
     """Encode the message's body"""
     if msg.headers.get('content-encoding', '') == 'gzip':
         msg.body = gzip.compress(msg.body)
+
+
+class RawHttpMessage:
+    """Return formatted HTTP message (useful for testing)"""
+    def __new__(cls, line: str, headers: List[str], body: str) -> bytes:
+        body = body.replace('\n', '')
+        headers += ['Content-Length: %s' % len(body)]
+        return bytes(line + CRLF + CRLF.join(headers) + CRLF*2 + body, 'utf8')
