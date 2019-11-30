@@ -109,6 +109,7 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 html_logo = '../.github/banner-white.svg'
+html_favicon = '../.github/favicon.ico'
 
 html_css_files = ['main.css']
 # Custom sidebar templates, must be a dictionary that maps document names
