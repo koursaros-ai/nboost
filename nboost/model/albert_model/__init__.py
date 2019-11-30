@@ -2,9 +2,9 @@ from queue import Queue
 from threading import Thread
 import numpy as np
 import tensorflow as tf
-from . import modeling, tokenization
-from ..bert_model import tokenization as bert_tokenization
-from ...base import *
+from nboost.model.albert_model import modeling, tokenization
+from nboost.model.bert_model import tokenization as bert_tokenization
+from nboost.model.base import BaseModel
 
 
 class AlbertModel(BaseModel):
