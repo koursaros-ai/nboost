@@ -123,14 +123,6 @@ class TestESCodex(unittest.TestCase):
         protocol.on_error(ValueError('This is an exception'))
         self.assertEqual(protocol.response.status, 500)
 
-    def test_request_3(self):
-        protocol = ESProtocol(multiplier=5, field='passage')
-        request_handler = RequestHandler(protocol)
-
-        request_handler.feed(REQUEST_3)
-        self.assertEqual(protocol.topk, 100)
-        self.assertEqual(protocol.query, 'this is a test')
-
     def test_detect_field(self):
         protocol = ESProtocol(multiplier=5)
         request_handler = RequestHandler(protocol)
