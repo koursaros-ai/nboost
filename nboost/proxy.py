@@ -58,8 +58,6 @@ class Proxy(SocketServer):
         self.kwargs = kwargs
         self.uaddress = (uhost, uport)
         self.bufsize = bufsize
-        self.topk_stats = dict(avg=0.0, trips=0)
-        self.choices_stats = dict(avg=0.0, trips=0)
         self.logger = set_logger(model.__name__, verbose=verbose)
 
         # pass command line arguments to instantiate each component
