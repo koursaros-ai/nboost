@@ -1,9 +1,9 @@
 """Logger for NBoost classes"""
 
-import os
-import copy
-import logging
 import termcolor
+import logging
+import copy
+import os
 
 
 def set_logger(context, verbose=False):

@@ -1,12 +1,11 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from nboost.cli import add_default_args
-from nboost.benchmark import api
-from nboost.proxy import Proxy
 from typing import List
 import termcolor
 import requests
-
-DATASETS = ['MsMarco']
+from nboost.benchmark.benchmarker import Benchmarker
+from nboost.cli import add_default_args
+from nboost.proxy import Proxy
+from nboost import DATASET_MAP
 
 
 def main(argv: List[str] = None):
@@ -20,19 +19,18 @@ def main(argv: List[str] = None):
 
     add_default_args(parser)
     parser.add_argument('--rows', type=int, default=-1, help='number of rows for benchmarking')
-    parser.add_argument('--dataset', type=str, required=True, choices=DATASETS)
+    parser.add_argument('--connector', type=str, default='ESConnector')
+    parser.add_argument('--dataset', type=str, required=True, choices=DATASET_MAP.keys())
     parser.add_argument('--topk', type=int, default=10)
     parser.add_argument('--url', default=None, type=str)
-    parser.add_argument('--shards', default=1, type=str)
+    parser.add_argument('--field', default='passage', type=str)
+    parser.add_argument('--shards', default=1, type=int)
     args = parser.parse_args(argv)
-
-    if args.dataset == 'msmarco':
-        args.field = 'passage'
-
     proxy = Proxy(**vars(args))
     proxy.start()
-    # execute dataset dependencies
-    benchmarker = getattr(api, args.dataset)(args)
+
+    benchmarker = Benchmarker(**vars(args))
+    benchmarker.setup()
     benchmarker.benchmark()
 
     print(requests.get('http://localhost:8000/nboost').text)

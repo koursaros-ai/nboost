@@ -1,42 +1,60 @@
-from nboost.proxy import SocketServer
-from nboost.cli import create_proxy
-from tests.test_es_protocol import RESPONSE
+from nboost.helpers import dump_json, load_json
+from nboost.types import Request, Response
+from nboost.model.shuffle import ShuffleModel
+from nboost.codex.base import BaseCodex
+from nboost.server import SocketServer
+from nboost.proxy import Proxy
 import requests
 import unittest
 
 
 class TestServer(SocketServer):
     def loop(self, client_socket, address):
-        client_socket.send(RESPONSE)
+        response = Response()
+        response.body = dump_json(['test choice'] * 10)
+        print(response.prepare(Request()))
+        client_socket.send(response.prepare(Request()))
         client_socket.close()
 
 
+class TestCodex(BaseCodex):
+    SEARCH_PATH = '/test'
+
+    def parse_query(self, request):
+        return request.url.query['q'].split(';')
+
+    def multiply_request(self, request):
+        topk = int(request.url.query['topk'])
+        request.url.query['topk'] = str(topk * self.multiplier)
+        return topk
+
+    def parse_choices(self, response, field):
+        return load_json(response.body)
+
+    def reorder_response(self, request, response, ranks):
+        response.body = dump_json(load_json(response.body)[:len(ranks)])
+
+
 class TestProxy(unittest.TestCase):
-    def test_default_proxy(self):
+    def test_proxy(self):
 
         server = TestServer(port=9500, verbose=True)
-        proxy = create_proxy([
-            '--port', '8000',
-            '--model', 'TestModel',
-            '--field', 'message',
-            '--uport', '9500',
-            '--verbose'
-        ])
+        proxy = Proxy(port=8000, model=ShuffleModel, codex=TestCodex,
+                      uport=9500, verbose=True)
         proxy.start()
         server.start()
         proxy.is_ready.wait()
         server.is_ready.wait()
 
         # search
-        params = dict(size=5, q='test:test query', pretty='')
+        params = dict(size=5, q='test_field;test query', topk=5)
 
-        proxy_res = requests.get('http://localhost:8000/mock_index/_search', params=params)
+        proxy_res = requests.get('http://localhost:8000/test', params=params)
         print(proxy_res.content)
-        proxy_json = proxy_res.json()
         self.assertTrue(proxy_res.ok)
-        self.assertIn('_nboost', proxy_json)
+        self.assertEqual(5, len(proxy_res.json()))
 
-        server_res = requests.get('http://localhost:9500/mock_index/_search', params=params)
+        server_res = requests.get('http://localhost:9500/test', params=params)
         print(server_res.content)
         self.assertTrue(server_res.ok)
 
@@ -52,7 +70,7 @@ class TestProxy(unittest.TestCase):
         print(status_res.content.decode())
 
         # invalid host
-        proxy.uaddress = ('localhost', 2000)
+        proxy.uaddress = ('0.0.0.0', 2000)
         invalid_res = requests.get('http://localhost:8000')
         print(invalid_res.content)
         self.assertFalse(invalid_res.ok)

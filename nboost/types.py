@@ -1,13 +1,13 @@
 """Base types for NBoost"""
 
-from http.client import responses
-from typing import Dict, Union, List
 from urllib.parse import urlparse, parse_qsl, urlunparse, urlencode
-from requests.structures import CaseInsensitiveDict as CID
+from http.client import responses
+from typing import Dict
 import gzip
+from requests.structures import CaseInsensitiveDict as CID
+
 
 HTTP1_1 = 'HTTP/1.1'
-CRLF = '\r\n'
 
 
 class URL:
@@ -46,17 +46,10 @@ class Request:
     def __repr__(self):
         return '<Request %s %s>' % (self.url, self.method)
 
-    def decode(self):
-        """decode request"""
-        decode_msg(self)
-
-    def encode(self):
-        """encode request"""
-        encode_msg(self)
-
     def prepare(self) -> bytes:
         """Prepare the request for socket transmission"""
         self.headers['content-length'] = str(len(self.body))
+
         headers = ''.join(
             '\r\n%s: %s' % (k, v) for k, v in self.headers.items())
         return '{method} {url} {version}{headers}\r\n\r\n'.format(
@@ -84,39 +77,21 @@ class Response:
         """Third argument in response status line"""
         return responses[self.status]
 
-    def decode(self):
-        """decode response"""
-        decode_msg(self)
+    def unpack(self):
+        """Preprocess http message (e.g decode)"""
+        if self.headers.get('content-encoding', '') == 'gzip':
+            self.body = gzip.decompress(self.body)
 
-    def encode(self):
-        """encode response"""
-        encode_msg(self)
-
-    def prepare(self) -> bytes:
+    def prepare(self, request: Request) -> bytes:
         """Prepare the response for socket transmission"""
+        if 'gzip' in request.headers.get('accept-encoding', ''):
+            self.headers['content-encoding'] = 'gzip'
+            self.body = gzip.compress(self.body)
+
         self.headers['content-length'] = str(len(self.body))
+
         return '{version} {status} {reason}{headers}\r\n\r\n'.format(
             version=self.version, status=self.status, reason=self.reason,
             headers=''.join(
                 '\r\n%s: %s' % (k, v) for k, v in self.headers.items())
         ).encode() + self.body
-
-
-def decode_msg(msg: Union[Request, Response]):
-    """Decode the message's body"""
-    if msg.headers.get('content-encoding', '') == 'gzip':
-        msg.body = gzip.decompress(msg.body)
-
-
-def encode_msg(msg: Union[Request, Response]):
-    """Encode the message's body"""
-    if msg.headers.get('content-encoding', '') == 'gzip':
-        msg.body = gzip.compress(msg.body)
-
-
-class RawHttpMessage:
-    """Return formatted HTTP message (useful for testing)"""
-    def __new__(cls, line: str, headers: List[str], body: str) -> bytes:
-        body = body.replace('\n', '')
-        headers += ['Content-Length: %s' % len(body)]
-        return bytes(line + CRLF + CRLF.join(headers) + CRLF*2 + body, 'utf8')

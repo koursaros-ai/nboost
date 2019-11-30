@@ -2,7 +2,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk
 from elasticsearch.exceptions import TransportError
 from nboost.tutorial import RESOURCES
-from nboost.base.logger import set_logger
+from nboost.logger import set_logger
 
 
 class Tutorial:

@@ -1,113 +1,84 @@
-import elasticsearch
-import csv
-from nboost.benchmark.benchmarker import Benchmarker
-from nboost.base.helpers import *
-from nboost import PKG_PATH
+from abc import abstractmethod
+from typing import List, Generator
+from elasticsearch.exceptions import NotFoundError
+from elasticsearch.helpers import streaming_bulk
+from elasticsearch import Elasticsearch
+from nboost.logger import set_logger
 
-REQUEST_TIMEOUT = 10000
+
+class Connector:
+    """The connector is the object that the benchmarker uses to return cids
+    from a search api."""
+
+    def __init__(self, topk: int = 10, dataset: str = 'ms_marco',
+                 host: str = '0.0.0.0', port: int = 8000,
+                 uhost: str = '0.0.0.0', uport: int = 9200,
+                 field: str = 'passage', **kwargs):
+        self.topk = topk
+        self.host = host
+        self.port = port
+        self.uhost = uhost
+        self.uport = uport
+        self.field = field
+        self.dataset = dataset
+        self.logger = set_logger(self.__class__.__name__)
+
+    @abstractmethod
+    def setup(self, choice_generator: Generator, total: int):
+        """Setup the search api (e.g. index, settings, etc).
+
+        :param choice_generator: generates choice id, choice tuples
+        :param total: total number of choices
+        """
+
+    @abstractmethod
+    def get_cids(self, query: str, proxy=False) -> List[int]:
+        """return the predicted choice ids given a query."""
 
 
-class MsMarco(Benchmarker):
-    """MSMARCO dataset benchmarker"""
-    DEFAULT_URL = ('https://msmarco.blob.core.windows.net'
-           '/msmarcoranking/collectionandqueries.tar.gz')
-    BASE_DATASET_DIR = PKG_PATH.joinpath('.cache/datasets/ms_marco')
+class ESConnector(Connector):
+    def __init__(self, shards: int = 5, **kwargs):
+        super().__init__(**kwargs)
+        self.mapping = {'settings': {'index': {'number_of_shards': shards}}}
+        self.proxy_elastic = self.set_elastic(self.host, self.port)
+        self.upstream_elastic = self.set_elastic(self.uhost, self.uport)
 
-    def __init__(self, args):
-        super().__init__(args)
-        if not args.url:
-            self.url = self.DEFAULT_URL
-        else:
-            self.url = args.url
-        archive_file = self.url.split('/')[-1]
-        archive_name = archive_file.split('.')[0]
-        self.dataset_dir = self.BASE_DATASET_DIR.joinpath(archive_name)
-        self.tar_gz_path = self.dataset_dir.joinpath(archive_file)
-        self.qrels_tsv_path = self.dataset_dir.joinpath('qrels.dev.small.tsv')
-        self.queries_tsv_path = self.dataset_dir.joinpath('queries.dev.tsv')
-        self.collections_tsv_path = self.dataset_dir.joinpath('collection.tsv')
-        self.index = 'ms_marco_' + archive_name
+    @staticmethod
+    def set_elastic(host: str, port: int) -> Elasticsearch:
+        """Construct elastic api"""
+        return Elasticsearch(host=host, port=port, timeout=10000)
 
-        # DOWNLOAD MSMARCO
-        if not self.dataset_dir.exists():
-            self.dataset_dir.mkdir(parents=True, exist_ok=True)
-            self.logger.info('Dowloading MSMARCO to %s' % self.tar_gz_path)
-            download_file(self.url, self.tar_gz_path)
-            self.logger.info('Extracting MSMARCO')
-            extract_tar_gz(self.tar_gz_path, self.dataset_dir)
-            self.tar_gz_path.unlink()
+    def format(self, cid: int, choice: str):
+        """Format a choice for indexing"""
+        return {
+            '_index': self.dataset, '_id': cid,
+            '_source': {self.field: choice}
+        }
 
-        self.proxy_es = Elasticsearch(
-            host=self.args.host,
-            port=self.args.port,
-            timeout=REQUEST_TIMEOUT)
-        self.direct_es = Elasticsearch(
-            host=self.args.uhost,
-            port=self.args.uport,
-            timeout=REQUEST_TIMEOUT)
-
-        collection_size = 0
-        with open(self.collections_tsv_path) as collection:
-            for _ in collection: collection_size += 1
-
-        # INDEX MSMARCO
+    def setup(self, choice_gen: Generator, total: int):
+        self.logger.info('Setting up Elasticsearch index...')
         try:
-            if self.direct_es.count(index=self.index)['count'] < collection_size:
-                raise elasticsearch.exceptions.NotFoundError
-        except elasticsearch.exceptions.NotFoundError:
-            try:
-                self.direct_es.indices.create(index=self.index, body={
-                    'settings': {
-                        'index': {
-                            'number_of_shards': args.shards
-                        }
-                    }
-                })
-            except: pass
-            self.logger.info('Indexing %s' % self.collections_tsv_path)
-            es_bulk_index(self.direct_es, self.stream_msmarco_full())
+            if self.upstream_elastic.count(index=self.dataset)['count'] < total:
+                raise NotFoundError
+            else:
+                self.logger.info('Index exists!')
+        except NotFoundError:
+            # with suppress(Exception):
+            self.logger.info('Creating index %s...' % self.dataset)
+            self.upstream_elastic.indices.create(self.dataset, self.mapping)
+            self.logger.info('Indexing %s...' % self.dataset)
 
-        self.logger.info('Reading %s' % self.qrels_tsv_path)
-        with self.qrels_tsv_path.open() as file:
-            qrels = csv.reader(file, delimiter='\t')
-            for qid, _, doc_id, _ in qrels:
-                self.add_qrel(qid, doc_id)
+            act = (self.format(cid, choice) for cid, choice in choice_gen)
+            list(streaming_bulk(self.upstream_elastic, actions=act))
 
-        self.logger.info('Reading %s' % self.queries_tsv_path)
-        with self.queries_tsv_path.open() as file:
-            queries = csv.reader(file, delimiter='\t')
-            for qid, query in queries:
-                self.add_query(qid, query)
+    def get_cids(self, query: str, proxy=False):
+        elastic = self.proxy_elastic if proxy else self.upstream_elastic
 
-    def stream_msmarco_full(self):
-        self.logger.info('Optimizing streamer...')
-        num_lines = sum(1 for _ in self.collections_tsv_path.open())
-        with self.collections_tsv_path.open() as fh:
-            data = csv.reader(fh, delimiter='\t')
-            with tqdm(total=num_lines, desc='INDEXING MSMARCO') as pbar:
-                for ident, passage in data:
-                    body = dict(_index=self.index,
-                                _id=ident, _source={'passage': passage})
-                    yield body
-                    pbar.update()
-
-    def proxied_doc_id_producer(self, query: str):
-        return self.es_doc_id_producer(self.proxy_es, query)
-
-    def direct_doc_id_producer(self, query: str):
-        return self.es_doc_id_producer(self.direct_es, query)
-
-    def es_doc_id_producer(self, es: Elasticsearch, query: str):
-        body = dict(
-            size=self.args.topk,
-            query={"match": {"passage": {"query": query}}})
-
-        res = es.search(
-            index=self.index,
-            body=body,
-            filter_path=['hits.hits._*'])
-
-        doc_ids = [hit['_id'] for hit in res['hits']['hits']]
-        return doc_ids
-
+        return [
+            hit['_id'] for hit in elastic.search(
+                index=self.dataset,
+                body={'size': self.topk, 'query': {"match": {self.field: {"query": query}}}},
+                filter_path=['hits.hits._*']
+            )['hits']['hits']
+        ]
 

@@ -2,10 +2,10 @@
 
 from pathlib import Path
 from typing import List
-from ..base import set_logger
-from .. import MODEL_MAP, PKG_PATH
-from .helpers import download_file, extract_tar_gz
 import os
+from nboost.helpers import download_file, extract_tar_gz
+from nboost import MODEL_MAP, PKG_PATH
+from nboost.logger import set_logger
 
 
 class BaseModel:
@@ -58,7 +58,7 @@ class BaseModel:
                                     '%s. Falling back to pytorch/tf',
                                     self.model_dir, MODEL_MAP.keys())
 
-    def rank(self, query: str, choices: List[str]) -> List[int]:
+    def rank(self, query: bytes, choices: List[bytes]) -> List[int]:
         """assign relative ranks to each choice"""
 
     def close(self):

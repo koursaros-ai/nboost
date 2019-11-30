@@ -1,13 +1,15 @@
-from ..base import BaseModel
-import os
-
-from transformers import (AutoConfig,
-                          AutoModelForSequenceClassification,
-                          AutoTokenizer,
-                          AdamW,
-                          ConstantLRSchedule)
-import torch, torch.nn
 import numpy as np
+import os
+from transformers import (
+    AutoConfig,
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
+    AdamW,
+    ConstantLRSchedule
+)
+import torch.nn
+import torch
+from nboost.model.base import BaseModel
 
 
 class TransformersModel(BaseModel):

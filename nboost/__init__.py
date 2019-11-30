@@ -7,12 +7,11 @@ PKG_PATH = Path(__file__).parent
 
 # component => class => module
 CLASS_MAP = {
-    'protocol': {
-        'TestCodex': 'test',
-        'ESProtocol': 'es'
+    'codex': {
+        'ESCodex': 'es'
     },
     'model': {
-        'TestModel': 'test',
+        'ShuffleModel': 'shuffle',
         'TransformersModel': 'transformers',
         'BertModel': 'bert_model',
         'AlbertModel': 'albert_model'
@@ -31,4 +30,17 @@ IMAGE_MAP = {
     'alpine': '../Dockerfiles/alpine',
     'tf': '../Dockerfiles/tf',
     'torch': '../Dockerfiles/torch'
+}
+
+# dataset => file_type => (file_name, [id column, data column], delimiter)
+# url: compressed url location of dataset
+# size: rough number of rows in the dataset (used to check if index exists)
+DATASET_MAP = {
+    'ms_marco': {
+        'qrels': ('qrels.dev.small.tsv', [0, 2], '\t'),
+        'queries': ('queries.dev.tsv', [0, 1], '\t'),
+        'choices': ('collection.tsv', [0, 1], '\t'),
+        'url': 'https://msmarco.blob.core.windows.net/msmarcoranking/collectionandqueries.tar.gz',
+        'size': 8 * 10 ** 6
+    }
 }

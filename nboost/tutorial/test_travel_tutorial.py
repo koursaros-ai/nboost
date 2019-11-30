@@ -14,10 +14,8 @@ class TestTravel(unittest.TestCase):
                         shell=True)
 
         proxy = create_proxy([
-            '--uhost', 'localhost',
             '--uport', '9200',
-            '--model', 'TestModel',
-            '--field', 'passage',
+            '--model', 'ShuffleModel',
             '--verbose'
         ])
         proxy.start()
@@ -25,12 +23,11 @@ class TestTravel(unittest.TestCase):
         # dump es index
         main([
             'Travel',
-            '--uhost', 'localhost',
-            '--uport', '8000',
+            '--port', '8000',
         ])
 
         # search
-        params = dict(size=2, q='hotels in vegas, baby')
+        params = dict(size=2, q='passage:hotels in vegas, baby')
 
         proxy_res = requests.get('http://localhost:8000/travel/_search', params=params)
         print(proxy_res.content)

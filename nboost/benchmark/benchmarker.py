@@ -1,9 +1,17 @@
 from collections import defaultdict
+from pathlib import Path
 from typing import List
 from tqdm import tqdm
-from ..base.helpers import TimeContext
-from ..base.logger import set_logger
-from argparse import Namespace
+from nboost.stats import ClassStatistics
+from nboost import DATASET_MAP, PKG_PATH
+from nboost.logger import set_logger
+from nboost.benchmark import api
+from nboost.helpers import (
+    csv_generator,
+    download_file,
+    extract_tar_gz,
+    count_lines
+)
 
 
 class Benchmarker:
@@ -16,31 +24,67 @@ class Benchmarker:
         documents: ddc id, document
         query relations (qrels): query id, doc id
     """
-    time_context = TimeContext()
+    stats = ClassStatistics()
 
-    def __init__(self, args: Namespace):
+    def __init__(self, dataset: str = 'ms_marco', rows: int = 100,
+                 connector: str = 'ESConnector', **kwargs):
+
+        self.dataset = dataset
+        self.rows = rows
+        self.connector = getattr(api, connector)(dataset=dataset, **kwargs)  # type: api.Connector
         self.logger = set_logger(self.__class__.__name__)
-        self.args = args
         self.queries = dict()
-        self.proxy_avg_mrr = 0
-        self.direct_avg_mrr = 0
         self.qrels = defaultdict(set)
+        self.map = DATASET_MAP[dataset]
+        self.cache_path = PKG_PATH.joinpath('.cache/datasets/%s' % dataset)
 
-    def add_qrel(self, qid: str, doc_id: str):
-        """Add query relation"""
-        self.qrels[qid].add(doc_id)
+    def setup(self):
+        self.logger.info('Setting up benchmarker...')
+        self.connector.setup(self.yield_csv('choices'), self.map['size'])
+        self.add_qrels()
+        self.add_queries()
 
-    def add_query(self, qid: str, query: str):
+    @stats.time_context
+    def query_upstream(self, query: str) -> List[int]:
+        return self.connector.get_cids(query)
+
+    @stats.time_context
+    def query_proxy(self, query: str) -> List[int]:
+        return self.connector.get_cids(query, proxy=True)
+
+    @stats.vars_context
+    def record_mrr(self, **kwargs):
+        """Record the proxy or upstream mrr"""
+
+    def download_and_extract(self):
+        file_name = Path(self.map['url']).name
+        tar_gz_path = self.cache_path.joinpath(file_name)
+        if not self.cache_path.exists():
+            self.cache_path.mkdir(parents=True, exist_ok=True)
+            self.logger.info('Dowloading to %s' % tar_gz_path)
+            download_file(self.map['url'], tar_gz_path)
+            self.logger.info('Extracting %s' % tar_gz_path)
+            extract_tar_gz(tar_gz_path)
+            tar_gz_path.unlink()
+
+    def yield_csv(self, file_type: str):
+        file_name, indices, delim = self.map[file_type]
+        path = self.cache_path.joinpath(file_name)
+        num_lines = count_lines(path)
+        with tqdm(total=num_lines, desc=path.name) as pbar:
+            for row in csv_generator(path, indices, delim):
+                pbar.update()
+                yield row
+
+    def add_qrels(self):
+        """Add query relations"""
+        for qid, doc_id in self.yield_csv('qrels'):
+            self.qrels[qid].add(doc_id)
+
+    def add_queries(self):
         """Add query id and text"""
-        self.queries[qid] = query
-
-    def proxied_doc_id_producer(self, query: str):
-        """Returns ranked doc ids from the proxy"""
-        raise NotImplementedError
-
-    def direct_doc_id_producer(self, query: str):
-        """Returns ranked doc ids from the server (without the proxy ranks)"""
-        raise NotImplementedError
+        for qid, query in self.yield_csv('queries'):
+            self.queries[qid] = query
 
     def benchmark(self):
         """The benchmark method times the doc_id_producers and
@@ -50,49 +94,39 @@ class Benchmarker:
             if qid not in self.qrels:
                 self.queries.pop(qid)
 
-        rows = len(self.queries) if self.args.rows == -1 else self.args.rows
+        maximum = len(self.queries)
+        rows = maximum if self.rows == -1 else min(maximum, self.rows)
 
         with tqdm(total=rows) as pbar:
-            for i in range(1, rows + 1):
+            for _ in range(rows):
                 qid, query = self.queries.popitem()
-                context = (qid, query, i)
-                self.proxy_avg_mrr = self.query_proxy(*context)
-                self.direct_avg_mrr = self.query_direct(*context)
+
+                proxy_cids = self.query_proxy(query)
+                proxy_mrr = self.calculate_mrr(qid, proxy_cids)
+                self.record_mrr(proxy_mrr=proxy_mrr)
+
+                upstream_cids = self.query_upstream(query)
+                upstream_mrr = self.calculate_mrr(qid, upstream_cids)
+                self.record_mrr(upstream_mrr=upstream_mrr)
+
                 self.set_progress_bar(pbar)
-
-    @time_context
-    def query_proxy(self, *context) -> float:
-        return self.get_new_mrr(self.proxied_doc_id_producer,
-                                self.proxy_avg_mrr, *context)
-
-    @time_context
-    def query_direct(self, *context) -> float:
-        return self.get_new_mrr(self.direct_doc_id_producer,
-                                self.direct_avg_mrr, *context)
-
-    def get_new_mrr(self, doc_id_producer, old_avg_mrr, qid, query, i):
-        guessed_doc_ids = doc_id_producer(query)
-        mrr = self.calculate_mrr(qid, guessed_doc_ids)
-        return self.running_avg(old_avg_mrr, mrr, i)
-
-    @staticmethod
-    def running_avg(old_avg: float, new_entry: float, iteration: int):
-        """Running average of floats"""
-        return sum([old_avg * (iteration - 1), new_entry]) / iteration
 
     def set_progress_bar(self, pbar: tqdm):
         """Update the progress bar with current statistics"""
-        pam = self.proxy_avg_mrr
-        dam = self.direct_avg_mrr
-        rqp = self.time_context.record['query_proxy']['avg']
-        rqd = self.time_context.record['query_direct']['avg']
-        pbar.set_description('PROXY: %.5f MRR %.2f ms/query ' % (pam, rqp) + \
-                             'DIRECT: %.5f MRR %.2f ms/query' % (dam, rqd))
+        pbar.set_description(
+            'PROXY: {proxy_mrr:.5f} MRR {proxy_ms:.2f} ms/query '
+            'DIRECT: {direct_mrr:.5f} MRR {direct_ms:.2f} ms/query'.format(
+                proxy_mrr=self.stats.record['vars']['proxy_mrr']['avg'],
+                direct_mrr=self.stats.record['vars']['upstream_mrr']['avg'],
+                proxy_ms=self.stats.record['time']['query_proxy']['avg'],
+                direct_ms=self.stats.record['time']['query_upstream']['avg']
+            )
+        )
         pbar.update()
 
-    def calculate_mrr(self, qid: str, guessed_doc_ids: List[str]):
+    def calculate_mrr(self, qid: str, cids: List[int]):
         """Calculate mean reciprocal rank as the first correct result index"""
-        for i, doc_id in enumerate(guessed_doc_ids, 1):
-            if doc_id in self.qrels[qid]:
+        for i, cid in enumerate(cids, 1):
+            if cid in self.qrels[qid]:
                 return 1 / i
         return 0

@@ -1,9 +1,10 @@
-from queue import Queue
 from threading import Thread
-import numpy as np
+from typing import List
 import tensorflow as tf
-from . import modeling, tokenization
-from ...base import *
+from queue import Queue
+import numpy as np
+from nboost.model.bert_model import modeling, tokenization
+from nboost.model.base import BaseModel
 
 
 class BertModel(BaseModel):
@@ -186,7 +187,7 @@ class BertModel(BaseModel):
             candidates += ['PADDING DOC'] * (self.batch_size - (len(candidates) % self.batch_size))
             return candidates
 
-    def rank(self, query, choices):
+    def rank(self, query: bytes, choices: List[bytes]) -> List[int]:
         actual_length = len(choices)
         candidates = self.pad(choices)
         self.input_q.put((query, choices))
