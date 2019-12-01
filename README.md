@@ -170,7 +170,7 @@ docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elastics
 #### Deploying the proxy
 Now we're ready to deploy our Neural Proxy! It is very simple to do this, simply run:
 ```bash
-nboost --uhost localhost --uport 9200 --field passage
+nboost --uport 9200
 ```
 > 📢 The `--uhost` and `--uport` should be the same as the Elasticsearch server above! Uhost and uport are short for upstream-host and upstream-port (referring to the upstream server).
 
@@ -179,7 +179,7 @@ If you get this message: `Listening: <host>:<port>`, then we're good to go!
 #### Indexing some data
 The proxy is set up so that there is no need to ever talk to the server directly from here on out. You can send index requests, stats requests, but only the search requests will be altered. For demonstration purposes, we will be indexing [a set of passages about traveling and hotels](https://microsoft.github.io/TREC-2019-Deep-Learning/) through NBoost. You can add the index to your Elasticsearch server by running:
 ```bash
-nboost-tutorial Travel --host localhost --port 8000
+nboost-tutorial Travel --port 8000 --field passage
 ```` 
 
 Now let's test it out! Hit the Elasticsearch with:
