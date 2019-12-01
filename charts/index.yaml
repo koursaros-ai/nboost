@@ -4,5 +4,6 @@ entries:
   - apiVersion: v1
     appVersion: "1.0"
     name: nboost
+    version: 0.0.1
     urls:
     - nboost-0.0.1.tgz
