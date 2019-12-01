@@ -1,11 +1,11 @@
 """Build and push images"""
 
 from nboost import __version__, PKG_PATH, IMAGE_MAP
-from nboost.base.logger import set_logger
+from nboost.logger import set_logger
 import subprocess
 
 REGISTRY = 'koursaros/nboost'
-VERSION_TAG = '%s:%s-{image}' % (REGISTRY, __version__)
+VERSION_TAG = '%s:%s-{image}' % (REGISTRY, __version__.__doc__)
 LATEST_TAG = '%s:latest-{image}' % REGISTRY
 BUILD = 'docker build -t %s -t %s {path}' % (VERSION_TAG, LATEST_TAG)
 PUSH = 'docker push %s' % REGISTRY
