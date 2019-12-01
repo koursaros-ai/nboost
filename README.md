@@ -59,13 +59,13 @@ The workflow of NBoost is relatively simple. Take the graphic above, and imagine
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/conventional.svg?sanitize=true" width="80%">
 </p>
 
-In a **conventional search request**, the user asks for *10* results from Elasticsearch and gets *10* back from the server.
+In a **conventional search request**, the user sends a query to *Elasticsearch* and gets back the results.
 
 <p align="center">
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/nboost.svg?sanitize=true" width="80%">
 </p>
 
-In an **NBoost search request**, the user asks for *10* results from the proxy. Then, the proxy asks for *100* results from the Elasticsearch. When the server returns *100* results, the model picks the best *10* results and returns them to the user.
+In an **NBoost search request**, the user sends a query to the *model*. Then, the model asks for results from Elasticsearch and picks the best ones to return to the user.
 
 <h2 align="center">Benchmarks</h2>
 
