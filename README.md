@@ -65,7 +65,7 @@ In a **conventional search request**, the user sends a query to *Elasticsearch* 
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/nboost.svg?sanitize=true" width="80%">
 </p>
 
-In an **NBoost search request**, the user sends a query to the *model*. Then, the model asks for results from Elasticsearch and picks the best ones to return to the user.
+In an **NBoost search request**, the user sends a query to the *model*. Then, the model asks for results from *Elasticsearch* and picks the best ones to return to the user.
 
 <h2 align="center">Benchmarks</h2>
 
