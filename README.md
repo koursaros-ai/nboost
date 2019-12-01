@@ -218,7 +218,7 @@ All possible `--set` ([values.yaml](https://github.com/koursaros-ai/nboost/blob/
 
 | Parameter                                    | Description                                      | Default                                                 |
 | -------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------- |
-| `replicaCount`                               | Number of replicas to deploy                     | `1`                                                     |
+| `replicaCount`                               | Number of replicas to deploy                     | `3`                                                     |
 | `image.repository`                           | NBoost Image name                                | `koursaros/nboost`                                      |
 | `image.tag`                                  | NBoost Image tag                                 | `latest-tf`                                             |
 | `args.model_dir`                             | Name or directory of the finetuned model         | `bert-base-uncased-msmarco`                             |
