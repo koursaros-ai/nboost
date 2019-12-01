@@ -1,13 +1,12 @@
 """Utility functions for NBoost classes"""
-from typing import Any, Union, List
 from json.decoder import JSONDecodeError
 from contextlib import suppress
+from typing import Any, Union
 from functools import reduce
 from pathlib import Path
 import operator
 import tarfile
 import json
-import csv
 from tqdm import tqdm
 import requests
 
@@ -63,11 +62,7 @@ def dump_json(obj: Union[dict, list, str, int, float], **kwargs) -> bytes:
 
 def count_lines(path: Path):
     """Count the number of lines in a file"""
-    return sum(1 for _ in path.open())
-
-
-def csv_generator(path: Path, columns: List[int], delim: str):
-    """yields the designated columns as a generator"""
-    with path.open() as file:
-        for line in csv.reader(file, delimiter=delim):
-            yield [line[idx] for idx in columns]
+    fileobj = path.open()
+    count = sum(1 for _ in fileobj)
+    fileobj.close()
+    return count
