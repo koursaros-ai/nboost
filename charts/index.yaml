@@ -5,5 +5,4 @@ entries:
     appVersion: "1.0"
     name: nboost
     urls:
-    - nboost-0.0.5.tgz
-    version: 0.0.5
+    - nboost-0.0.1.tgz

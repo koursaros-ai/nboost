@@ -21,9 +21,3 @@
 *.tmproj
 .vscode/
 
-.github/
-docs/
-nboost/
-tests/
-Dockerfiles/
-

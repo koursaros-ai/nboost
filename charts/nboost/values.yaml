@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: koursaros/nboost
-  tag: tf-latest
+  tag: latest-tf
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
