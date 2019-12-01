@@ -68,7 +68,7 @@ class Proxy(SocketServer):
 
     def on_client_request_url(self, url: URL):
         """Method for screening the url path from the client request"""
-        if re.match('/nboost', url.path):
+        if re.match('/_nboost', url.path):
             raise StatusRequest
 
         if not re.match(self.codex.SEARCH_PATH, url.path):

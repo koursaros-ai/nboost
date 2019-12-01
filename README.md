@@ -32,6 +32,7 @@
   <a href="#benchmarks">Benchmarks</a> •
   <a href="#install-nboost">Install</a> •
   <a href="#getting-started">Getting Started</a> •
+  <a href="#kubernetes">Kubernetes</a> •
   <a href="https://nboost.readthedocs.io/">Documentation</a> •
   <a href="#tutorials">Tutorials</a> •
   <a href="#contributing">Contributing</a> •
@@ -118,8 +119,6 @@ Any way you install it, if you end up reading the following message after `$ nbo
   * [Deploying the proxy](#deploying-the-proxy)
   * [Indexing some data](#indexing-some-data)
 - [Elastic made easy](#elastic-made-easy)
-- [Deploying a distributed proxy via Docker Swarm/Kubernetes](#deploying-a-proxy-via-docker-swarmkubernetes)
-- [‍Take-home messages](#take-home-messages)
 
 
 ### 📡The Proxy
@@ -177,10 +176,11 @@ nboost --uport 9200
 If you get this message: `Listening: <host>:<port>`, then we're good to go!
 
 #### Indexing some data
-The proxy is set up so that there is no need to ever talk to the server directly from here on out. You can send index requests, stats requests, but only the search requests will be altered. For demonstration purposes, we will be indexing [a set of passages about traveling and hotels](https://microsoft.github.io/TREC-2019-Deep-Learning/) through NBoost. You can add the index to your Elasticsearch server by running:
+NBoost has a handy indexing tool built in (`nboost-index`). For demonstration purposes,  will be indexing [a set of passages about traveling and hotels](https://microsoft.github.io/TREC-2019-Deep-Learning/) through NBoost. You can add the index to your Elasticsearch server by running:
 ```bash
-nboost-tutorial Travel --port 8000 --field passage
+nboost-index --file travel.csv --name travel --delim ,
 ```` 
+
 
 Now let's test it out! Hit the Elasticsearch with:
 ```bash
@@ -189,17 +189,24 @@ curl "http://localhost:8000/travel/_search?pretty&q=passage:vegas&size=2"
 
 If the Elasticsearch result has the `_nboost` tag in it, congratulations it's working!
 
-What just happened? You asked for two results from Elasticsearch having to do with "vegas". The proxy intercepted this request, asked the Elasticsearch for 10 results, and the model picked the best two. Magic! 🔮 (statistics)
-
 <p align="center">
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/travel-tutorial.svg?sanitize=true" alt="success installation of NBoost">
 </p>
 
-#### Elastic made easy
-To increase the number of parallel proxies, simply increase `--workers`. For a more robust deployment approach, you can distribute the proxy [via Docker Swarm or Kubernetes](#Deploying-a-proxy-via-Docker-Swarm/Kubernetes).
+#### What just happened?
+Let's check out the **NBoost frontend**. Go to your browser and visit [localhost:8000/nboost](http://localhost:8000/nboost).
 
-### Deploying a proxy via Kubernetes ☸️
-We can easily deploy NBoost on Kubernetes using [Helm](https://helm.sh/).
+(Frontend picture)
+
+You asked for two results from Elasticsearch having to do with "vegas". The proxy intercepted this request, asked the Elasticsearch for 10 results, and the model picked the best two. Magic! 🔮 (statistics)
+
+#### Elastic made easy
+To increase the number of parallel proxies, simply increase `--workers`. For a more robust deployment approach, you can distribute the proxy via Kubernetes (see below).
+
+<h2 align="center">Kubernetes</h2>
+
+### Deploying NBoost via Kubernetes
+We can easily deploy NBoost in a Kubernetes cluster using [Helm](https://helm.sh/).
 
 #### Add the NBoost Helm Repo
 First we need to register the repo with your Kubernetes cluster.
@@ -208,10 +215,10 @@ helm repo add nboost https://raw.githubusercontent.com/koursaros-ai/nboost/maste
 helm repo update
 ```
 
-#### Create an NBoost Cluster
-Let's try deploying three replicas:
+#### Deploy some NBoost replicas
+Let's try deploying four replicas:
 ```bash
-helm install --name nboost --set replicaCount=3 nboost/nboost
+helm install --name nboost --set replicaCount=4 nboost/nboost
 ```
 
 All possible `--set` ([values.yaml](https://github.com/koursaros-ai/nboost/blob/master/charts/nboost/values.yaml)) options are listed below:
