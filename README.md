@@ -235,10 +235,10 @@ All possible `--set` ([values.yaml](https://github.com/koursaros-ai/nboost/blob/
 | `args.workers`                               | Number of threads serving the proxy              | `10`                                                    |
 | `args.codex`                                 | Codex Class                                      | `ESCodex`                                               |
 | `service.type`                               | Kubernetes Service type                          | `LoadBalancer`                                          |
-| `resources`                                  | resource needs and limits to apply to the pod    | {}                                                      |
-| `nodeSelector`                               | Node labels for pod assignment                   | {}                                                      |
-| `affinity`                                   | Affinity settings for pod assignment             | {}                                                      |
-| `tolerations`                                | Toleration labels for pod assignment             | []                                                      |
+| `resources`                                  | resource needs and limits to apply to the pod    | `{}`                                                    |
+| `nodeSelector`                               | Node labels for pod assignment                   | `{}`                                                    |
+| `affinity`                                   | Affinity settings for pod assignment             | `{}`                                                    |
+| `tolerations`                                | Toleration labels for pod assignment             | `[]`                                                    |
 | `image.pullPolicy`                           | Image pull policy                                | `IfNotPresent`                                          |
 | `imagePullSecrets`                           | Docker registry secret names as an array         | `[]` (does not add image pull secrets to deployed pods) |
 | `nameOverride`                               | String to override Chart.name                    | `nil`                                                   |
