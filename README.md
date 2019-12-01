@@ -198,8 +198,62 @@ What just happened? You asked for two results from Elasticsearch having to do wi
 #### Elastic made easy
 To increase the number of parallel proxies, simply increase `--workers`. For a more robust deployment approach, you can distribute the proxy [via Docker Swarm or Kubernetes](#Deploying-a-proxy-via-Docker-Swarm/Kubernetes).
 
-### Deploying a proxy via Docker Swarm/Kubernetes
-> 🚧 Swarm yaml/Helm chart under construction...
+### Deploying a proxy via Kubernetes ☸️
+We can easily deploy NBoost on Kubernetes using [Helm](https://helm.sh/).
+
+#### Add the NBoost Helm Repo
+First we need to register the repo with your Kubernetes cluster.
+```bash
+helm repo add nboost https://raw.githubusercontent.com/koursaros-ai/nboost/master/charts/
+helm repo update
+```
+
+#### Create an NBoost Cluster
+Let's try deploying three replicas:
+```bash
+helm install --name nboost --set replicaCount=3 nboost/nboost
+```
+
+All possible `--set` ([values.yaml](https://github.com/koursaros-ai/nboost/blob/master/charts/nboost/values.yaml)) options are listed below:
+
+| Parameter                                    | Description                                      | Default                                                 |
+| -------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------- |
+| `replicaCount`                               | Number of replicas to deploy                     | `1`                                                     |
+| `image.repository`                           | NBoost Image name                                | `koursaros/nboost`                                      |
+| `image.tag`                                  | NBoost Image tag                                 | `latest-tf`                                             |
+| `args.model_dir`                             | Name or directory of the finetuned model         | `bert-base-uncased-msmarco`                             |
+| `args.model`                                 | Model Class                                      | `BertModel`                                             |
+| `args.host`                                  | Hostname of the proxy                            | `0.0.0.0`                                               |
+| `args.port`                                  | Port for the proxy to listen on                  | `8000`                                                  |
+| `args.uhost`                                 | Hostname of the upstream search api server       | `elasticsearch-master`                                  |
+| `args.uport`                                 | Port of the upstream server                      | `9200`                                                  |
+| `args.data_dir`                              | Directory to cache model binary                  | `nil`                                                   |
+| `args.max_seq_len`                           | Max combined token length                        | `64`                                                    |
+| `args.bufsize`                               | Size of the http buffer in bytes                 | `2048`                                                  |
+| `args.batch_size`                            | Batch size for running through rerank model      | `4`                                                     |
+| `args.multiplier`                            | Factor to increase results by                    | `5`                                                     |
+| `args.workers`                               | Number of threads serving the proxy              | `10`                                                    |
+| `args.codex`                                 | Codex Class                                      | `ESCodex`                                               |
+| `service.type`                               | Kubernetes Service type                          | `LoadBalancer`                                          |
+| `resources`                                  | resource needs and limits to apply to the pod    | {}                                                      |
+| `nodeSelector`                               | Node labels for pod assignment                   | {}                                                      |
+| `affinity`                                   | Affinity settings for pod assignment             | {}                                                      |
+| `tolerations`                                | Toleration labels for pod assignment             | []                                                      |
+| `image.pullPolicy`                           | Image pull policy                                | `IfNotPresent`                                          |
+| `imagePullSecrets`                           | Docker registry secret names as an array         | `[]` (does not add image pull secrets to deployed pods) |
+| `nameOverride`                               | String to override Chart.name                    | `nil`                                                   |
+| `fullnameOverride`                           | String to override Chart.fullname                | `nil`                                                   |
+| `serviceAccount.create`                      | Specifies whether a service account is created   | `nil`                                                   |
+| `serviceAccount.name`                        | The name of the service account to use. If not set and create is true, a name is generated using the fullname template   | `nil`  |
+| `serviceAccount.create`                      | Specifies whether a service account is created   | `nil`                                                   |
+| `podSecurityContext.fsGroup`                 | Group ID for the container                       | `nil`                                                   |
+| `securityContext.runAsUser`                  | User ID for the container                        | `1001`                                                  |
+| `ingress.enabled`                            | Enable ingress resource                          | `false`                                                 |
+| `ingress.hostName`                           | Hostname to your installation                    | `nil`                                                   |
+| `ingress.path`                               | Path within the url structure                    | `[]`                                                    |
+| `ingress.tls`                                | enable ingress with tls                          | `[]`                                                    |
+| `ingress.tls.secretName`                     | tls type secret to be used                       | `chart-example-tls`                                     |
+
 
 
 <h2 align="center">Documentation</h2>
@@ -207,10 +261,6 @@ To increase the number of parallel proxies, simply increase `--workers`. For a m
 [![ReadTheDoc](https://readthedocs.org/projects/nboost/badge/?version=latest&style=for-the-badge)](https://nboost.readthedocs.io)
 
 The official NBoost documentation is hosted on [nboost.readthedocs.io](http://nboost.readthedocs.io/). It is automatically built, updated and archived on every new release.
-
-<h2 align="center">Tutorials</h2>
-
-> 🚧 Under construction.
 
 <h2 align="center">Contributing</h2>
 
