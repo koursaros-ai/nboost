@@ -1,3 +1,14 @@
+# Release `0.0.5`
+> Nov 30th, 2019
+
+### 📏 Benchmark
+
+ - [[```6e739ea```](https://github.com/koursaros-ai/nboost/commit/6e739ea76072fa21f9d9ec2cce77dc7145c82686)] parser construct (*colethienes*) <span style="color:blue">△12</span>
+
+### ⌨️ Cli
+
+ - [[```7e03d4b```](https://github.com/koursaros-ai/nboost/commit/7e03d4b46eb47bd3f73aa3442a6d8a466c939f50)] use version file (*colethienes*) <span style="color:blue">△21</span>
+
 # Release `0.0.4`
 > Nov 25th, 2019
 
