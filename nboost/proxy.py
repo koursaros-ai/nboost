@@ -12,6 +12,7 @@ from nboost.codex.base import BaseCodex
 from nboost.model.base import BaseModel
 from nboost.server import SocketServer
 from nboost.logger import set_logger
+from nboost.types import Choice
 from nboost.exceptions import (
     UpstreamConnectionError,
     UnknownRequest,
@@ -22,6 +23,7 @@ from nboost.exceptions import (
 
 class HttpParserContext:
     """Context that reraises the __context__ of an HttpParserError"""
+
     def __enter__(self):
         return self
 
@@ -129,13 +131,17 @@ class Proxy(SocketServer):
         client_socket.send(raw_response)
 
     @stats.time_context
-    def model_rank(self, query: bytes, choices: List[bytes]) -> List[int]:
+    def model_rank(self, query: bytes, choices: List[Choice]) -> List[int]:
         """Rank the query and choices and return the argsorted indices"""
         return self.model.rank(query, choices)
 
     @stats.vars_context
     def record_topk_and_choices(self, topk: int = None, choices: list = None):
         """Add topk and choices to the running statistical averages"""
+
+    @stats.vars_context
+    def record_mrrs(self, upstream_mrr: float = None, model_mrr: float = None):
+        """Add the upstream mrr and model mrr to the stats"""
 
     @stats.time_context
     def server_connect(self, server_socket: socket.socket) -> None:
@@ -150,6 +156,24 @@ class Proxy(SocketServer):
         """Return status dictionary in the case of a status request"""
         return {'multiplier': self.codex.multiplier, **self.stats.record,
                 'description': 'NBoost, for search ranking.'}
+
+    def calculate_mrrs(self, correct_cids: List[str], choices: List[Choice],
+                       ranks: List[int]):
+        """Calculate the mrr of the upstream server and reranked choices from
+        the model. This only occurs if the client specified the "nboost"
+        parameter in the request url or body."""
+        upstream_mrr = self.calculate_mrr(correct_cids, choices)
+        reranked_choices = [choices[rank] for rank in ranks]
+        model_mrr = self.calculate_mrr(correct_cids, reranked_choices)
+        self.record_mrrs(upstream_mrr=upstream_mrr, model_mrr=model_mrr)
+
+    @staticmethod
+    def calculate_mrr(correct_cids: List[str], choices: List[Choice]):
+        """Calculate mean reciprocal rank as the first correct result index"""
+        for i, choice in enumerate(choices, 1):
+            if choice.cid in correct_cids:
+                return 1 / i
+        return 0
 
     def loop(self, client_socket, address):
         """Main ioloop for reranking server results to the client. Exceptions
@@ -171,7 +195,7 @@ class Proxy(SocketServer):
                 field, query = self.codex.parse_query(request)
 
                 # magnify the size of the request to the server
-                topk = self.codex.multiply_request(request)
+                topk, correct_cids = self.codex.multiply_request(request)
                 self.server_send(server_socket, request)
 
                 # make sure server response comes back properly
@@ -186,6 +210,10 @@ class Proxy(SocketServer):
                 # use the model to rerank the choices
                 ranks = self.model_rank(query, choices)[:topk]
                 self.codex.reorder_response(request, response, ranks)
+
+                # if the "nboost" param was sent, calculate MRRs
+                if correct_cids is not None:
+                    self.calculate_mrrs(correct_cids, choices, ranks)
 
             self.client_send(request, response, client_socket)
 

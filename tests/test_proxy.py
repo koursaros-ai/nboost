@@ -1,5 +1,5 @@
+from nboost.types import Request, Response, Choice
 from nboost.helpers import dump_json, load_json
-from nboost.types import Request, Response
 from nboost.model.shuffle import ShuffleModel
 from nboost.codex.base import BaseCodex
 from nboost.server import SocketServer
@@ -11,8 +11,13 @@ import unittest
 class TestServer(SocketServer):
     def loop(self, client_socket, address):
         response = Response()
-        response.body = dump_json(['test choice'] * 10)
-        print(response.prepare(Request()))
+        response.body = dump_json([
+            {'id': 7, 'body': 'a choice'},
+            {'id': 23, 'body': 'another choice'},
+            {'id': 24, 'body': 'a third choice'},
+            {'id': 3, 'body': 'notha one'},
+            {'id': 4, 'body': 'banana 🍌'},
+        ])
         client_socket.send(response.prepare(Request()))
         client_socket.close()
 
@@ -26,10 +31,14 @@ class TestCodex(BaseCodex):
     def multiply_request(self, request):
         topk = int(request.url.query['topk'])
         request.url.query['topk'] = str(topk * self.multiplier)
-        return topk
+        correct_cids = request.url.query['nboost'] if 'nboost' in request.url.query else None
+        return topk, correct_cids
 
     def parse_choices(self, response, field):
-        return load_json(response.body)
+        return [Choice(
+            str(choice['id']),  # cid
+            choice['body']  # body
+        ) for choice in load_json(response.body)]
 
     def reorder_response(self, request, response, ranks):
         response.body = dump_json(load_json(response.body)[:len(ranks)])
@@ -47,16 +56,22 @@ class TestProxy(unittest.TestCase):
         server.is_ready.wait()
 
         # search
-        params = dict(size=5, q='test_field;test query', topk=5)
+        params = dict(q='test_field;test query', topk=3)
 
         proxy_res = requests.get('http://localhost:8000/test', params=params)
         print(proxy_res.content)
         self.assertTrue(proxy_res.ok)
-        self.assertEqual(5, len(proxy_res.json()))
+        self.assertEqual(3, len(proxy_res.json()))
 
         server_res = requests.get('http://localhost:9500/test', params=params)
         print(server_res.content)
         self.assertTrue(server_res.ok)
+
+        # benchmark
+        params['nboost'] = '2,23'
+        bench_res = requests.get('http://localhost:8000/test', params=params)
+        print(bench_res.content)
+        self.assertTrue(bench_res.ok)
 
         # fallback
         fallback_res = requests.post('http://localhost:8000/only_on_server',
@@ -67,6 +82,7 @@ class TestProxy(unittest.TestCase):
         # status
         status_res = requests.get('http://localhost:8000/nboost')
         self.assertTrue(status_res.ok)
+        self.assertEqual(0.5, status_res.json()['vars']['upstream_mrr']['avg'])
         print(status_res.content.decode())
 
         # invalid host

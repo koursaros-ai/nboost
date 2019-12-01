@@ -31,6 +31,15 @@ class URL:
                            urlencode(self.query), self.fragment))
 
 
+class Choice:
+    """An object that holds the id and body of a rankable choice"""
+    __slots__ = ['cid', 'body']
+
+    def __init__(self, cid: str, body: bytes):
+        self.cid = cid
+        self.body = body
+
+
 class Request:
     """The object that the server must pack all requests into. This is
     necessary to support multiple search apis."""

@@ -1,5 +1,5 @@
 from typing import List, Any, Tuple
-from nboost.types import Request, Response
+from nboost.types import Request, Response, Choice
 
 
 class BaseCodex:
@@ -20,12 +20,21 @@ class BaseCodex:
         """Parse the client request. Autodetect the field.
         :return: Tuple[field, query]"""
 
-    def multiply_request(self, request: Request) -> int:
-        """Increase the size of the request and return topk"""
+    def multiply_request(self, request: Request) -> Tuple[int, List[str]]:
+        """This function is a little complicated and should be potentially
+        refactored in the future. It does two things:
 
-    def parse_choices(self, response: Response, field: str) -> List[bytes]:
+            1. Increase the size of the request in place.
+            2. Returns the topk and the "nboost" parameter in case it exists.
+                The "nboost" parameter contains the correct choice ids of the
+                query. This is used for benchmarking.
+
+        :return topk: topk choices requested by user
+        :return correct_cids: designated by the "nboost" parameter"""
+
+    def parse_choices(self, response: Response, field: str) -> List[Choice]:
         """Parse the all choices from the given field in the response"""
 
     def reorder_response(self, request: Request, response: Response,
-                         ranks: List[int]) -> Response:
+                         ranks: List[int]):
         """Reorder the response according the ranks from the model"""

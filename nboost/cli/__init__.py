@@ -26,7 +26,6 @@ BUFSIZE = 'size of the http buffer'
 BATCH_SIZE = 'batch size for running through rerank model'
 MULTIPLIER = 'factor to increase results by'
 WORKERS = 'number of threads serving the proxy'
-FIELD = 'specified meta field to train on'
 PROTOCOL = 'protocol class'
 MODEL = 'model class'
 

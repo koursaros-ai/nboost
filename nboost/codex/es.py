@@ -1,8 +1,8 @@
 from typing import List, Tuple, Any
 from contextlib import suppress
+from nboost.types import Request, Response, Choice
 from nboost.helpers import load_json, dump_json
 from nboost.exceptions import MissingQuery
-from nboost.types import Request, Response
 from nboost.codex.base import BaseCodex
 
 
@@ -29,9 +29,10 @@ class ESCodex(BaseCodex):
 
         raise MissingQuery
 
-    def multiply_request(self, request: Request):
+    def multiply_request(self, request: Request) -> Tuple[int, List[str]]:
         """Multiply size of Elasticsearch query"""
         body = load_json(request.body)
+        correct_cids = None
 
         # search for topk in body
         if body:
@@ -39,20 +40,26 @@ class ESCodex(BaseCodex):
                 topk = body['size']
                 body['size'] = topk * self.multiplier
                 request.body = dump_json(body)
+                correct_cids = [str(cid) for cid in body['nboost']]
         else:
             try:
                 topk = int(request.url.query['size'])
             except KeyError:
                 topk = 10
+            with suppress(KeyError):
+                correct_cids = request.url.query['nboost'].split(',')
             request.url.query['size'] = str(topk * self.multiplier)
 
-        return topk
+        return topk, correct_cids
 
-    def parse_choices(self, response: Response, field: str) -> List[bytes]:
+    def parse_choices(self, response: Response, field: str) -> List[Choice]:
         """Parse out Elasticsearch hits"""
         body = load_json(response.body)
         hits = body.get('hits', {'hits': []})['hits']
-        return [hit['_source'][field].encode() for hit in hits]
+        return [Choice(
+            hit['_id'],  # cid
+            hit['_source'][field].encode()  # body
+        ) for hit in hits]
 
     def reorder_response(self, request, response, ranks):
         """Reorder Elasticsearch hits"""

@@ -46,7 +46,7 @@ RESPONSE_BODY = dump_json({
             }, {
                 "_index": "twitter",
                 "_type": "_doc",
-                "_id": "0",
+                "_id": "5",
                 "_score": 1.3862944,
                 "_source": {
                     "date": "2009-11-15T14:12:12",
@@ -70,7 +70,7 @@ class TestESCodex(unittest.TestCase):
         field, query = codex.parse_query(request)
         self.assertEqual(field, 'passage')
         self.assertEqual(query, b'this is a test')
-        topk = codex.multiply_request(request)
+        topk, correct_cids = codex.multiply_request(request)
         self.assertEqual(topk, 100)
         size = load_json(request.body)['size']
         self.assertEqual(size, 800)
@@ -83,7 +83,7 @@ class TestESCodex(unittest.TestCase):
         field, query = codex.parse_query(request)
         self.assertEqual(field, 'message')
         self.assertEqual(query, b'testing')
-        topk = codex.multiply_request(request)
+        topk, correct_cids = codex.multiply_request(request)
         self.assertEqual(topk, 15)
         self.assertEqual(request.url.query['size'], '30')
 
@@ -95,8 +95,8 @@ class TestESCodex(unittest.TestCase):
         response.body = RESPONSE_BODY
 
         choices = codex.parse_choices(response, 'message')
-        actual_choices = [b'trying out Elasticsearch', b'second choice']
-        self.assertEqual(choices, actual_choices)
+        self.assertEqual(choices[0].body, b'trying out Elasticsearch')
+        self.assertEqual(choices[1].cid, "5")
 
         codex.reorder_response(request, response, [1, 0])
         body = load_json(response.body)
