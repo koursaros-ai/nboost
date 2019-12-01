@@ -6,7 +6,7 @@ setup(
     name='nboost',
     packages=find_packages(),
     include_package_data=True,
-    version=__version__,
+    version=__version__.__doc__,
     license='Apache 2.0',
     description='Nboost is a scalable, search-'
                 'api-boosting platform for developing and deploying '
