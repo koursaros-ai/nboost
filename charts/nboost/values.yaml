@@ -69,16 +69,16 @@ affinity: {}
 args:
   # nboost command line arguments
   verbose:
-  host:
+  host: 0.0.0.0
   port: 8000
   uhost: elasticsearch-master
   uport: 9200
-  model_dir:
+  model_dir: bert-base-uncased-msmarco
   data_dir:
-  max_seq_len:
-  bufsize:
-  batch_size:
-  multiplier:
-  workers:
-  codex:
-  model:
+  max_seq_len: 64
+  bufsize: 2048
+  batch_size: 4
+  multiplier: 5
+  workers: 10
+  codex: ESCodex
+  model: BertModel
