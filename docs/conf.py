@@ -49,6 +49,7 @@ release = module.__doc__
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx_autodoc_typehints',
+    'sphinx_markdown_tables',
     'sphinx.ext.viewcode',
     'sphinxcontrib.apidoc',
     'sphinxarg.ext',
