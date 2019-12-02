@@ -1,6 +1,7 @@
 sphinx-argparse
 sphinxcontrib-apidoc
 sphinx-autodoc-typehints
+sphinx-markdown-tables
 elasticsearch
 tqdm
 termcolor
