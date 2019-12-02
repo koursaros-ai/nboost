@@ -95,7 +95,7 @@ There are two ways to get NBoost, either as a Docker image or as a PyPi package.
 For installing NBoost, follow the table below.
 <center>
 
-Dependency                      | 🐳 Docker                                                 | 📦 Pypi                                           | 🐙 Kubernetes
+Dependency                      | 🐳 Docker                                                 | 📦 Pypi                                           |  <a href="#kubernetes">🐙 Kubernetes</a>
 ------------------------------- | --------------------------------------------------------- | ------------------------------------------------- | -------------
 **Tensorflow** (*recommended*)  | <sub><sup>`koursaros/nboost:latest-tf`</sup></sub>        | <sub><sup>`pip install nboost[tf]`</sup></sub>    | <sub><sup>`helm install nboost/nboost --set image.tag=latest-tf`</sup></sub>
 **Pytorch**                     | <sub><sup>`koursaros/nboost:latest-torch`</sup></sub>     | <sub><sup>`pip install nboost[torch]`</sup></sub> | <sub><sup>`helm install nboost/nboost --set image.tag=latest-torch`</sup></sub>
