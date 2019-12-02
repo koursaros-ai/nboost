@@ -9,7 +9,7 @@ from nboost.cli import import_class
 
 TAG = termcolor.colored('NBoost Indexer', 'cyan', attrs=['underline'])
 DESCRIPTION = ('This is the %s. This command line utility can be used to send '
-               'a csv to a search api for indexing.')
+               'a csv to a search api for indexing.' % TAG)
 
 FILE = 'path of the csv to send to the index'
 NAME = 'name of the index send to'
