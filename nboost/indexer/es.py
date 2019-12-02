@@ -22,8 +22,8 @@ class ESIndexer(BaseIndexer):
         self.logger.info('Setting up Elasticsearch index...')
         elastic = Elasticsearch(host=self.host, port=self.port, timeout=10000)
         try:
-            self.logger.info('Creating index %s...' % self.field_name)
-            elastic.indices.create(self.field_name, self.mapping)
+            self.logger.info('Creating index %s...' % self.name)
+            elastic.indices.create(self.name, self.mapping)
         except RequestError:
             self.logger.info('Index already exists, skipping...')
 
