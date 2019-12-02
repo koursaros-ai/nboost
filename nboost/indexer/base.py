@@ -48,6 +48,7 @@ class BaseIndexer:
             self.logger.error('Could not find %s or %s', pkg_path, cwd_path)
             raise SystemExit
 
+        self.logger.info('Estimating completion size...')
         num_lines = count_lines(path)
         with path.open() as file:
             with tqdm(total=num_lines, desc=path.name) as pbar:
