@@ -34,7 +34,7 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--body_col', type=int, default=1, help=BODY_COL)
     parser.add_argument('--field_name', type=str, default='passage', help=FIELD_NAME)
     parser.add_argument('--host', type=str, default='0.0.0.0', help=HOST)
-    parser.add_argument('--port', type=int, default=8000, help=PORT)
+    parser.add_argument('--port', type=int, default=9200, help=PORT)
     parser.add_argument('--delim', type=str, default='\t', help=DELIM)
     parser.add_argument('--shards', default=3, type=int)
     parser.add_argument('--indexer', type=lambda x: import_class('indexer', x), default='ESIndexer', help=INDEXER)
