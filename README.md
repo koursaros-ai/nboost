@@ -206,6 +206,10 @@ To increase the number of parallel proxies, simply increase `--workers`. For a m
 
 <h2 align="center">Kubernetes</h2>
 
+<p align="center">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/sailboat.svg?sanitize=true" width="100%">
+</p>
+
 ### Deploying NBoost via Kubernetes
 We can easily deploy NBoost in a Kubernetes cluster using [Helm](https://helm.sh/).
 
