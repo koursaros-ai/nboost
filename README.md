@@ -95,12 +95,12 @@ There are two ways to get NBoost, either as a Docker image or as a PyPi package.
 For installing NBoost, follow the table below.
 <center>
 
-Dependency                      | 🐳 Docker                             | 📦 Pypi                     | 🚦Status
-------------------------------- | ------------------------------------- | --------------------------  | -------------
-**Tensorflow** (*recommended*)  | `koursaros/nboost:latest-tf`          | `pip install nboost[tf]`    | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
-**Pytorch**                     | `koursaros/nboost:latest-torch`       | `pip install nboost[torch]` | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
-**All**                         | `koursaros/nboost:latest-all`         | `pip install nboost[all]`   | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
-**-** (*for testing*)           | `koursaros/nboost:latest-alpine`      | `pip install nboost`        | <img src="https://cloud.drone.io/api/badges/koursaros-ai/nboost/status.svg" />
+Dependency                      | 🐳 Docker                                                 | 📦 Pypi                                           | 🐙 Kubernetes
+------------------------------- | --------------------------------------------------------- | ------------------------------------------------- | -------------
+**Tensorflow** (*recommended*)  | <sub><sup>`koursaros/nboost:latest-tf`</sup></sub>        | <sub><sup>`pip install nboost[tf]`</sup></sub>    | <sub><sup>`helm install nboost/nboost --set image.tag=latest-tf`</sup></sub>
+**Pytorch**                     | <sub><sup>`koursaros/nboost:latest-torch`</sup></sub>     | <sub><sup>`pip install nboost[torch]`</sup></sub> | <sub><sup>`helm install nboost/nboost --set image.tag=latest-torch`</sup></sub>
+**All**                         | <sub><sup>`koursaros/nboost:latest-all`</sup></sub>       | <sub><sup>`pip install nboost[all]`</sup></sub>   | <sub><sup>`helm install nboost/nboost --set image.tag=latest-all`</sup></sub>
+**-** (*for testing*)           | <sub><sup>`koursaros/nboost:latest-alpine`</sup></sub>    | <sub><sup>`pip install nboost`</sup></sub>        | <sub><sup>`helm install nboost/nboost --set image.tag=latest-alpine`</sup></sub>
 
 </center>
 
