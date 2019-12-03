@@ -70,7 +70,7 @@ In an **NBoost search request**, the user sends a query to the *model*. Then, th
 
 <h2 align="center">Benchmarks</h2>
 
-> We value generalizability. Therefore, we benchmark each model on different datasets within its domain. Check out the results below!
+> 🌎 We value generalizability! Therefore, we benchmark each model on different datasets within its domain.
 
 <center>
 
@@ -101,10 +101,10 @@ For installing NBoost, follow the table below.
 
 Dependency                      | 🐳 Docker                                                 | 📦 Pypi                                           |  <a href="#kubernetes">🐙 Kubernetes</a>
 ------------------------------- | --------------------------------------------------------- | ------------------------------------------------- | -------------
-**Tensorflow** (*recommended*)  | <sup>`koursaros/nboost:latest-tf`</sup>        | <sup>`pip install nboost[tf]`</sup>    | <sup>`helm install nboost/nboost --set image.tag=latest-tf`</sup>
-**Pytorch**                     | <sup>`koursaros/nboost:latest-torch`</sup>     | <sup>`pip install nboost[torch]`</sup> | <sup>`helm install nboost/nboost --set image.tag=latest-torch`</sup>
-**All**                         | <sup>`koursaros/nboost:latest-all`</sup>       | <sup>`pip install nboost[all]`</sup>   | <sup>`helm install nboost/nboost --set image.tag=latest-all`</sup>
-**-** (*for testing*)           | <sup>`koursaros/nboost:latest-alpine`</sup>    | <sup>`pip install nboost`</sup>        | <sup>`helm install nboost/nboost --set image.tag=latest-alpine`</sup>
+<sup>**Tensorflow** (*recommended*)</sup>   | <sup>`koursaros/nboost:latest-tf`</sup>        | <sup>`pip install nboost[tf]`</sup>    | <sup>`helm install nboost/nboost --set image.tag=latest-tf`</sup>
+<sup>**Pytorch**</sup>                      | <sup>`koursaros/nboost:latest-torch`</sup>     | <sup>`pip install nboost[torch]`</sup> | <sup>`helm install nboost/nboost --set image.tag=latest-torch`</sup>
+<sup>**All**</sup>                          | <sup>`koursaros/nboost:latest-all`</sup>       | <sup>`pip install nboost[all]`</sup>   | <sup>`helm install nboost/nboost --set image.tag=latest-all`</sup>
+<sup>**-** (*for testing*)</sup>            | <sup>`koursaros/nboost:latest-alpine`</sup>    | <sup>`pip install nboost`</sup>        | <sup>`helm install nboost/nboost --set image.tag=latest-alpine`</sup>
 
 </center>
 
