@@ -3,8 +3,8 @@ Vue.use(VueCharts);
 const vm = new Vue({
     el: '#mrc-ui',
     data: {
-        serverUrl: 'http://35.237.202.20:8000/',
-        apiRoute: 'nboost/',
+        serverUrl: 'nboost/',
+        apiRoute: 'status',
         results: [],
         top_deck: [],
         second_deck: [],
@@ -83,7 +83,7 @@ const vm = new Vue({
                         function (value, index) {
                             prop = vm.results.vars[value];
                             if (Object.prototype.hasOwnProperty.call(vm.results.vars, value)) {
-                                vm.addToDeck(value, prop.avg, vm.third_deck, true);
+                                vm.addToDeck(value, prop.avg, vm.third_deck, false);
                             }
                         })
                 },
@@ -116,4 +116,4 @@ const vm = new Vue({
 setInterval(function () {
     vm.refreshDatabase();
     console.log('update database!')
-}, 60 * 1000);
+}, 1 * 1000);

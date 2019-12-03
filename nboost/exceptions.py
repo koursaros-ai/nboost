@@ -13,8 +13,8 @@ class UpstreamConnectionError(ConnectionRefusedError):
     """Raised when the upstream host refuses connection"""
 
 
-class StatusRequest(RequestException):
-    """Client sent status request"""
+class FrontendRequest(RequestException):
+    """Client sent frontend request"""
 
 
 class UnknownRequest(RequestException):

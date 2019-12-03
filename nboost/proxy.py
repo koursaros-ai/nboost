@@ -1,5 +1,6 @@
 """NBoost Proxy Class"""
 
+from contextlib import suppress
 from typing import Type, List
 import socket
 import json
@@ -13,10 +14,11 @@ from nboost.model.base import BaseModel
 from nboost.server import SocketServer
 from nboost.logger import set_logger
 from nboost.types import Choice
+from nboost import PKG_PATH
 from nboost.exceptions import (
     UpstreamConnectionError,
     UnknownRequest,
-    StatusRequest,
+    FrontendRequest,
     MissingQuery
 )
 
@@ -51,6 +53,7 @@ class Proxy(SocketServer):
     """
 
     # statistical contexts
+    STATIC_PATH = PKG_PATH.joinpath('resources/frontend')
     stats = ClassStatistics()
 
     def __init__(self, model: Type[BaseModel], codex: Type[BaseCodex],
@@ -68,8 +71,8 @@ class Proxy(SocketServer):
 
     def on_client_request_url(self, url: URL):
         """Method for screening the url path from the client request"""
-        if re.match('/_nboost', url.path):
-            raise StatusRequest
+        if url.path.startswith('/nboost'):
+            raise FrontendRequest
 
         if not re.match(self.codex.SEARCH_PATH, url.path):
             raise UnknownRequest
@@ -142,6 +145,12 @@ class Proxy(SocketServer):
     @stats.vars_context
     def record_mrrs(self, upstream_mrr: float = None, model_mrr: float = None):
         """Add the upstream mrr and model mrr to the stats"""
+        with suppress(ZeroDivisionError):
+            self.record_search_boost(search_boost=model_mrr / upstream_mrr)
+
+    @stats.vars_context
+    def record_search_boost(self, search_boost: float = None):
+        """Record the quotient of model mrr and upstream mrr"""
 
     @stats.time_context
     def server_connect(self, server_socket: socket.socket) -> None:
@@ -175,6 +184,21 @@ class Proxy(SocketServer):
                 return 1 / i
         return 0
 
+    def get_static_file(self, path: str) -> bytes:
+        """Construct the static path of the frontend asset requested."""
+        if path == '/nboost':
+            asset = 'index.html'
+        else:
+            asset = path.replace('/nboost/', '', 1)
+
+        static_path = self.STATIC_PATH.joinpath(asset)
+
+        # for security reasons, make sure there is no access to other dirs
+        if self.STATIC_PATH in static_path.parents and static_path.exists():
+            return static_path.read_bytes()
+        else:
+            return self.STATIC_PATH.joinpath('404.html').read_bytes()
+
     def loop(self, client_socket, address):
         """Main ioloop for reranking server results to the client. Exceptions
         raised in the http parser must be reraised from __context__ because
@@ -186,7 +210,6 @@ class Proxy(SocketServer):
         log = ('%s:%s %s', *address, request)
 
         try:
-            self.server_connect(server_socket)
 
             with HttpParserContext():
                 # receive and buffer the client request
@@ -196,10 +219,12 @@ class Proxy(SocketServer):
 
                 # magnify the size of the request to the server
                 topk, correct_cids = self.codex.multiply_request(request)
+                self.server_connect(server_socket)
                 self.server_send(server_socket, request)
 
                 # make sure server response comes back properly
                 self.server_recv(server_socket, response)
+                server_socket.close()
                 response.unpack()
 
             if response.status < 300:
@@ -217,19 +242,25 @@ class Proxy(SocketServer):
 
             self.client_send(request, response, client_socket)
 
-        except StatusRequest:
+        except FrontendRequest:
             self.logger.info(*log)
-            response.body = json.dumps(self.status, indent=2).encode()
+
+            if request.url.path == '/nboost/status':
+                response.body = json.dumps(self.status, indent=2).encode()
+            else:
+                response.body = self.get_static_file(request.url.path)
             self.client_send(request, response, client_socket)
 
         except (UnknownRequest, MissingQuery):
             self.logger.warning(*log)
+            self.server_connect(server_socket)
 
             # send the initial buffer that was used to check url path
             self.proxy_send(client_socket, server_socket, buffer)
 
             # stream the client socket to the server socket
             self.proxy_recv(client_socket, server_socket)
+            server_socket.close()
 
         except Exception as exc:
             # for misc errors, send back json error msg
@@ -240,7 +271,6 @@ class Proxy(SocketServer):
 
         finally:
             client_socket.close()
-            server_socket.close()
 
     def run(self):
         """Same as socket server run() but logs"""
