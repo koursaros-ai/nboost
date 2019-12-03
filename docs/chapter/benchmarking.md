@@ -33,7 +33,7 @@ import requests, csv
 with open('queries.tsv') as file:
     for query, cids in csv.reader(file, delimiter='\t'):
         params = dict(q='passage:' + query, nboost=cids)
-        requests.post('http://localhost:8000/trec_car', params=params)
+        requests.post('http://localhost:8000/trec_car/_search', params=params)
 ```
 
 That's it! This just sends `http://localhost:8000/trec_car?nboost=id1,id2,id3...&q=passage:query` for every query.
