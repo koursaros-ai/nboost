@@ -5,7 +5,7 @@ from queue import Queue
 import numpy as np
 from nboost.model.bert_model import modeling, tokenization
 from nboost.model.base import BaseModel
-
+from nboost.types import Choice
 
 class BertModel(BaseModel):
 
@@ -187,10 +187,11 @@ class BertModel(BaseModel):
             candidates += ['PADDING DOC'] * (self.batch_size - (len(candidates) % self.batch_size))
             return candidates
 
-    def rank(self, query: bytes, choices: List[bytes]) -> List[int]:
-        actual_length = len(choices)
-        candidates = self.pad(choices)
-        self.input_q.put((query, choices))
+    def rank(self, query: bytes, choices: List[Choice]) -> List[int]:
+        bodies = [choice.body for choice in choices]
+        actual_length = len(bodies)
+        candidates = self.pad(bodies)
+        self.input_q.put((query, bodies))
 
         results = [self.output_q.get() for _ in range(len(candidates))][:actual_length]
         log_probs, labels = zip(*results)
