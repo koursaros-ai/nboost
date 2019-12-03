@@ -32,24 +32,24 @@ class ESCodex(BaseCodex):
     def multiply_request(self, request: Request) -> Tuple[int, List[str]]:
         """Multiply size of Elasticsearch query"""
         body = load_json(request.body)
-        correct_cids = None
+
+        topk = request.url.query.pop('size', None)
+        correct_cids = request.url.query.pop('nboost', None)
 
         # search for topk in body
         if body:
-            with suppress(KeyError):
-                topk = body['size']
-                body['size'] = topk * self.multiplier
-                request.body = dump_json(body)
-                correct_cids = [str(cid) for cid in body['nboost']]
+            correct_cids = body.pop('nboost', correct_cids)
+            topk = body.pop('size', topk)
+
+        topk = 10 if topk is None else int(topk)
+
+        if body:
+            body['size'] = topk * self.multiplier
+            request.body = dump_json(body)
         else:
-            try:
-                topk = int(request.url.query['size'])
-            except KeyError:
-                topk = 10
-            with suppress(KeyError):
-                correct_cids = request.url.query['nboost'].split(',')
             request.url.query['size'] = str(topk * self.multiplier)
 
+        correct_cids = correct_cids.split(',') if correct_cids else None
         return topk, correct_cids
 
     def parse_choices(self, response: Response, field: str) -> List[Choice]:
