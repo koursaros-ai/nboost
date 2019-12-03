@@ -70,20 +70,24 @@ In an **NBoost search request**, the user sends a query to the *model*. Then, th
 
 <h2 align="center">Benchmarks</h2>
 
-To use one of these fine-tuned models with nboost, run `nboost --model_dir bert-base-uncased-msmarco` for example, and it will download and cache automatically.
+> We value generalizability. Therefore, we benchmark each model on different datasets within its domain. Check out the results below!
 
 <center>
 
-Fine-tuned Models                                                               | Dependency                                                                   | Domain                                                             | Search Boost<sup>[4]</sup>                       | Speed
+Fine-tuned Models                                                               | Dependency                                                                   | Domain                                                             | Search Boost<sup>[1]</sup>                       | Speed
 ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------ | ----------
-`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[1]</sup></a> | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://www.msmarco.org/'>bing queries</a>                | **+80%** <sub><sup>(0.30 vs 0.17)</sup></sub>    | ~300 ms/query<a href='#footnotes'><sup>[3]</sup></a>
-`biobert-base-uncased-msmarco`                                                  | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='https://github.com/naver/biobert-pretrained'>biomed</a> | **+66%** <sub><sup>(0.17 vs 0.10)</sup></sub>    | ~300 ms/query<a href='#footnotes'><sup>[3]</sup></a>
+`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[2]</sup></a> | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://www.msmarco.org/'>bing queries</a>                | **+80%** <sub><sup>(0.30 vs 0.17)</sup></sub>    | ~300 ms/query<a href='#footnotes'>
+`bert-base-uncased-msmarco`                                                     | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://trec-car.cs.unh.edu/'>wiki search</a>             | **+71%** <sub><sup>(0.29 vs 0.17)</sup></sub>    | ~300 ms/query<a href='#footnotes'>
+`biobert-base-uncased-msmarco`                                                  | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='https://github.com/naver/biobert-pretrained'>biomed</a>  | **+66%** <sub><sup>(0.17 vs 0.10)</sup></sub>    | ~300 ms/query<a href='#footnotes'>
 `bert-tiny-uncased` (*coming soon*)                                             | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> |  -                                                                 | -                                                | -
-`albert-tiny-uncased` (*coming soon*)                                           | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> |  -                                                                 | -                                                | ~50ms/query <a href='#footnotes'><sup>[3]</sup></a>
+`albert-tiny-uncased` (*coming soon*)                                           | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> |  -                                                                 | -                                                | ~50ms/query <a href='#footnotes'>
 
 </center>
 
-<sub>[4] <a href = 'https://en.wikipedia.org/wiki/Mean_reciprocal_rank'>MRR </a> compared to BM25, the default for Elasticsearch. Reranking top 50.</sub>
+<sub>[1] <a href = 'https://en.wikipedia.org/wiki/Mean_reciprocal_rank'>MRR </a> compared to BM25, the default for Elasticsearch. Reranking top 50. See how we benchmarked NBoost <a href = 'https://nboost.readthedocs.io/en/latest/chapter/benchmarking.html'>here</a>.</sub>
+<sub>[2] https://github.com/nyu-dl/dl4marco-bert</sub>
+
+To use one of these fine-tuned models with nboost, run `nboost --model_dir bert-base-uncased-msmarco` for example, and it will download and cache automatically.
 
 Using pre-trained language understanding models, you can boost search relevance metrics by nearly **2x** compared to just text search, with little to no extra configuration. While assessing performance, there is often a tradeoff between model accuracy and speed, so we benchmark both of these factors above. This leaderboard is a work in progress, and we intend on releasing more cutting edge models!
 
@@ -97,10 +101,10 @@ For installing NBoost, follow the table below.
 
 Dependency                      | 🐳 Docker                                                 | 📦 Pypi                                           |  <a href="#kubernetes">🐙 Kubernetes</a>
 ------------------------------- | --------------------------------------------------------- | ------------------------------------------------- | -------------
-**Tensorflow** (*recommended*)  | <sub><sup>`koursaros/nboost:latest-tf`</sup></sub>        | <sub><sup>`pip install nboost[tf]`</sup></sub>    | <sub><sup>`helm install nboost/nboost --set image.tag=latest-tf`</sup></sub>
-**Pytorch**                     | <sub><sup>`koursaros/nboost:latest-torch`</sup></sub>     | <sub><sup>`pip install nboost[torch]`</sup></sub> | <sub><sup>`helm install nboost/nboost --set image.tag=latest-torch`</sup></sub>
-**All**                         | <sub><sup>`koursaros/nboost:latest-all`</sup></sub>       | <sub><sup>`pip install nboost[all]`</sup></sub>   | <sub><sup>`helm install nboost/nboost --set image.tag=latest-all`</sup></sub>
-**-** (*for testing*)           | <sub><sup>`koursaros/nboost:latest-alpine`</sup></sub>    | <sub><sup>`pip install nboost`</sup></sub>        | <sub><sup>`helm install nboost/nboost --set image.tag=latest-alpine`</sup></sub>
+**Tensorflow** (*recommended*)  | <sup>`koursaros/nboost:latest-tf`</sup>        | <sup>`pip install nboost[tf]`</sup>    | <sup>`helm install nboost/nboost --set image.tag=latest-tf`</sup>
+**Pytorch**                     | <sup>`koursaros/nboost:latest-torch`</sup>     | <sup>`pip install nboost[torch]`</sup> | <sup>`helm install nboost/nboost --set image.tag=latest-torch`</sup>
+**All**                         | <sup>`koursaros/nboost:latest-all`</sup>       | <sup>`pip install nboost[all]`</sup>   | <sup>`helm install nboost/nboost --set image.tag=latest-all`</sup>
+**-** (*for testing*)           | <sup>`koursaros/nboost:latest-alpine`</sup>    | <sup>`pip install nboost`</sup>        | <sup>`helm install nboost/nboost --set image.tag=latest-alpine`</sup>
 
 </center>
 
@@ -155,7 +159,7 @@ pip install nboost[tf]
 
 
 #### Setting up an Elasticsearch Server
-> 🔔 If you already have an Elasticsearch server, you can move on to the next step!
+> 🔔 If you already have an Elasticsearch server, you can skip this step!
 
 If you don't have Elasticsearch, not to worry! You can set up a local Elasticsearch cluster by using docker. First, get the ES image by running:
 ```bash
@@ -308,7 +312,7 @@ If you use NBoost in an academic paper, we would love to be cited. Here are the 
 
 <h2 align="center">Footnotes</h2>
 
-<sup>[1]</sup> https://github.com/nyu-dl/dl4marco-bert <br/>
+
 <sup>[2]</sup> https://github.com/huggingface/transformers <br/>
 <sup>[3]</sup> ms for reranking each hit. On nvidia T4 GPU. <br/>
 
