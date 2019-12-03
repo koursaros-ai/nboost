@@ -9,7 +9,7 @@ class ResponseException(Exception):
     """Upstream response contains error message"""
 
 
-class UpstreamConnectionError(ConnectionRefusedError):
+class UpstreamConnectionError(Exception):
     """Raised when the upstream host refuses connection"""
 
 

@@ -210,6 +210,7 @@ class Proxy(SocketServer):
         log = ('%s:%s %s', *address, request)
 
         try:
+            self.server_connect(server_socket)
 
             with HttpParserContext():
                 # receive and buffer the client request
@@ -219,12 +220,10 @@ class Proxy(SocketServer):
 
                 # magnify the size of the request to the server
                 topk, correct_cids = self.codex.multiply_request(request)
-                self.server_connect(server_socket)
                 self.server_send(server_socket, request)
 
                 # make sure server response comes back properly
                 self.server_recv(server_socket, response)
-                server_socket.close()
                 response.unpack()
 
             if response.status < 300:
@@ -253,14 +252,12 @@ class Proxy(SocketServer):
 
         except (UnknownRequest, MissingQuery):
             self.logger.warning(*log)
-            self.server_connect(server_socket)
 
             # send the initial buffer that was used to check url path
             self.proxy_send(client_socket, server_socket, buffer)
 
             # stream the client socket to the server socket
             self.proxy_recv(client_socket, server_socket)
-            server_socket.close()
 
         except Exception as exc:
             # for misc errors, send back json error msg
@@ -271,6 +268,7 @@ class Proxy(SocketServer):
 
         finally:
             client_socket.close()
+            server_socket.close()
 
     def run(self):
         """Same as socket server run() but logs"""
