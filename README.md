@@ -70,11 +70,11 @@ In an **NBoost search request**, the user sends a query to the *model*. Then, th
 
 <h2 align="center">Benchmarks</h2>
 
-> 🌎 We value generalizability! Therefore, we benchmark each model on different datasets within its domain.
+> 🌎 Note that we are evaluating models on differently constructed sets than they were trained on (MS Marco vs TREC-CAR), suggesting the generalizability of these models to many other real world search problems.
 
 <center>
 
-Fine-tuned Models                                                                | Dependency                                                                   | Domain                                                             | Search Boost<a href='#benchmarks'><sup>[1]</sup></a>  | Speed
+Fine-tuned Models                                                                | Dependency                                                                   | Eval Set                                                             | Search Boost<a href='#benchmarks'><sup>[1]</sup></a>  | Speed
 -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------- | ----------------------------------
 `bert-base-uncased-msmarco`(**default**)<a href='#benchmarks'><sup>[2]</sup></a> | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://www.msmarco.org/'>bing queries</a>                | **+80%** <sub><sup>(0.30 vs 0.17)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
 `bert-base-uncased-msmarco`                                                      | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://trec-car.cs.unh.edu/'>wiki search</a>             | **+71%** <sub><sup>(0.29 vs 0.17)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
@@ -84,7 +84,9 @@ Fine-tuned Models                                                               
 
 </center>
 
-<sub>[1] <a href = 'https://en.wikipedia.org/wiki/Mean_reciprocal_rank'>MRR </a> compared to BM25, the default for Elasticsearch. Reranking top 50. See how we benchmarked NBoost <a href = 'https://nboost.readthedocs.io/en/latest/chapter/benchmarking.html'>here</a>.</sub>
+**Instructions for reproducing <a href = 'https://nboost.readthedocs.io/en/latest/chapter/benchmarking.html'>here</a>.**
+
+<sub>[1] <a href = 'https://en.wikipedia.org/wiki/Mean_reciprocal_rank'>MRR </a> compared to BM25, the default for Elasticsearch. Reranking top 50.</sub>
 <br>
 <sub>[2] https://github.com/nyu-dl/dl4marco-bert</sub>
 
