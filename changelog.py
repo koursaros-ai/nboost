@@ -51,7 +51,7 @@ def get_changelog() -> dict:
                     name=commit.committer.name,
                     changes=commit.stats.total['lines']
                 )
-                module = file.split('/')[1].split('.')[0]
+                module = file.split('/')[1].split('.')[0] if '/' in file else file
                 changelog[module].append(line)
         if commit.committed_date < LAST_RELEASE:
             break
