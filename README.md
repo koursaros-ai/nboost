@@ -74,9 +74,9 @@ In an **NBoost search request**, the user sends a query to the *model*. Then, th
 
 <center>
 
-Fine-tuned Models                                                               | Dependency                                                                   | Domain                                                             | Search Boost<sup>[1]</sup>                       | Speed
+Fine-tuned Models                                                               | Dependency                                                                   | Domain                                                             | Search Boost<a href='#benchmarks'><sup>[1]</sup></a>  | Speed
 ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------ | ----------
-`bert-base-uncased-msmarco`(**default**)<a href='#footnotes'><sup>[2]</sup></a> | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://www.msmarco.org/'>bing queries</a>                | **+80%** <sub><sup>(0.30 vs 0.17)</sup></sub>    | ~300 ms/query<a href='#footnotes'>
+`bert-base-uncased-msmarco`(**default**)<a href='#benchmarks'><sup>[2]</sup></a> | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://www.msmarco.org/'>bing queries</a>                | **+80%** <sub><sup>(0.30 vs 0.17)</sup></sub>    | ~300 ms/query<a href='#footnotes'>
 `bert-base-uncased-msmarco`                                                     | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://trec-car.cs.unh.edu/'>wiki search</a>             | **+71%** <sub><sup>(0.29 vs 0.17)</sup></sub>    | ~300 ms/query<a href='#footnotes'>
 `biobert-base-uncased-msmarco`                                                  | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='https://github.com/naver/biobert-pretrained'>biomed</a>  | **+66%** <sub><sup>(0.17 vs 0.10)</sup></sub>    | ~300 ms/query<a href='#footnotes'>
 `bert-tiny-uncased` (*coming soon*)                                             | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> |  -                                                                 | -                                                | -
@@ -310,12 +310,6 @@ If you use NBoost in an academic paper, we would love to be cited. Here are the 
       year={2019}
     }
     ```
-
-<h2 align="center">Footnotes</h2>
-
-
-<sup>[2]</sup> https://github.com/huggingface/transformers <br/>
-<sup>[3]</sup> ms for reranking each hit. On nvidia T4 GPU. <br/>
 
 <h2 align="center">License</h2>
 
