@@ -1,4 +1,5 @@
 from nboost.model.bert_model import BertModel
+from nboost.types import Choice
 from tests import RESOURCES
 import unittest
 
@@ -13,7 +14,7 @@ class TestTransformersModel(unittest.TestCase):
         with RESOURCES.joinpath('sonnets.txt').open('rb') as fh:
             for i, line in enumerate(fh):
                 if not line == '':
-                    self.choices.append(line)
+                    self.choices.append(Choice('id', line))
 
     def test_rank(self):
         self.model.rank(self.query, self.choices)
