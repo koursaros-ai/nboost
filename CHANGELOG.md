@@ -1,3 +1,28 @@
+# Release `0.0.6`
+> Dec 2nd, 2019
+
+### 🧠 Model
+
+ - [[```ce69a5b```](https://github.com/koursaros-ai/nboost/commit/ce69a5b5c39f5b057603072170185a4b6a60c38c)] support choices (*colethienes*) <span style="color:blue">△11</span>
+
+###  Indexer
+
+ - [[```1e3ff4f```](https://github.com/koursaros-ai/nboost/commit/1e3ff4f225fb76d381b48f0a1a9aa07651f4a42b)] update benchmarking methods (*colethienes*) <span style="color:blue">△56</span>
+ - [[```7dcbc79```](https://github.com/koursaros-ai/nboost/commit/7dcbc7979c6ea9d93c465cb816379e670a9521e3)] set default port (*colethienes*) <span style="color:blue">△2</span>
+ - [[```2dc832e```](https://github.com/koursaros-ai/nboost/commit/2dc832e73b8d9089c99ee6772d657b3ed5426e45)] refactor indexing capabilities (*colethienes*) <span style="color:blue">△7566</span>
+
+### 📡 Proxy
+
+ - [[```0d493c4```](https://github.com/koursaros-ai/nboost/commit/0d493c47fc1fd3ffb05642f2f8ce0f729458ca69)] add native Search boost benchmarking (*colethienes*) <span style="color:blue">△121</span>
+
+###  Resources
+
+ - [[```5542075```](https://github.com/koursaros-ai/nboost/commit/554207557a3df1f1af28f08bee55784283577822)] add nboost/resources (*colethienes*) <span style="color:blue">△6967</span>
+
+###  Helm
+
+ - [[```93f0774```](https://github.com/koursaros-ai/nboost/commit/93f077448b235b35d56b60a846de8a2a81f812bb)] initial helm support (*colethienes*) <span style="color:blue">△13</span>
+
 # Release `0.0.5`
 > Nov 30th, 2019
 
