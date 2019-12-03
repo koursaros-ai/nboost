@@ -84,7 +84,9 @@ Fine-tuned Models                                                               
 
 </center>
 
-<sub>[1] <a href = 'https://en.wikipedia.org/wiki/Mean_reciprocal_rank'>MRR </a> compared to BM25, the default for Elasticsearch. Reranking top 50. See how we benchmarked NBoost <a href = 'https://nboost.readthedocs.io/en/latest/chapter/benchmarking.html'>here</a>.</sub>
+**Instructions for reproducing <a href = 'https://nboost.readthedocs.io/en/latest/chapter/benchmarking.html'>here</a>.**
+
+<sub>[1] <a href = 'https://en.wikipedia.org/wiki/Mean_reciprocal_rank'>MRR </a> compared to BM25, the default for Elasticsearch. Reranking top 50.</sub>
 <br>
 <sub>[2] https://github.com/nyu-dl/dl4marco-bert</sub>
 
