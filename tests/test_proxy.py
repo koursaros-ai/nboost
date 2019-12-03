@@ -80,7 +80,7 @@ class TestProxy(unittest.TestCase):
         self.assertTrue(fallback_res.ok)
 
         # status
-        status_res = requests.get('http://localhost:8000/_nboost')
+        status_res = requests.get('http://localhost:8000/nboost/status')
         self.assertTrue(status_res.ok)
         self.assertEqual(0.5, status_res.json()['vars']['upstream_mrr']['avg'])
         print(status_res.content.decode())
