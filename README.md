@@ -207,9 +207,14 @@ Let's check out the **NBoost frontend**. Go to your browser and visit [localhost
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/frontend-tutorial.png">
 </p>
 
-The frontend records everything that happened:
+The frontend recorded everything that happened:
 
-The client requested **2 search results** *(0.32 ms)* → connected to the server *(0.13 ms)* → sent a request for 10 search results to the server *(0.12 ms)* → receive **10 search results** from the server *(120.33 ms)* → the model reranks the search results *(300 ms)* → 2 search results are returned to the client.
+1. NBoost got a request for **2 search results**. *(0.32 ms)*
+2. NBoost onnected to the server. *(0.13 ms)*
+3. NBoost sent a request for 10 search results to the server. *(0.12 ms)* 
+4. NBoost received **10 search results** from the server. *(120.33 ms)*
+5. The model picked the best 2 search results. *(300 ms)*
+6. NBoost returned the search results to the client. *(0.10 ms)* 
 
 #### Elastic made easy
 To increase the number of parallel proxies, simply increase `--workers`. For a more robust deployment approach, you can distribute the proxy via Kubernetes (see below).
