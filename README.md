@@ -182,7 +182,8 @@ nboost --uport 9200
 If you get this message: `Listening: <host>:<port>`, then we're good to go!
 
 #### Indexing some data
-NBoost has a handy indexing tool built in (`nboost-index`). For demonstration purposes,  will be indexing [a set of passages about traveling and hotels](https://microsoft.github.io/TREC-2019-Deep-Learning/) through NBoost. You can add the index to your Elasticsearch server by running (`travel.csv` comes with NBoost):
+NBoost has a handy indexing tool built in (`nboost-index`). For demonstration purposes,  will be indexing [a set of passages about traveling and hotels](https://microsoft.github.io/TREC-2019-Deep-Learning/) through NBoost. You can add the index to your Elasticsearch server by running:
+>  `travel.csv` comes with NBoost
 ```bash
 nboost-index --file travel.csv --name travel --delim ,
 ```` 
