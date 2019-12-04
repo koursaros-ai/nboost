@@ -201,7 +201,7 @@ If the Elasticsearch result has the `_nboost` tag in it, congratulations it's wo
 
 #### What just happened?
 Let's check out the **NBoost frontend**. Go to your browser and visit [localhost:8000/nboost](http://localhost:8000/nboost).
-> If you don't have access to a browser, you can `curl http://localhost:8000/_nboost` for the same information.
+> If you don't have access to a browser, you can `curl http://localhost:8000/nboost/status` for the same information.
 
 (Frontend picture)
 
