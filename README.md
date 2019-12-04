@@ -136,7 +136,7 @@ Any way you install it, if you end up reading the following message after `$ nbo
       <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/rocket.svg?sanitize=true" alt="component overview">
       </td>
   <td>
-  <p>The <a href="http://nboost.readthedocs.io/en/latest/chapter/proxy.html">Proxy</a> is the core of NBoost. The proxy is essentially a wrapper to enable serving the model. It is able to understand incoming messages from specific search apis (i.e. Elasticsearch). When the proxy receives a message, it increases the amount of results the client is asking for so that the model can rerank a larger set and return the (hopefully) better results.</p>
+  <p>The <a href="https://nboost.readthedocs.io/en/latest/api/nboost.proxy.html">Proxy</a> is the core of NBoost. The proxy is essentially a wrapper to enable serving the model. It is able to understand incoming messages from specific search apis (i.e. Elasticsearch). When the proxy receives a message, it increases the amount of results the client is asking for so that the model can rerank a larger set and return the (hopefully) better results.</p>
   <p>For instance, if a client asks for 10 results to do with the query "brown dogs" from Elasticsearch, then the proxy may increase the results request to 100 and filter down the best ten results for the client.</p>
 </td>
   </tr>
@@ -203,7 +203,9 @@ If the Elasticsearch result has the `_nboost` tag in it, congratulations it's wo
 Let's check out the **NBoost frontend**. Go to your browser and visit [localhost:8000/nboost](http://localhost:8000/nboost).
 > If you don't have access to a browser, you can `curl http://localhost:8000/nboost/status` for the same information.
 
-(Frontend picture)
+<p align="center">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/frontend-tutorial.png">
+</p>
 
 You asked for two results from Elasticsearch having to do with "vegas". The proxy intercepted this request, asked the Elasticsearch for 10 results, and the model picked the best two. Magic! 🔮 (statistics)
 
