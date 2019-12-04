@@ -12,7 +12,7 @@ pip install nboost[tf]
 
 
 #### Setting up an Elasticsearch Server
-> 🔔 If you already have an Elasticsearch server, you can move on to the next step!
+> 🔔 If you already have an Elasticsearch server, you can skip this step!
 
 If you don't have Elasticsearch, not to worry! You can set up a local Elasticsearch cluster by using docker. First, get the ES image by running:
 ```bash
@@ -34,6 +34,7 @@ If you get this message: `Listening: <host>:<port>`, then we're good to go!
 
 #### Indexing some data
 NBoost has a handy indexing tool built in (`nboost-index`). For demonstration purposes,  will be indexing [a set of passages about traveling and hotels](https://microsoft.github.io/TREC-2019-Deep-Learning/) through NBoost. You can add the index to your Elasticsearch server by running:
+>  `travel.csv` comes with NBoost
 ```bash
 nboost-index --file travel.csv --name travel --delim ,
 ```` 
@@ -52,16 +53,29 @@ If the Elasticsearch result has the `_nboost` tag in it, congratulations it's wo
 
 #### What just happened?
 Let's check out the **NBoost frontend**. Go to your browser and visit [localhost:8000/nboost](http://localhost:8000/nboost).
-> If you don't have access to a browser, you can `curl http://localhost:8000/_nboost` for the same information.
+> If you don't have access to a browser, you can `curl http://localhost:8000/nboost/status` for the same information.
 
-(Frontend picture)
+<p align="center">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/frontend-tutorial.png">
+</p>
 
-You asked for two results from Elasticsearch having to do with "vegas". The proxy intercepted this request, asked the Elasticsearch for 10 results, and the model picked the best two. Magic! 🔮 (statistics)
+The frontend recorded everything that happened:
+
+1. NBoost got a request for **2 search results**. *(0.32 ms)*
+2. NBoost connected to the server. *(0.13 ms)*
+3. NBoost sent a request for 10 search results to the server. *(0.12 ms)* 
+4. NBoost received **10 search results** from the server. *(120.33 ms)*
+5. The model picked the best 2 search results. *(300 ms)*
+6. NBoost returned the search results to the client. *(0.10 ms)* 
 
 #### Elastic made easy
 To increase the number of parallel proxies, simply increase `--workers`. For a more robust deployment approach, you can distribute the proxy via Kubernetes (see below).
 
 <h2 align="center">Kubernetes</h2>
+
+<p align="center">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/sailboat.svg?sanitize=true" width="100%">
+</p>
 
 ### Deploying NBoost via Kubernetes
 We can easily deploy NBoost in a Kubernetes cluster using [Helm](https://helm.sh/).

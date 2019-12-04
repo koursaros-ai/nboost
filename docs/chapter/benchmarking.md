@@ -42,6 +42,8 @@ Now check out the frontend at [localhost:8000/nboost](http://localhost:8000/nboo
 
 You should find the model latency and calculated MRR for Elasticsearch vs NBoost. Here's our output:
 
-(frontend picture)
+<p align="center">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/frontend-benchmark.png">
+</p>
 
 Even though this model was finetuned on [a different dataset](http://www.msmarco.org/), it was generalizable enough to increase Elasticsearch search relevancy by **70%**!  

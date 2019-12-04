@@ -1,3 +1,12 @@
+# Release `0.0.7`
+> Dec 3rd, 2019
+
+### 📡 Proxy
+
+ - [[```7a120ce```](https://github.com/koursaros-ai/nboost/commit/7a120cef9d8e110a721b4c186a72786b5b570511)] record search boost (*colethienes*) <span style="color:blue">△10</span>
+ - [[```14446e6```](https://github.com/koursaros-ai/nboost/commit/14446e6b4e41d1bcecfbe500c505fec97fcc44aa)] fix connection dynamic (*colethienes*) <span style="color:blue">△8</span>
+ - [[```1052328```](https://github.com/koursaros-ai/nboost/commit/10523280eb458207260a2a5241e5af3109bccf5e)] add frontend (*colethienes*) <span style="color:blue">△61</span>
+
 # Release `0.0.6`
 > Dec 2nd, 2019
 

@@ -70,7 +70,7 @@ In an **NBoost search request**, the user sends a query to the *model*. Then, th
 
 <h2 align="center">Benchmarks</h2>
 
-> 🌎 Note that we are evaluating models on differently constructed sets than they were trained on (MS Marco vs TREC-CAR), suggesting the generalizability of these models to many other real world search problems.
+> 🔬 Note that we are evaluating models on differently constructed sets than they were trained on (MS Marco vs TREC-CAR), suggesting the generalizability of these models to many other real world search problems.
 
 <center>
 
@@ -79,8 +79,7 @@ Fine-tuned Models                                                               
 `bert-base-uncased-msmarco`(**default**)<a href='#benchmarks'><sup>[2]</sup></a> | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://www.msmarco.org/'>bing queries</a>                | **+80%** <sub><sup>(0.30 vs 0.17)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
 `bert-base-uncased-msmarco`                                                      | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://trec-car.cs.unh.edu/'>wiki search</a>             | **+71%** <sub><sup>(0.29 vs 0.17)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
 `biobert-base-uncased-msmarco`                                                   | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='https://github.com/naver/biobert-pretrained'>biomed</a>  | **+66%** <sub><sup>(0.17 vs 0.10)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
-`bert-tiny-uncased` (*coming soon*)                                              | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> |  -                                                                 | -                                                     | -
-`albert-tiny-uncased` (*coming soon*)                                            | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> |  -                                                                 | -                                                     | ~50ms/query <a href='#footnotes'>
+`bert-tiny-uncased` (*coming soon*)                                              | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> |  -                                                                 | -                                                     | ~50ms/query <a href='#footnotes'>
 
 </center>
 
@@ -137,7 +136,7 @@ Any way you install it, if you end up reading the following message after `$ nbo
       <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/rocket.svg?sanitize=true" alt="component overview">
       </td>
   <td>
-  <p>The <a href="http://nboost.readthedocs.io/en/latest/chapter/proxy.html">Proxy</a> is the core of NBoost. The proxy is essentially a wrapper to enable serving the model. It is able to understand incoming messages from specific search apis (i.e. Elasticsearch). When the proxy receives a message, it increases the amount of results the client is asking for so that the model can rerank a larger set and return the (hopefully) better results.</p>
+  <p>The <a href="https://nboost.readthedocs.io/en/latest/api/nboost.proxy.html">Proxy</a> is the core of NBoost. The proxy is essentially a wrapper to enable serving the model. It is able to understand incoming messages from specific search apis (i.e. Elasticsearch). When the proxy receives a message, it increases the amount of results the client is asking for so that the model can rerank a larger set and return the (hopefully) better results.</p>
   <p>For instance, if a client asks for 10 results to do with the query "brown dogs" from Elasticsearch, then the proxy may increase the results request to 100 and filter down the best ten results for the client.</p>
 </td>
   </tr>
@@ -184,6 +183,7 @@ If you get this message: `Listening: <host>:<port>`, then we're good to go!
 
 #### Indexing some data
 NBoost has a handy indexing tool built in (`nboost-index`). For demonstration purposes,  will be indexing [a set of passages about traveling and hotels](https://microsoft.github.io/TREC-2019-Deep-Learning/) through NBoost. You can add the index to your Elasticsearch server by running:
+>  `travel.csv` comes with NBoost
 ```bash
 nboost-index --file travel.csv --name travel --delim ,
 ```` 
@@ -202,11 +202,20 @@ If the Elasticsearch result has the `_nboost` tag in it, congratulations it's wo
 
 #### What just happened?
 Let's check out the **NBoost frontend**. Go to your browser and visit [localhost:8000/nboost](http://localhost:8000/nboost).
-> If you don't have access to a browser, you can `curl http://localhost:8000/_nboost` for the same information.
+> If you don't have access to a browser, you can `curl http://localhost:8000/nboost/status` for the same information.
 
-(Frontend picture)
+<p align="center">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/frontend-tutorial.png">
+</p>
 
-You asked for two results from Elasticsearch having to do with "vegas". The proxy intercepted this request, asked the Elasticsearch for 10 results, and the model picked the best two. Magic! 🔮 (statistics)
+The frontend recorded everything that happened:
+
+1. NBoost got a request for **2 search results**. *(0.32 ms)*
+2. NBoost connected to the server. *(0.13 ms)*
+3. NBoost sent a request for 10 search results to the server. *(0.12 ms)* 
+4. NBoost received **10 search results** from the server. *(120.33 ms)*
+5. The model picked the best 2 search results. *(300 ms)*
+6. NBoost returned the search results to the client. *(0.10 ms)* 
 
 #### Elastic made easy
 To increase the number of parallel proxies, simply increase `--workers`. For a more robust deployment approach, you can distribute the proxy via Kubernetes (see below).

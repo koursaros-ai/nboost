@@ -1,7 +1,7 @@
 """NBoost Proxy Class"""
 
+from typing import Type, List, Tuple
 from contextlib import suppress
-from typing import Type, List
 import socket
 import json
 import re
@@ -114,12 +114,12 @@ class Proxy(SocketServer):
 
     @staticmethod
     @stats.time_context
-    def server_send(server_socket, request: Request):
+    def server_send(server_socket: socket.socket, request: Request):
         """Send magnified request to the server"""
         server_socket.send(request.prepare())
 
     @stats.time_context
-    def server_recv(self, server_socket, response: Response):
+    def server_recv(self, server_socket: socket.socket, response: Response):
         """Receive magnified request from the server"""
         protocol = self.set_protocol(server_socket)
         protocol.set_response_parser()
@@ -144,13 +144,11 @@ class Proxy(SocketServer):
 
     @stats.vars_context
     def record_mrrs(self, upstream_mrr: float = None, model_mrr: float = None):
-        """Add the upstream mrr and model mrr to the stats"""
+        """Add the upstream mrr, model mrr, and search boost to the stats"""
         with suppress(ZeroDivisionError):
-            self.record_search_boost(search_boost=model_mrr / upstream_mrr)
-
-    @stats.vars_context
-    def record_search_boost(self, search_boost: float = None):
-        """Record the quotient of model mrr and upstream mrr"""
+            var = self.stats.record['vars']
+            var['search_boost'] = {
+                'avg': var['model_mrr']['avg'] / var['upstream_mrr']['avg']}
 
     @stats.time_context
     def server_connect(self, server_socket: socket.socket) -> None:
@@ -185,7 +183,8 @@ class Proxy(SocketServer):
         return 0
 
     def get_static_file(self, path: str) -> bytes:
-        """Construct the static path of the frontend asset requested."""
+        """Construct the static path of the frontend asset requested and return
+        the raw file."""
         if path == '/nboost':
             asset = 'index.html'
         else:
@@ -199,7 +198,7 @@ class Proxy(SocketServer):
         else:
             return self.STATIC_PATH.joinpath('404.html').read_bytes()
 
-    def loop(self, client_socket, address):
+    def loop(self, client_socket: socket.socket, address: Tuple[str, str]):
         """Main ioloop for reranking server results to the client. Exceptions
         raised in the http parser must be reraised from __context__ because
         they are caught by the MagicStack implementation"""
@@ -210,6 +209,7 @@ class Proxy(SocketServer):
         log = ('%s:%s %s', *address, request)
 
         try:
+            self.server_connect(server_socket)
 
             with HttpParserContext():
                 # receive and buffer the client request
@@ -219,12 +219,10 @@ class Proxy(SocketServer):
 
                 # magnify the size of the request to the server
                 topk, correct_cids = self.codex.multiply_request(request)
-                self.server_connect(server_socket)
                 self.server_send(server_socket, request)
 
                 # make sure server response comes back properly
                 self.server_recv(server_socket, response)
-                server_socket.close()
                 response.unpack()
 
             if response.status < 300:
@@ -253,14 +251,12 @@ class Proxy(SocketServer):
 
         except (UnknownRequest, MissingQuery):
             self.logger.warning(*log)
-            self.server_connect(server_socket)
 
             # send the initial buffer that was used to check url path
             self.proxy_send(client_socket, server_socket, buffer)
 
             # stream the client socket to the server socket
             self.proxy_recv(client_socket, server_socket)
-            server_socket.close()
 
         except Exception as exc:
             # for misc errors, send back json error msg
@@ -271,6 +267,7 @@ class Proxy(SocketServer):
 
         finally:
             client_socket.close()
+            server_socket.close()
 
     def run(self):
         """Same as socket server run() but logs"""
