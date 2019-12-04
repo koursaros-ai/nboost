@@ -1,7 +1,7 @@
 """NBoost Proxy Class"""
 
+from typing import Type, List, Tuple
 from contextlib import suppress
-from typing import Type, List
 import socket
 import json
 import re
@@ -114,12 +114,12 @@ class Proxy(SocketServer):
 
     @staticmethod
     @stats.time_context
-    def server_send(server_socket, request: Request):
+    def server_send(server_socket: socket.socket, request: Request):
         """Send magnified request to the server"""
         server_socket.send(request.prepare())
 
     @stats.time_context
-    def server_recv(self, server_socket, response: Response):
+    def server_recv(self, server_socket: socket.socket, response: Response):
         """Receive magnified request from the server"""
         protocol = self.set_protocol(server_socket)
         protocol.set_response_parser()
@@ -183,7 +183,8 @@ class Proxy(SocketServer):
         return 0
 
     def get_static_file(self, path: str) -> bytes:
-        """Construct the static path of the frontend asset requested."""
+        """Construct the static path of the frontend asset requested and return
+        the raw file."""
         if path == '/nboost':
             asset = 'index.html'
         else:
@@ -197,7 +198,7 @@ class Proxy(SocketServer):
         else:
             return self.STATIC_PATH.joinpath('404.html').read_bytes()
 
-    def loop(self, client_socket, address):
+    def loop(self, client_socket: socket.socket, address: Tuple[str, str]):
         """Main ioloop for reranking server results to the client. Exceptions
         raised in the http parser must be reraised from __context__ because
         they are caught by the MagicStack implementation"""
