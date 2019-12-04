@@ -144,13 +144,11 @@ class Proxy(SocketServer):
 
     @stats.vars_context
     def record_mrrs(self, upstream_mrr: float = None, model_mrr: float = None):
-        """Add the upstream mrr and model mrr to the stats"""
+        """Add the upstream mrr, model mrr, and search boost to the stats"""
         with suppress(ZeroDivisionError):
-            self.record_search_boost(search_boost=model_mrr / upstream_mrr)
-
-    @stats.vars_context
-    def record_search_boost(self, search_boost: float = None):
-        """Record the quotient of model mrr and upstream mrr"""
+            var = self.stats.record['vars']
+            var['search_boost'] = {
+                'avg': var['model_mrr']['avg'] / var['upstream_mrr']['avg']}
 
     @stats.time_context
     def server_connect(self, server_socket: socket.socket) -> None:
