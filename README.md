@@ -70,7 +70,7 @@ In an **NBoost search request**, the user sends a query to the *model*. Then, th
 
 <h2 align="center">Benchmarks</h2>
 
-> 🌎 Note that we are evaluating models on differently constructed sets than they were trained on (MS Marco vs TREC-CAR), suggesting the generalizability of these models to many other real world search problems.
+> 🔬 Note that we are evaluating models on differently constructed sets than they were trained on (MS Marco vs TREC-CAR), suggesting the generalizability of these models to many other real world search problems.
 
 <center>
 
