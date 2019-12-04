@@ -210,7 +210,7 @@ Let's check out the **NBoost frontend**. Go to your browser and visit [localhost
 The frontend recorded everything that happened:
 
 1. NBoost got a request for **2 search results**. *(0.32 ms)*
-2. NBoost onnected to the server. *(0.13 ms)*
+2. NBoost connected to the server. *(0.13 ms)*
 3. NBoost sent a request for 10 search results to the server. *(0.12 ms)* 
 4. NBoost received **10 search results** from the server. *(120.33 ms)*
 5. The model picked the best 2 search results. *(300 ms)*
