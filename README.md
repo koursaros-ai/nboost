@@ -50,7 +50,7 @@
 
 Nboost leverages finetuned models to produce domain-specific neural search engines. The platform can also improve other downstream tasks requiring ranked input, such as question answering.
 
-<a href = '#contact'>Contact us to request domain-specific models or leave feedback</a>
+<a href = 'mailto:jp954@cornell.edu'>Contact us to request domain-specific models or leave feedback</a>
 
 <h2 align="center">Overview</h2>
 
