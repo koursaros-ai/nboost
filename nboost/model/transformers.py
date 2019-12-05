@@ -99,7 +99,7 @@ class TransformersModel(BaseModel):
 
     def encode(self, query, choices):
         inputs = [self.tokenizer.encode_plus(
-            query, choice, add_special_tokens=True) for choice in choices]
+            str(query), str(choice), add_special_tokens=True) for choice in choices]
 
         max_len = min(max(len(t['input_ids']) for t in inputs), self.max_seq_len)
         input_ids = [t['input_ids'][:max_len] +
