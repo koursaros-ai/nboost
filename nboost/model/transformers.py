@@ -4,8 +4,7 @@ from transformers import (
     AutoConfig,
     AutoModelForSequenceClassification,
     AutoTokenizer,
-    AdamW,
-    ConstantLRSchedule
+    AdamW
 )
 import torch.nn
 import torch
@@ -51,35 +50,35 @@ class TransformersModel(BaseModel):
         self.rerank_model.to(self.device, non_blocking=True)
 
         self.optimizer = AdamW(self.rerank_model.parameters(), lr=self.lr, correct_bias=False)
-        self.scheduler = ConstantLRSchedule(self.optimizer)
+        # self.scheduler = ConstantLRSchedule(self.optimizer)
 
         self.weight = 1.0
 
-    def train(self, query, choices):
-        input_ids, attention_mask, token_type_ids = self.encode(query, choices)
-
-        if self.model_config.num_labels == 1:
-            labels = torch.tensor(labels, dtype=torch.float).to(self.device, non_blocking=True)
-        else:
-            labels = torch.tensor(labels, dtype=torch.long).to(self.device, non_blocking=True)
-
-        if self.distilbert:
-            loss = self.rerank_model(input_ids,labels=labels,attention_mask=attention_mask)[0]
-        else:
-            loss = self.rerank_model(input_ids,
-                                     labels=labels,
-                                     attention_mask=attention_mask,
-                                     token_type_ids=token_type_ids)[0]
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.rerank_model.parameters(), self.max_grad_norm)
-        self.optimizer.step()
-        self.scheduler.step()
-        self.rerank_model.zero_grad()
-        self.train_steps += 1
-        if self.weight < 1.0:
-            self.weight += self.lr*0.1
-        if self.train_steps % self.checkpoint_steps == 0:
-            self.save()
+    # def train(self, query, choices):
+    #     input_ids, attention_mask, token_type_ids = self.encode(query, choices)
+    #
+    #     if self.model_config.num_labels == 1:
+    #         labels = torch.tensor(labels, dtype=torch.float).to(self.device, non_blocking=True)
+    #     else:
+    #         labels = torch.tensor(labels, dtype=torch.long).to(self.device, non_blocking=True)
+    #
+    #     if self.distilbert:
+    #         loss = self.rerank_model(input_ids,labels=labels,attention_mask=attention_mask)[0]
+    #     else:
+    #         loss = self.rerank_model(input_ids,
+    #                                  labels=labels,
+    #                                  attention_mask=attention_mask,
+    #                                  token_type_ids=token_type_ids)[0]
+    #     loss.backward()
+    #     torch.nn.utils.clip_grad_norm_(self.rerank_model.parameters(), self.max_grad_norm)
+    #     self.optimizer.step()
+    #     self.scheduler.step()
+    #     self.rerank_model.zero_grad()
+    #     self.train_steps += 1
+    #     if self.weight < 1.0:
+    #         self.weight += self.lr*0.1
+    #     if self.train_steps % self.checkpoint_steps == 0:
+    #         self.save()
 
     def rank(self, query, choices):
         input_ids, attention_mask, token_type_ids = self.encode(query, choices)
