@@ -1,6 +1,7 @@
 from nboost.model.transformers import TransformersModel
 from tests import RESOURCES
 import unittest
+from nboost.types import Choice
 
 
 class TestModel(unittest.TestCase):
@@ -13,8 +14,8 @@ class TestModel(unittest.TestCase):
         with RESOURCES.joinpath('sonnets.txt').open() as fh:
             for i, line in enumerate(fh):
                 if not line == '':
-                    self.choices.append(line)
+                    self.choices.append(Choice('0', bytes(line)))
 
     def test_rank(self):
-        self.model.rank(self.query, self.choices)
+        self.model.rank(bytes(self.query), self.choices)
         self.assertIsInstance(self.choices, list)
