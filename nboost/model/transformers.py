@@ -9,6 +9,7 @@ from transformers import (
 import torch.nn
 import torch
 from nboost.model.base import BaseModel
+import pathlib
 
 
 class TransformersModel(BaseModel):
@@ -25,7 +26,7 @@ class TransformersModel(BaseModel):
         if os.path.exists(os.path.join(self.model_ckpt, 'config.json')):
             self.logger.info('Loading from checkpoint %s' % self.model_ckpt)
             self.model_config = AutoConfig.from_pretrained(self.model_ckpt)
-        elif os.path.exists(self.data_dir.joinpath('./config.json')):
+        elif os.path.exists(self.data_dir.joinpath(pathlib.Path('./config.json'))):
             self.logger.info('Loading from trained model in %s' % self.data_dir)
             self.model_ckpt = str(self.data_dir)
             self.model_config = AutoConfig.from_pretrained(self.model_ckpt)
