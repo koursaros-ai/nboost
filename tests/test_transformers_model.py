@@ -17,5 +17,5 @@ class TestModel(unittest.TestCase):
                     self.choices.append(Choice('0', line.encode()))
 
     def test_rank(self):
-        self.model.rank(bytes(self.query), self.choices)
+        self.model.rank(self.query.encode(), self.choices)
         self.assertIsInstance(self.choices, list)
