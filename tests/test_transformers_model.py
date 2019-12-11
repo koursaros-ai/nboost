@@ -7,7 +7,7 @@ from nboost.types import Choice
 class TestModel(unittest.TestCase):
 
     def setUp(self):
-        self.model = TransformersModel(model_dir='distilbert-base-uncased')
+        self.model = TransformersModel(model_dir='pt-tinybert-msmarco')
         self.query = 'O wherefore art thou'
         self.choices = []
 
