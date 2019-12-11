@@ -1,40 +1,20 @@
 import numpy as np
 from transformers import (
-    AutoConfig,
     AutoModelForSequenceClassification,
     AutoTokenizer,
-    AdamW
 )
 import torch.nn
 import torch
 from nboost.model.base import BaseModel
-import pathlib
 
 
 class TransformersModel(BaseModel):
-    max_grad_norm = 1.0
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.download()
-        self.train_steps = 0
-        self.checkpoint_steps = 500
-        self.model_ckpt = str(self.model_dir.name)
-        self.distilbert = 'distilbert' in self.model_ckpt
 
-        if self.model_dir.joinpath(pathlib.Path('config.json')).exists():
-            self.logger.info('Loading from checkpoint %s' % self.model_ckpt)
-            self.model_config = AutoConfig.from_pretrained(self.model_ckpt)
-        elif self.data_dir.joinpath(pathlib.Path('./config.json')).exists():
-            self.logger.info('Loading from trained model in %s' % self.data_dir)
-            self.model_ckpt = str(self.data_dir)
-            self.model_config = AutoConfig.from_pretrained(self.model_ckpt)
-        else:
-            self.logger.info(
-                'Initializing new model with pretrained weights %s' % self.model_ckpt)
-            self.model_config = AutoConfig.from_pretrained(self.model_ckpt)
-            self.model_config.num_labels = 1  # set up for regression
-
+        self.logger.info('Loading from checkpoint %s' % str(self.model_dir))
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         if self.device == torch.device("cpu"):
@@ -44,52 +24,17 @@ class TransformersModel(BaseModel):
             torch.cuda.synchronize(self.device)
 
         self.rerank_model = AutoModelForSequenceClassification.from_pretrained(
-            self.model_ckpt,
-            config=self.model_config)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_ckpt)
+            str(self.model_dir))
+        self.tokenizer = AutoTokenizer.from_pretrained(str(self.model_dir))
         self.rerank_model.to(self.device, non_blocking=True)
-
-        self.optimizer = AdamW(self.rerank_model.parameters(), lr=self.lr, correct_bias=False)
-        # self.scheduler = ConstantLRSchedule(self.optimizer)
-
-        self.weight = 1.0
-
-    # def train(self, query, choices):
-    #     input_ids, attention_mask, token_type_ids = self.encode(query, choices)
-    #
-    #     if self.model_config.num_labels == 1:
-    #         labels = torch.tensor(labels, dtype=torch.float).to(self.device, non_blocking=True)
-    #     else:
-    #         labels = torch.tensor(labels, dtype=torch.long).to(self.device, non_blocking=True)
-    #
-    #     if self.distilbert:
-    #         loss = self.rerank_model(input_ids,labels=labels,attention_mask=attention_mask)[0]
-    #     else:
-    #         loss = self.rerank_model(input_ids,
-    #                                  labels=labels,
-    #                                  attention_mask=attention_mask,
-    #                                  token_type_ids=token_type_ids)[0]
-    #     loss.backward()
-    #     torch.nn.utils.clip_grad_norm_(self.rerank_model.parameters(), self.max_grad_norm)
-    #     self.optimizer.step()
-    #     self.scheduler.step()
-    #     self.rerank_model.zero_grad()
-    #     self.train_steps += 1
-    #     if self.weight < 1.0:
-    #         self.weight += self.lr*0.1
-    #     if self.train_steps % self.checkpoint_steps == 0:
-    #         self.save()
 
     def rank(self, query, choices):
         input_ids, attention_mask, token_type_ids = self.encode(query, choices)
 
         with torch.no_grad():
-            if self.distilbert:
-                logits = self.rerank_model(input_ids, attention_mask=attention_mask)[0]
-            else:
-                logits = self.rerank_model(input_ids,
-                                           attention_mask=attention_mask,
-                                           token_type_ids=token_type_ids)[0]
+            logits = self.rerank_model(input_ids,
+                                       attention_mask=attention_mask,
+                                       token_type_ids=token_type_ids)[0]
             scores = np.squeeze(logits.detach().cpu().numpy())
             if len(scores.shape) > 1 and scores.shape[1] == 2:
                 scores = np.squeeze(scores[:,1])
@@ -114,9 +59,3 @@ class TransformersModel(BaseModel):
         token_type_ids = torch.tensor(token_type_ids).to(self.device, non_blocking=True)
 
         return input_ids, attention_mask, token_type_ids
-
-    def save(self):
-        self.logger.info('Saving model')
-        os.makedirs(self.data_dir, exist_ok=True)
-        self.rerank_model.save_pretrained(self.data_dir)
-        self.tokenizer.save_pretrained(self.data_dir)
