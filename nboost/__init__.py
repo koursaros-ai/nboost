@@ -25,7 +25,7 @@ MODEL_MAP = {
     "albert-tiny-uncased-msmarco": "https://storage.googleapis.com/koursaros/albert-tiny-uncased-msmarco.tar.gz",
     "biobert-base-uncased-msmarco": "https://storage.googleapis.com/koursaros/biobert-base-uncased-msmarco.tar.gz",
     "pt-tinybert-msmarco": "https://storage.googleapis.com/koursaros/pt-tinybert-msmarco.tar.gz",
-    "pt-bert-base-uncased-msmarco.tar.gz": "https://storage.googleapis.com/koursaros/pt-bert-base-uncased-msmarco.tar.gz"
+    "pt-bert-base-uncased-msmarco": "https://storage.googleapis.com/koursaros/pt-bert-base-uncased-msmarco.tar.gz"
 }
 
 # image => directory
