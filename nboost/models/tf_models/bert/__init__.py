@@ -3,11 +3,11 @@ from typing import List
 import tensorflow as tf
 from queue import Queue
 import numpy as np
-from nboost.model.bert_model import modeling, tokenization
-from nboost.model.base import BaseModel
-from nboost.types import Choice
+from nboost.models.tf_models.bert import modeling, tokenization
+from nboost.models.base import BaseModel
 
-class BertModel(BaseModel):
+
+class TfBertModel(BaseModel):
 
     def __init__(self, verbose=False, **kwargs):
         super().__init__(**kwargs)
@@ -187,18 +187,18 @@ class BertModel(BaseModel):
             candidates += ['PADDING DOC'] * (self.batch_size - (len(candidates) % self.batch_size))
             return candidates
 
-    def rank(self, query: bytes, choices: List[Choice]) -> List[int]:
-        bodies = [choice.body for choice in choices]
-        actual_length = len(bodies)
-        candidates = self.pad(bodies)
-        self.input_q.put((query, bodies))
+    def rank(self, query: bytes, choices: List[str]) -> List[int]:
+
+        actual_length = len(choices)
+        candidates = self.pad(choices)
+        self.input_q.put((query, choices))
 
         results = [self.output_q.get() for _ in range(len(candidates))][:actual_length]
         log_probs, labels = zip(*results)
         log_probs = np.stack(log_probs).reshape(-1, 2)
         scores = log_probs[:, 1]
         assert len(scores) == actual_length
-        return scores.argsort()[::-1]
+        return list(scores.argsort()[::-1])
 
     def close(self):
         self.input_q.put(None)

@@ -1,14 +1,12 @@
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from typing import List
 import numpy as np
-from transformers import (
-    AutoModelForSequenceClassification,
-    AutoTokenizer,
-)
 import torch.nn
 import torch
-from nboost.model.base import BaseModel
+from nboost.models.base import BaseModel
 
 
-class TransformersModel(BaseModel):
+class TorchBertModel(BaseModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,7 +26,7 @@ class TransformersModel(BaseModel):
         self.tokenizer = AutoTokenizer.from_pretrained(str(self.model_dir))
         self.rerank_model.to(self.device, non_blocking=True)
 
-    def rank(self, query, choices):
+    def rank(self, query: str, choices: List[str]):
         input_ids, attention_mask, token_type_ids = self.encode(query, choices)
 
         with torch.no_grad():
@@ -40,12 +38,11 @@ class TransformersModel(BaseModel):
                 scores = np.squeeze(scores[:,1])
             if len(logits) == 1:
                 scores = [scores]
-            return np.argsort(scores)[::-1]
+            return list(np.argsort(scores)[::-1])
 
-    def encode(self, query, choices):
-        inputs = [self.tokenizer.encode_plus(
-            query.decode().lower(),
-            choice.body.decode().lower(), add_special_tokens=True) for choice in choices]
+    def encode(self, query: str, choices: List[str]):
+        inputs = [self.tokenizer.encode_plus(query.lower(),
+            choice.lower(), add_special_tokens=True) for choice in choices]
 
         max_len = min(max(len(t['input_ids']) for t in inputs), self.max_seq_len)
         input_ids = [t['input_ids'][:max_len] +

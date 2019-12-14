@@ -1,14 +1,119 @@
 """Utility functions for NBoost classes"""
+from urllib.parse import urlparse, parse_qsl, urlunparse, urlencode
 from json.decoder import JSONDecodeError
+from typing import Any, Union, List
+from http.client import responses
 from contextlib import suppress
-from typing import Any, Union
 from functools import reduce
 from pathlib import Path
 import operator
 import tarfile
 import json
+import gzip
+from jsonpath_ng.ext import parse
+from jsonpath_ng import jsonpath
 from tqdm import tqdm
 import requests
+
+JSONTYPES = Union[dict, list, str, int, float]
+
+
+def update(self, data, val):
+    """JsonPath Union class patch to support updating."""
+    with suppress(TypeError):
+        self.left.update(data, val)
+
+    with suppress(TypeError):
+        self.right.update(data, val)
+
+
+jsonpath.Union.update = update
+
+
+def parse_url(url: bytes) -> dict:
+    """Parses a url bytes string in the form of:
+        scheme://netloc/path;params?query#fragment
+
+    Returns a dictionary with the respective keys value pairs."""
+    url = urlparse(url.decode())
+    qsl = parse_qsl(url.query, keep_blank_values=True)
+    return {
+        'scheme': url.scheme,
+        'netloc': url.netloc,
+        'path': url.path,
+        'params': url.params,
+        'fragment': url.fragment,
+        'query': dict(qsl) if url.query else {}
+    }
+
+
+def unparse_url(url: dict) -> str:
+    """Reformats a url produced in parse_url()"""
+    return urlunparse((
+        url['scheme'],
+        url['netloc'],
+        url['path'],
+        url['params'],
+        urlencode(url['query']),
+        url['fragment']
+    ))
+
+
+def prepare_request(request: dict) -> bytes:
+    """Prepares a request with the following keys:
+        version: str
+        headers: dict
+        url: dict
+        body: dict
+        method: str"""
+
+    # cast request sections to strings
+    body = json.dumps(request['body'])
+    headers = {**request['headers'], 'content-length': str(len(body))}
+    request = {
+        'body': body,
+        'url': unparse_url(request['url']),
+        'headers': ''.join('\r\n%s: %s' % (k, v) for k, v in headers.items()),
+        'method': request['method'],
+        'version': request['version']
+    }
+
+    return '{method} {url} {version}{headers}\r\n\r\n{body}'.format(**request).encode()
+
+
+def prepare_response(request: dict, response: dict) -> bytes:
+    """Prepares a request with the following keys:
+        version: str
+        status: int
+        headers: dict
+        body: dict"""
+
+    response['reason'] = responses[response['status']]
+    kwargs = {}
+    if 'url' in request and request['url']['query'] == 'pretty':
+        kwargs = dict(indent=2)
+    body = dump_json(response.pop('body'), **kwargs)
+    response['headers'].pop('content-encoding', '')
+
+    if 'gzip' in request['headers'].get('accept-encoding', ''):
+        response['headers']['content-encoding'] = 'gzip'
+        body = gzip.compress(body)
+
+    response['headers']['content-length'] = str(len(body))
+    response['headers'] = ''.join('\r\n%s: %s' % (k, v) for k, v in response['headers'].items())
+
+    return '{version} {status} {reason}{headers}\r\n\r\n'.format(**response).encode() + body
+
+
+def get_jsonpath(obj: dict, path: str) -> List[JSONTYPES]:
+    """Return json values matching jsonpaths."""
+    return [match.value for match in parse(path).find(obj)]
+
+
+def set_jsonpath(obj: dict, path: str, value: Any) -> None:
+    """Sets the value in each matching jsonpath key."""
+    expression = parse(path)
+    expression.update(obj, value)
 
 
 def download_file(url: str, path: Path):
@@ -55,7 +160,7 @@ def load_json(json_string: bytes) -> Union[dict, None]:
         return json.loads(json_string.decode())
 
 
-def dump_json(obj: Union[dict, list, str, int, float], **kwargs) -> bytes:
+def dump_json(obj: JSONTYPES, **kwargs) -> bytes:
     """Dump dict to json encoded bytes string"""
     return json.dumps(obj, **kwargs).encode()
 
@@ -66,3 +171,8 @@ def count_lines(path: Path):
     count = sum(1 for _ in fileobj)
     fileobj.close()
     return count
+
+
+def flatten(array: list):
+    """Flatten nested list to a single list"""
+    return [item for sublist in array for item in sublist]

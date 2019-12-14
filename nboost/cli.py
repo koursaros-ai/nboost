@@ -5,28 +5,32 @@ from pathlib import Path
 from typing import List
 from argparse import ArgumentParser
 import termcolor
-from nboost import CLASS_MAP, PKG_PATH
-from nboost.proxy import Proxy
+from nboost.maps import CLASS_MAP, CONFIG_MAP
 from nboost.__version__ import __doc__
+from nboost.proxy import Proxy
+from nboost import PKG_PATH
+
 
 TAG = termcolor.colored('NBoost (v%s)' % __doc__, 'cyan', attrs=['underline'])
 DESCRIPTION = ('%s: is a scalable, search-api-boosting platform for '
                'developing and deploying SOTA models to improve the '
                'relevance of search results..' % TAG)
+DELIM = 'the deliminator to concatenate multiple queries into a single query'
+CONFIG = 'which search api nboost should be configured for'
+BATCH_SIZE = 'batch size for running through rerank model'
+MODEL_DIR = 'name or directory of the finetuned model'
+WORKERS = 'number of threads serving the proxy'
+MULTIPLIER = 'factor to increase results by'
+MAX_SEQ_LEN = 'max combined token length'
 VERBOSE = 'turn on detailed logging'
-HOST = 'host of the proxy'
-PORT = 'port of the proxy'
+BUFSIZE = 'size of the http buffer'
+LR = 'learning rate of the model'
+DATA_DIR = 'dir for model binary'
 UHOST = 'host of the server'
 UPORT = 'port of the server'
-LR = 'learning rate of the model'
-MODEL_DIR = 'name or directory of the finetuned model'
-DATA_DIR = 'dir for model binary'
-MAX_SEQ_LEN = 'max combined token length'
-BUFSIZE = 'size of the http buffer'
-BATCH_SIZE = 'batch size for running through rerank model'
-MULTIPLIER = 'factor to increase results by'
-WORKERS = 'number of threads serving the proxy'
 PROTOCOL = 'protocol class'
+HOST = 'host of the proxy'
+PORT = 'port of the proxy'
 MODEL = 'model class'
 
 
@@ -38,6 +42,7 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--port', type=int, default=8000, help=PORT)
     parser.add_argument('--uhost', type=str, default='0.0.0.0', help=UHOST)
     parser.add_argument('--uport', type=int, default=9200, help=UPORT)
+    parser.add_argument('--delim', type=str, default='. ', help=DELIM)
     parser.add_argument('--lr', type=float, default=10e-3, help=LR)
     parser.add_argument('--model_dir', type=str, default='bert-base-uncased-msmarco', help=MODEL_DIR)
     parser.add_argument('--data_dir', type=Path, default=PKG_PATH.joinpath('.cache'), help=DATA_DIR)
@@ -46,7 +51,7 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--batch_size', type=int, default=4, help=BATCH_SIZE)
     parser.add_argument('--multiplier', type=int, default=5, help=MULTIPLIER)
     parser.add_argument('--workers', type=int, default=10, help=WORKERS)
-    parser.add_argument('--codex', type=lambda x: import_class('codex', x), default='ESCodex', help=PROTOCOL)
+    parser.add_argument('--config', type=str, default='Elasticsearch', choices=CONFIG_MAP.keys(), help=CONFIG)
     parser.add_argument('--model', type=lambda x: import_class('model', x), default='BertModel', help=MODEL)
     return parser
 

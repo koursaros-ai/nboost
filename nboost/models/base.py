@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import List
 import os
 from nboost.helpers import download_file, extract_tar_gz
-from nboost import MODEL_MAP, PKG_PATH
 from nboost.logger import set_logger
-from nboost.types import Choice
+from nboost.maps import MODEL_MAP
+from nboost import PKG_PATH
 
 
 class BaseModel:
@@ -59,7 +59,7 @@ class BaseModel:
                                     '%s. Falling back to pytorch/tf',
                                     self.model_dir, MODEL_MAP.keys())
 
-    def rank(self, query: bytes, choices: List[Choice]) -> List[int]:
+    def rank(self, query: str, choices: List[str]) -> List[int]:
         """assign relative ranks to each choice"""
 
     def close(self):

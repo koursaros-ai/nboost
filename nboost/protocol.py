@@ -2,21 +2,23 @@
 
 from typing import List, Union, Callable
 import socket
+import gzip
 from httptools import HttpRequestParser, HttpResponseParser
-from nboost.types import Request, Response, URL
+from nboost.helpers import parse_url, load_json
+
+PARSER_TYPE = Union[HttpRequestParser, HttpResponseParser]
 
 
 class HttpProtocol:
     """The protocol class constructs the incoming request and response."""
 
-    def __init__(self, sock: socket.socket = None):
-        self._sock = sock
-        self._bufsize = 2048
+    def __init__(self, bufsize: int = 2048):
+        self._bufsize = bufsize
         self._data_hooks = []  # type: List[Callable]
         self._url_hooks = []  # type: List[Callable]
-        self._parser = None  # type: Union[HttpRequestParser, HttpResponseParser]
+        self._parser = None  # type: PARSER_TYPE
         self._is_done = False
-        self.msg = None  # type: Union[Request, Response]
+        self.msg = {}
 
     def add_url_hook(self, func: Callable):
         """Add hook to be executed during on_url()"""
@@ -38,11 +40,11 @@ class HttpProtocol:
         """Set a new response parser with self as callback"""
         self._parser = HttpResponseParser(self)
 
-    def set_request(self, request: Request):
+    def set_request(self, request: dict):
         """Set new request"""
         self.msg = request
 
-    def set_response(self, response: Response):
+    def set_response(self, response: dict):
         """Set new response"""
         self.msg = response
 
@@ -50,30 +52,35 @@ class HttpProtocol:
         """feed data to the underlying parser"""
         for hook in self._data_hooks:
             hook(data)
+
         self._parser.feed_data(data)
 
-    def recv(self):
+    def recv(self, sock: socket.socket):
         """Receive all incoming http data on a socket and execute hooks"""
         while not self._is_done:
-            data = self._sock.recv(self._bufsize)
+            data = sock.recv(self._bufsize)
             self.feed(data)
 
     # HTTPTOOLS CALLBACK METHODS
     def on_message_begin(self):
         """Triggered on first bytes"""
+        if self.msg is not None:
+            self.msg['body'] = bytes()
+            self.msg['headers'] = {}
 
     def on_status(self, status: bytes):
         """Status integer callback"""
         if self.msg is not None:
-            self.msg.status = self._parser.get_status_code()
+            self.msg['status'] = self._parser.get_status_code()
+            self.msg['reason'] = status.decode()
 
     def on_url(self, url: bytes):
         """Request message attribute will have url and method at this point"""
-        url = URL(url)
+        url = parse_url(url)
 
         if self.msg is not None:
-            self.msg.url = url
-            self.msg.method = self._parser.get_method().decode()
+            self.msg['url'] = url
+            self.msg['method'] = self._parser.get_method().decode()
 
         for hook in self._url_hooks:
             hook(url)
@@ -81,7 +88,7 @@ class HttpProtocol:
     def on_header(self, name: bytes, value: bytes):
         """Alter request header as they come in if necessary"""
         if self.msg is not None:
-            self.msg.headers[name.decode()] = value.decode()
+            self.msg['headers'][name.decode().lower()] = value.decode()
 
     def on_headers_complete(self):
         """End of headers trigger"""
@@ -89,10 +96,18 @@ class HttpProtocol:
     def on_body(self, body: bytes):
         """Optionally access body stream"""
         if self.msg is not None:
-            self.msg.body += body
+            self.msg['body'] += body
 
     def on_message_complete(self):
         """Trigger when message finishes"""
+
+        if self.msg is not None:
+            self.msg['version'] = 'HTTP/' + self._parser.get_http_version()
+
+            if self.msg['headers'].get('content-encoding', '') == 'gzip':
+                self.msg['body'] = gzip.decompress(self.msg['body'])
+            self.msg['body'] = load_json(self.msg['body'])
+
         self._is_done = True
 
     def on_chunk_header(self):

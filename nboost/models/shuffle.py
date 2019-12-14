@@ -1,6 +1,6 @@
 """Shuffle model"""
 
-from nboost.model.base import BaseModel
+from nboost.models.base import BaseModel
 import random
 
 

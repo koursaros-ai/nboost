@@ -1,6 +1,0 @@
-{
-    "from" : 0, "size" : 20,
-    "query" : {
-        "term" : { "user" : "kimchy" }
-    }
-}

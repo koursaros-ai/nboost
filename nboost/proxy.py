@@ -3,24 +3,27 @@
 from typing import Type, List, Tuple
 from contextlib import suppress
 import socket
-import json
 import re
 from httptools import HttpParserError
-from nboost.types import Request, Response, URL
 from nboost.protocol import HttpProtocol
 from nboost.stats import ClassStatistics
-from nboost.codex.base import BaseCodex
-from nboost.model.base import BaseModel
+from nboost.models.base import BaseModel
 from nboost.server import SocketServer
 from nboost.logger import set_logger
-from nboost.types import Choice
+from nboost.maps import CONFIG_MAP
 from nboost import PKG_PATH
+from nboost.helpers import (
+    prepare_response,
+    prepare_request,
+    get_jsonpath,
+    set_jsonpath,
+    dump_json,
+    flatten)
 from nboost.exceptions import (
     UpstreamConnectionError,
-    UnknownRequest,
     FrontendRequest,
-    MissingQuery
-)
+    UnknownRequest,
+    MissingQuery)
 
 
 class HttpParserContext:
@@ -30,7 +33,7 @@ class HttpParserContext:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if isinstance(exc_val, HttpParserError):
+        if isinstance(exc_val, HttpParserError) and exc_val.__context__:
             raise exc_val.__context__
 
 
@@ -56,85 +59,80 @@ class Proxy(SocketServer):
     STATIC_PATH = PKG_PATH.joinpath('resources/frontend')
     stats = ClassStatistics()
 
-    def __init__(self, model: Type[BaseModel], codex: Type[BaseCodex],
-                 uhost: str = '0.0.0.0', uport: int = 9200,
-                 bufsize: int = 2048, verbose: bool = False, **kwargs):
+    def __init__(self, model: Type[BaseModel], config: str = 'elasticsearch',
+                 verbose: bool = False, **kwargs):
         super().__init__(**kwargs)
-        self.kwargs = kwargs
-        self.uaddress = (uhost, uport)
-        self.bufsize = bufsize
         self.logger = set_logger(model.__name__, verbose=verbose)
 
-        # pass command line arguments to instantiate each component
+        # pass command line arguments to instantiate the model
         self.model = model(verbose=verbose, **kwargs)
-        self.codex = codex(verbose=verbose, **kwargs)
 
-    def on_client_request_url(self, url: URL):
+        # these are global parameters that are overrided by nboost json key
+        self.config = {'model': model.__name__, **CONFIG_MAP[config], **kwargs}
+
+    def on_client_request_url(self, url: dict):
         """Method for screening the url path from the client request"""
-        if url.path.startswith('/nboost'):
+        if url['path'].startswith('/nboost'):
             raise FrontendRequest
 
-        if not re.match(self.codex.SEARCH_PATH, url.path):
+        if not re.match(self.config['capture_path'], url['path']):
             raise UnknownRequest
 
-    def set_protocol(self, sock: socket.socket) -> HttpProtocol:
-        """Construct the protocol with the proxy settings"""
-        protocol = HttpProtocol(sock)
-        protocol.set_bufsize = self.bufsize
-        return protocol
+    def get_protocol(self) -> HttpProtocol:
+        """Return a configured http protocol parser."""
+        return HttpProtocol(self.config['bufsize'])
 
     @stats.time_context
     def proxy_send(self, client_socket, server_socket, buffer: bytearray):
         """Send buffered request to server and receive the rest of the original
         client request"""
-        protocol = self.set_protocol(client_socket)
+        protocol = self.get_protocol()
         protocol.set_request_parser()
         server_socket.send(buffer)
         protocol.feed(buffer)
         protocol.add_data_hook(server_socket.send)
-        protocol.recv()
+        protocol.recv(client_socket)
 
     @stats.time_context
     def proxy_recv(self, client_socket, server_socket):
         """Receive the proxied response and pipe to the client"""
-        protocol = self.set_protocol(server_socket)
+        protocol = self.get_protocol()
         protocol.set_response_parser()
         protocol.add_data_hook(client_socket.send)
-        protocol.recv()
+        protocol.recv(server_socket)
 
     @stats.time_context
-    def client_recv(self, client_socket, request: Request, buffer: bytearray):
+    def client_recv(self, client_socket, request: dict, buffer: bytearray):
         """Receive client request and pipe to buffer in case of exceptions"""
-        protocol = self.set_protocol(client_socket)
+        protocol = self.get_protocol()
         protocol.set_request_parser()
         protocol.set_request(request)
         protocol.add_data_hook(buffer.extend)
         protocol.add_url_hook(self.on_client_request_url)
-        protocol.recv()
+        protocol.recv(client_socket)
 
     @staticmethod
     @stats.time_context
-    def server_send(server_socket: socket.socket, request: Request):
+    def server_send(server_socket: socket.socket, request: dict):
         """Send magnified request to the server"""
-        server_socket.send(request.prepare())
+        server_socket.send(prepare_request(request))
 
     @stats.time_context
-    def server_recv(self, server_socket: socket.socket, response: Response):
+    def server_recv(self, server_socket: socket.socket, response: dict):
         """Receive magnified request from the server"""
-        protocol = self.set_protocol(server_socket)
+        protocol = self.get_protocol()
         protocol.set_response_parser()
         protocol.set_response(response)
-        protocol.recv()
+        protocol.recv(server_socket)
 
     @staticmethod
     @stats.time_context
-    def client_send(request: Request, response: Response, client_socket):
+    def client_send(request: dict, response: dict, client_socket):
         """Send the ranked results to the client"""
-        raw_response = response.prepare(request)
-        client_socket.send(raw_response)
+        client_socket.send(prepare_response(request, response))
 
     @stats.time_context
-    def model_rank(self, query: bytes, choices: List[Choice]) -> List[int]:
+    def model_rank(self, query: str, choices: List[str]) -> List[int]:
         """Rank the query and choices and return the argsorted indices"""
         return self.model.rank(query, choices)
 
@@ -151,34 +149,35 @@ class Proxy(SocketServer):
                 'avg': var['model_mrr']['avg'] / var['upstream_mrr']['avg']}
 
     @stats.time_context
-    def server_connect(self, server_socket: socket.socket) -> None:
+    def server_connect(self, server_socket: socket.socket):
         """Connect proxied server socket"""
+        uaddress = (self.config['uhost'], self.config['uport'])
         try:
-            server_socket.connect(self.uaddress)
+            server_socket.connect(uaddress)
         except ConnectionRefusedError:
-            raise UpstreamConnectionError(*self.uaddress)
+            raise UpstreamConnectionError('Connect error for %s:%s' % uaddress)
 
     @property
     def status(self) -> dict:
         """Return status dictionary in the case of a status request"""
-        return {'multiplier': self.codex.multiplier, **self.stats.record,
+        return {**self.config, **self.stats.record,
                 'description': 'NBoost, for search ranking.'}
 
-    def calculate_mrrs(self, correct_cids: List[str], choices: List[Choice],
+    def calculate_mrrs(self, true_cids: List[str], cids: List[str],
                        ranks: List[int]):
         """Calculate the mrr of the upstream server and reranked choices from
         the model. This only occurs if the client specified the "nboost"
         parameter in the request url or body."""
-        upstream_mrr = self.calculate_mrr(correct_cids, choices)
-        reranked_choices = [choices[rank] for rank in ranks]
-        model_mrr = self.calculate_mrr(correct_cids, reranked_choices)
+        upstream_mrr = self.calculate_mrr(true_cids, cids)
+        reranked_cids = [cids[rank] for rank in ranks]
+        model_mrr = self.calculate_mrr(true_cids, reranked_cids)
         self.record_mrrs(upstream_mrr=upstream_mrr, model_mrr=model_mrr)
 
     @staticmethod
-    def calculate_mrr(correct_cids: List[str], choices: List[Choice]):
+    def calculate_mrr(correct: list, guesses: list):
         """Calculate mean reciprocal rank as the first correct result index"""
-        for i, choice in enumerate(choices, 1):
-            if choice.cid in correct_cids:
+        for i, guess in enumerate(guesses, 1):
+            if guess in correct:
                 return 1 / i
         return 0
 
@@ -204,9 +203,9 @@ class Proxy(SocketServer):
         they are caught by the MagicStack implementation"""
         server_socket = self.set_socket()
         buffer = bytearray()
-        request = Request()
-        response = Response()
-        log = ('%s:%s %s', *address, request)
+        request = {'version': 'HTTP/1.1', 'headers': {}}
+        response = {'version': 'HTTP/1.1', 'headers': {}}
+        log = ('<Request from %s:%s>', *address)
 
         try:
             self.server_connect(server_socket)
@@ -215,38 +214,56 @@ class Proxy(SocketServer):
                 # receive and buffer the client request
                 self.client_recv(client_socket, request, buffer)
                 self.logger.debug(*log)
-                field, query = self.codex.parse_query(request)
+
+                # combine runtime configs and preset configs
+                configs = {**self.config, **request.get('nboost', {})}
+
+                queries = get_jsonpath(request, configs['query_path'])
+                query = configs['delim'].join(queries)
 
                 # magnify the size of the request to the server
-                topk, correct_cids = self.codex.multiply_request(request)
+                topks = get_jsonpath(request, configs['topk_path'])
+                topk = int(topks[0]) if topks else configs['default_topk']
+                true_cids = get_jsonpath(request, configs['true_cids_path'])
+                new_topk = topk * configs['multiplier']
+                set_jsonpath(request, configs['topk_path'], new_topk)
                 self.server_send(server_socket, request)
 
                 # make sure server response comes back properly
                 self.server_recv(server_socket, response)
-                response.unpack()
 
-            if response.status < 300:
+            if response['status'] < 300:
                 # parse the choices from the magnified response
-                choices = self.codex.parse_choices(response, field)
+                choices = get_jsonpath(response, configs['choices_path'])
+                choices = flatten(choices)
+                cids = get_jsonpath(response, configs['cids_path'])
+                # choices = self.codex.parse_choices(response, field)
                 self.record_topk_and_choices(topk=topk, choices=choices)
 
                 # use the model to rerank the choices
-                ranks = self.model_rank(query, choices)[:topk]
-                self.codex.reorder_response(request, response, ranks)
+                cvalues = get_jsonpath(response, configs['cvalues_path'])
+                ranks = self.model_rank(query, cvalues)[:topk]
+                reranked = [choices[rank] for rank in ranks]
+                set_jsonpath(response, configs['choices_path'], reranked)
 
                 # if the "nboost" param was sent, calculate MRRs
-                if correct_cids is not None:
-                    self.calculate_mrrs(correct_cids, choices, ranks)
+                if true_cids is not None:
+                    self.calculate_mrrs(true_cids, cids, ranks)
 
             self.client_send(request, response, client_socket)
 
         except FrontendRequest:
             self.logger.info(*log)
 
-            if request.url.path == '/nboost/status':
-                response.body = json.dumps(self.status, indent=2).encode()
+            response['headers'] = {}
+
+            if request['url']['path'] == '/nboost/status':
+                response['body'] = self.status
             else:
-                response.body = self.get_static_file(request.url.path)
+                response['body'] = self.get_static_file(request['url']['path'])
+
+            request['url']['query']['pretty'] = True
+            response['status'] = 200
             self.client_send(request, response, client_socket)
 
         except (UnknownRequest, MissingQuery):
@@ -261,8 +278,8 @@ class Proxy(SocketServer):
         except Exception as exc:
             # for misc errors, send back json error msg
             self.logger.error(repr(exc), exc_info=True)
-            response.body = json.dumps(dict(error=repr(exc))).encode()
-            response.status = 500
+            response['body'] = {'error': repr(exc)}
+            response['status'] = 500
             self.client_send(request, response, client_socket)
 
         finally:
@@ -271,7 +288,7 @@ class Proxy(SocketServer):
 
     def run(self):
         """Same as socket server run() but logs"""
-        self.logger.critical('Upstream host is %s:%s', *self.uaddress)
+        self.logger.info(dump_json(self.config, indent=4).decode())
         super().run()
 
     def close(self):
