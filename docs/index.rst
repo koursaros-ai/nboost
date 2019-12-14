@@ -38,6 +38,11 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 
    chapter/benchmarking.md
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Configuration
+
+   chapter/configuration.md
 
 .. toctree::
    :maxdepth: 2
