@@ -201,15 +201,52 @@ class Proxy(SocketServer):
         else:
             return self.STATIC_PATH.joinpath('404.html').read_bytes()
 
+    @staticmethod
+    def get_request_paths(request, configs) -> Tuple[list, list, list]:
+        """Get the request jsonpaths noted in the configs"""
+        queries = get_jsonpath(request, configs['query_path'])
+        topks = get_jsonpath(request, configs['topk_path'])
+        true_cids = get_jsonpath(request, configs['true_cids_path'])
+        return queries, topks, true_cids
+
+    @staticmethod
+    def get_response_paths(response, configs) -> Tuple[list, list, list]:
+        """Get the request jsonpaths noted in the configs"""
+        choices = get_jsonpath(response, configs['choices_path'])
+        cids = get_jsonpath(response, configs['cids_path'])
+        cvalues = get_jsonpath(response, configs['cvalues_path'])
+        return choices, cids, cvalues
+
     def loop(self, client_socket: socket.socket, address: Tuple[str, str]):
         """Main ioloop for reranking server results to the client. Exceptions
         raised in the http parser must be reraised from __context__ because
         they are caught by the MagicStack implementation"""
-        server_socket = self.set_socket()
         buffer = bytearray()
-        request = {'version': 'HTTP/1.1', 'headers': {}}
-        response = {'version': 'HTTP/1.1', 'headers': {}, 'nboost': {}}
-        log = ('<Request from %s:%s>', *address)
+
+        request = {
+            'version': 'HTTP/1.1',
+            'method': 'GET',
+            'headers': {},
+            'body': {},
+            'url': {
+                'scheme': '',
+                'netloc': '',
+                'path': '',
+                'params': '',
+                'query': {},
+                'fragment': ''
+            }
+        }
+        response = {
+            'version': 'HTTP/1.1',
+            'status': 200,
+            'reason': 'OK',
+            'headers': {},
+            'body': {},
+        }
+        log = ('Request (%s:%s):', *address)
+
+        server_socket = self.set_socket()
 
         try:
             self.server_connect(server_socket)
@@ -217,35 +254,33 @@ class Proxy(SocketServer):
             with HttpParserContext():
                 # receive and buffer the client request
                 self.client_recv(client_socket, request, buffer)
-                self.logger.debug(*log)
+                self.logger.debug('Request (%s:%s): search.', *address)
 
                 # combine runtime configs and preset configs
-                configs = {**self.config, **request.get('nboost', {})}
+                configs = {**self.config, **request['body'].get('nboost', {})}
 
-                queries = get_jsonpath(request, configs['query_path'])
+                queries, topks, true_cids = self.get_request_paths(request,
+                                                                   configs)
+
+                # coerce request variables from their paths
                 query = configs['delim'].join(queries)
+                topk = int(topks[0]) if topks else configs['default_topk']
 
                 # magnify the size of the request to the server
-                topks = get_jsonpath(request, configs['topk_path'])
-                topk = int(topks[0]) if topks else configs['default_topk']
-                true_cids = get_jsonpath(request, configs['true_cids_path'])
                 new_topk = topk * configs['multiplier']
                 set_jsonpath(request, configs['topk_path'], new_topk)
-                self.server_send(server_socket, request)
 
-                # make sure server response comes back properly
+                # send the magnified request to the upstream server
+                self.server_send(server_socket, request)
                 self.server_recv(server_socket, response)
 
             if response['status'] < 300:
-                # parse the choices from the magnified response
-                choices = get_jsonpath(response, configs['choices_path'])
-                choices = flatten(choices)
-                cids = get_jsonpath(response, configs['cids_path'])
-                # choices = self.codex.parse_choices(response, field)
+                choices, cids, cvalues = self.get_response_paths(response,
+                                                                 configs)
+
                 self.record_topk_and_choices(topk=topk, choices=choices)
 
                 # use the model to rerank the choices
-                cvalues = get_jsonpath(response, configs['cvalues_path'])
                 ranks = self.model_rank(query, cvalues)[:topk]
                 reranked = [choices[rank] for rank in ranks]
                 set_jsonpath(response, configs['choices_path'], reranked)
@@ -255,33 +290,36 @@ class Proxy(SocketServer):
                     self.calculate_mrrs(true_cids, cids, ranks)
 
                 if self.qa_model.__class__ != QAModel:
-                    answer = self.qa_model.get_answer(query, choices)
+                    answer = self.qa_model.get_answer(query, choices[0])
                     response['nboost']['qa_model'] = answer
 
             self.client_send(request, response, client_socket)
 
         except FrontendRequest:
-            self.logger.info(*log)
+            self.logger.info('Request (%s:%s): frontend.', *address)
 
-            response['headers'] = {}
+            request['url']['query']['pretty'] = True
 
             if request['url']['path'] == '/nboost/status':
                 response['body'] = self.status
             else:
                 response['body'] = self.get_static_file(request['url']['path'])
 
-            request['url']['query']['pretty'] = True
-            response['status'] = 200
             self.client_send(request, response, client_socket)
 
-        except (UnknownRequest, MissingQuery):
-            self.logger.warning(*log)
+        except UnknownRequest:
+            self.logger.info('Request (%s:%s): unknown path %s.',
+                             request['url']['path'], *address)
 
             # send the initial buffer that was used to check url path
             self.proxy_send(client_socket, server_socket, buffer)
 
             # stream the client socket to the server socket
             self.proxy_recv(client_socket, server_socket)
+
+        except MissingQuery:
+            self.logger.info('Request (%s:%s): unknown path %s.',
+                             request['url']['path'], *address)
 
         except Exception as exc:
             # for misc errors, send back json error msg
