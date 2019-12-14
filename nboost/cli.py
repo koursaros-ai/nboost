@@ -2,12 +2,10 @@
 
 import importlib
 from pathlib import Path
-from typing import List
 from argparse import ArgumentParser
 import termcolor
 from nboost.maps import CLASS_MAP, CONFIG_MAP
 from nboost.__version__ import __doc__
-from nboost.proxy import Proxy
 from nboost import PKG_PATH
 
 
@@ -15,6 +13,7 @@ TAG = termcolor.colored('NBoost (v%s)' % __doc__, 'cyan', attrs=['underline'])
 DESCRIPTION = ('%s: is a scalable, search-api-boosting platform for '
                'developing and deploying SOTA models to improve the '
                'relevance of search results..' % TAG)
+QA_MODEL = 'adds the qa plugin which treats the query as a question and marks the answer offset'
 DELIM = 'the deliminator to concatenate multiple queries into a single query'
 CONFIG = 'which search api nboost should be configured for'
 BATCH_SIZE = 'batch size for running through rerank model'
@@ -53,6 +52,7 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--workers', type=int, default=10, help=WORKERS)
     parser.add_argument('--config', type=str, default='Elasticsearch', choices=CONFIG_MAP.keys(), help=CONFIG)
     parser.add_argument('--model', type=lambda x: import_class('models', x), default='TorchBertModel', help=MODEL)
+    parser.add_argument('--qa_model', type=lambda x: import_class('models', x), default=None, help=QA_MODEL)
     return parser
 
 
@@ -65,10 +65,3 @@ def import_class(module: str, name: str):
 
     file = 'nboost.%s.%s' % (module, CLASS_MAP[module][name])
     return getattr(importlib.import_module(file), name)
-
-
-def create_proxy(argv: List[str] = None):
-    """Return proxy instance given a command line"""
-    parser = set_parser()
-    args = parser.parse_args(argv)
-    return Proxy(**vars(args))

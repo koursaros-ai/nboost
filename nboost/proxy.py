@@ -9,6 +9,7 @@ from nboost.protocol import HttpProtocol
 from nboost.stats import ClassStatistics
 from nboost.models.base import BaseModel
 from nboost.server import SocketServer
+from nboost.models.qa import QAModel
 from nboost.logger import set_logger
 from nboost.maps import CONFIG_MAP
 from nboost import PKG_PATH
@@ -59,7 +60,8 @@ class Proxy(SocketServer):
     STATIC_PATH = PKG_PATH.joinpath('resources/frontend')
     stats = ClassStatistics()
 
-    def __init__(self, model: Type[BaseModel], config: str = 'elasticsearch',
+    def __init__(self, model: Type[BaseModel], qa_model: Type[QAModel],
+                 config: str = 'elasticsearch',
                  verbose: bool = False, **kwargs):
         super().__init__(**kwargs)
         self.logger = set_logger(model.__name__, verbose=verbose)
@@ -69,6 +71,8 @@ class Proxy(SocketServer):
 
         # these are global parameters that are overrided by nboost json key
         self.config = {'model': model.__name__, **CONFIG_MAP[config], **kwargs}
+
+        self.qa_model = qa_model()
 
     def on_client_request_url(self, url: dict):
         """Method for screening the url path from the client request"""
@@ -204,7 +208,7 @@ class Proxy(SocketServer):
         server_socket = self.set_socket()
         buffer = bytearray()
         request = {'version': 'HTTP/1.1', 'headers': {}}
-        response = {'version': 'HTTP/1.1', 'headers': {}}
+        response = {'version': 'HTTP/1.1', 'headers': {}, 'nboost': {}}
         log = ('<Request from %s:%s>', *address)
 
         try:
@@ -249,6 +253,10 @@ class Proxy(SocketServer):
                 # if the "nboost" param was sent, calculate MRRs
                 if true_cids is not None:
                     self.calculate_mrrs(true_cids, cids, ranks)
+
+                if self.qa_model.__class__ != QAModel:
+                    answer = self.qa_model.get_answer(query, choices)
+                    response['nboost']['qa_model'] = answer
 
             self.client_send(request, response, client_socket)
 

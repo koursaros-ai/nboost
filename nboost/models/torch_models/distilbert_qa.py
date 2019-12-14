@@ -1,6 +1,8 @@
-from transformers import *
-import torch
+from typing import Tuple
+from transformers import DistilBertForQuestionAnswering, DistilBertTokenizer
 import numpy as np
+import torch
+from nboost.models.qa import QAModel
 
 
 def _is_whitespace(c):
@@ -9,8 +11,7 @@ def _is_whitespace(c):
     return False
 
 
-class TransformersQAModel():
-
+class TorchDistilBertQAModel(QAModel):
     def __init__(self, model='distilbert-base-uncased-distilled-squad',
                  max_query_length=64,
                  max_seq_length=512):
@@ -19,7 +20,8 @@ class TransformersQAModel():
         self.max_query_length = max_query_length
         self.max_seq_length = max_seq_length
 
-    def get_answer(self, question, context):
+    def get_answer(self, question: str, context: str) -> Tuple[str, Tuple[int, int, int]]:
+        """Return (answer, (candidate, start_pos, end_pos))"""
         doc_tokens = []
         char_to_word_offset = []
         prev_is_whitespace = True

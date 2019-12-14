@@ -2,10 +2,12 @@
 # component => class => module
 CLASS_MAP = {
     'models': {
+        'QAModel': 'qa',
         'ShuffleModel': 'shuffle',
-        'TransformersModel': 'transformers',
-        'BertModel': 'bert_model',
-        'AlbertModel': 'albert_model'
+        'TfBertModel': 'tf_models.bert',
+        'TfAlbertModel': 'tf_models.albert',
+        'TorchBertModel': 'torch_models.bert',
+        'TorchDistilBertQAModel': 'torch_models.distilbert_qa',
     },
     'indexers': {
         'ESIndexer': 'es'

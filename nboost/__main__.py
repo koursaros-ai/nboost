@@ -1,10 +1,13 @@
 """__main__ cli entrypoint"""
-from .cli import create_proxy
+from nboost.proxy import Proxy
+from nboost.cli import set_parser
 
 
 def main():
     """Entrypoint for nboost"""
-    proxy = create_proxy()
+    parser = set_parser()
+    args = parser.parse_args()
+    proxy = Proxy(**vars(args))
     try:
         proxy.start()
     except KeyboardInterrupt:
