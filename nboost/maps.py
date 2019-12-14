@@ -1,13 +1,13 @@
 
 # component => class => module
 CLASS_MAP = {
-    'model': {
+    'models': {
         'ShuffleModel': 'shuffle',
         'TransformersModel': 'transformers',
         'BertModel': 'bert_model',
         'AlbertModel': 'albert_model'
     },
-    'indexer': {
+    'indexers': {
         'ESIndexer': 'es'
     }
 }

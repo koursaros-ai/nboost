@@ -52,7 +52,7 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--multiplier', type=int, default=5, help=MULTIPLIER)
     parser.add_argument('--workers', type=int, default=10, help=WORKERS)
     parser.add_argument('--config', type=str, default='Elasticsearch', choices=CONFIG_MAP.keys(), help=CONFIG)
-    parser.add_argument('--model', type=lambda x: import_class('model', x), default='BertModel', help=MODEL)
+    parser.add_argument('--model', type=lambda x: import_class('models', x), default='TorchBertModel', help=MODEL)
     return parser
 
 
