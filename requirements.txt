@@ -6,3 +6,4 @@ torch
 transformers
 tqdm
 httptools
+jsonpath-ng

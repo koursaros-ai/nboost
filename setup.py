@@ -29,7 +29,8 @@ setup(
         'requests',
         'elasticsearch',
         'tqdm',
-        'httptools'
+        'httptools',
+        'jsonpath-ng'
     ],
     extras_require={
         'torch': ['torch', 'transformers'],
