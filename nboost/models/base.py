@@ -11,22 +11,27 @@ from nboost import PKG_PATH
 
 class BaseModel:
     """Base Class for Transformer Models"""
+    MODEL_DIR = str()
 
-    def __init__(self, lr: float = 10e-3,
-                 model_dir: str = 'bert-base-uncased-msmarco',
+    def __init__(self, lr: float = 10e-3, model_dir: str = str(),
                  data_dir: Path = PKG_PATH.joinpath('.cache'),
                  max_seq_len: int = 128, batch_size: int = 4, **_):
         super().__init__()
+        self.data_dir = data_dir
+        model_dir = model_dir if model_dir else self.MODEL_DIR
+        self.model_dir = self.resolve_model_dir(model_dir)
         self.lr = lr
         self.max_seq_len = max_seq_len
         self.batch_size = batch_size
-        self.data_dir = data_dir
-        if not os.path.exists(model_dir):
-            self.model_dir = data_dir.joinpath(model_dir).absolute()
-        else:
-            self.logger.info('Using custom model at path %s' % model_dir)
-            self.model_dir = Path(model_dir)
         self.logger = set_logger(model_dir)
+
+    def resolve_model_dir(self, directory: str):
+        if not os.path.exists(directory):
+            model_dir = self.data_dir.joinpath(directory).absolute()
+        else:
+            self.logger.info('Using custom model at path %s' % directory)
+            model_dir = Path(directory)
+        return model_dir
 
     def download(self):
         """Download the model binary and cache to the package path"""

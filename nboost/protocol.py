@@ -18,6 +18,7 @@ class HttpProtocol:
         self._url_hooks = []  # type: List[Callable]
         self._parser = None  # type: PARSER_TYPE
         self._is_done = False
+        self._body = bytes()
         self.msg = {}
 
     def add_url_hook(self, func: Callable):
@@ -42,10 +43,27 @@ class HttpProtocol:
 
     def set_request(self, request: dict):
         """Set new request"""
+        request['version'] = 'HTTP/1.1'
+        request['method'] = 'GET'
+        request['headers'] = {}
+        request['body'] = {}
+        request['url'] = {
+            'scheme': '',
+            'netloc': '',
+            'path': '',
+            'params': '',
+            'query': {},
+            'fragment': ''
+        }
         self.msg = request
 
     def set_response(self, response: dict):
         """Set new response"""
+        response['version'] = 'HTTP/1.1'
+        response['status'] = 200
+        response['reason'] = 'OK'
+        response['headers'] = {}
+        response['body'] = {}
         self.msg = response
 
     def feed(self, data: bytes):
@@ -64,9 +82,6 @@ class HttpProtocol:
     # HTTPTOOLS CALLBACK METHODS
     def on_message_begin(self):
         """Triggered on first bytes"""
-        if self.msg is not None:
-            self.msg['body'] = bytes()
-            self.msg['headers'] = {}
 
     def on_status(self, status: bytes):
         """Status integer callback"""
@@ -95,8 +110,7 @@ class HttpProtocol:
 
     def on_body(self, body: bytes):
         """Optionally access body stream"""
-        if self.msg is not None:
-            self.msg['body'] += body
+        self._body += body
 
     def on_message_complete(self):
         """Trigger when message finishes"""
@@ -105,8 +119,8 @@ class HttpProtocol:
             self.msg['version'] = 'HTTP/' + self._parser.get_http_version()
 
             if self.msg['headers'].get('content-encoding', '') == 'gzip':
-                self.msg['body'] = gzip.decompress(self.msg['body'])
-            self.msg['body'] = load_json(self.msg['body'])
+                self._body = gzip.decompress(self._body)
+            self.msg['body'] = load_json(self._body)
 
         self._is_done = True
 

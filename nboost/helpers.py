@@ -64,45 +64,35 @@ def prepare_request(request: dict) -> bytes:
         version: str
         headers: dict
         url: dict
-        body: dict
+        body: bytes
         method: str"""
 
     # cast request sections to strings
-    body = json.dumps(request['body'])
-    headers = {**request['headers'], 'content-length': str(len(body))}
+    request['headers'].pop('content-encoding', '')
+    request['headers']['content-length'] = len(request['body'])
     request = {
-        'body': body,
+        'body': request['body'],
         'url': unparse_url(request['url']),
-        'headers': ''.join('\r\n%s: %s' % (k, v) for k, v in headers.items()),
+        'headers': ''.join('\r\n%s: %s' % (k, v) for k, v in request['headers'].items()),
         'method': request['method'],
         'version': request['version']
     }
 
-    return '{method} {url} {version}{headers}\r\n\r\n{body}'.format(**request).encode()
+    return '{method} {url} {version}{headers}\r\n\r\n'.format(**request).encode() + request['body']
 
 
-def prepare_response(request: dict, response: dict) -> bytes:
+def prepare_response(response: dict) -> bytes:
     """Prepares a request with the following keys:
         version: str
         status: int
         headers: dict
-        body: dict"""
-
+        body: bytes"""
     response['reason'] = responses[response['status']]
-    kwargs = {}
-    if 'url' in request and request['url']['query'] == 'pretty':
-        kwargs = dict(indent=2)
-    body = dump_json(response.pop('body'), **kwargs)
     response['headers'].pop('content-encoding', '')
-
-    if 'gzip' in request['headers'].get('accept-encoding', ''):
-        response['headers']['content-encoding'] = 'gzip'
-        body = gzip.compress(body)
-
-    response['headers']['content-length'] = str(len(body))
+    response['headers']['content-length'] = str(len(response['body']))
     response['headers'] = ''.join('\r\n%s: %s' % (k, v) for k, v in response['headers'].items())
 
-    return '{version} {status} {reason}{headers}\r\n\r\n'.format(**response).encode() + body
+    return '{version} {status} {reason}{headers}\r\n\r\n'.format(**response).encode() + response['body']
 
 
 def get_jsonpath(obj: dict, path: str) -> List[JSONTYPES]:
@@ -154,10 +144,11 @@ def set_by_path(root: dict, items: list, value: Any):
     get_by_path(root, items[:-1])[items[-1]] = value
 
 
-def load_json(json_string: bytes) -> Union[dict, None]:
-    """try to load json and return None if decode error"""
+def load_json(json_string: bytes) -> dict:
+    """try to load json and return empty dict if decode error"""
     with suppress(JSONDecodeError):
         return json.loads(json_string.decode())
+    return {}
 
 
 def dump_json(obj: JSONTYPES, **kwargs) -> bytes:

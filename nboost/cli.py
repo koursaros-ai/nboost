@@ -15,6 +15,7 @@ DESCRIPTION = ('%s: is a scalable, search-api-boosting platform for '
                'relevance of search results..' % TAG)
 QA_MODEL = 'adds the qa plugin which treats the query as a question and marks the answer offset'
 DELIM = 'the deliminator to concatenate multiple queries into a single query'
+QA_MODEL_DIR = 'name or directory of the finetuned qa model'
 CONFIG = 'which search api nboost should be configured for'
 BATCH_SIZE = 'batch size for running through rerank model'
 MODEL_DIR = 'name or directory of the finetuned model'
@@ -43,7 +44,7 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--uport', type=int, default=9200, help=UPORT)
     parser.add_argument('--delim', type=str, default='. ', help=DELIM)
     parser.add_argument('--lr', type=float, default=10e-3, help=LR)
-    parser.add_argument('--model_dir', type=str, default='bert-base-uncased-msmarco', help=MODEL_DIR)
+    parser.add_argument('--model_dir', type=str, default='', help=MODEL_DIR)
     parser.add_argument('--data_dir', type=Path, default=PKG_PATH.joinpath('.cache'), help=DATA_DIR)
     parser.add_argument('--max_seq_len', type=int, default=64, help=MAX_SEQ_LEN)
     parser.add_argument('--bufsize', type=int, default=2048, help=BUFSIZE)
@@ -53,6 +54,7 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--config', type=str, default='Elasticsearch', choices=CONFIG_MAP.keys(), help=CONFIG)
     parser.add_argument('--model', type=lambda x: import_class('models', x), default='TorchBertModel', help=MODEL)
     parser.add_argument('--qa_model', type=lambda x: import_class('models', x), default="QAModel", help=QA_MODEL)
+    parser.add_argument('--qa_model_dir', type=str, default='', help=QA_MODEL_DIR)
     return parser
 
 

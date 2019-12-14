@@ -8,6 +8,7 @@ from nboost.models.base import BaseModel
 
 
 class TfBertModel(BaseModel):
+    MODEL_DIR = 'bert-base-uncased-msmarco'
 
     def __init__(self, verbose=False, **kwargs):
         super().__init__(**kwargs)

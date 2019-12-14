@@ -13,6 +13,10 @@ class UpstreamConnectionError(Exception):
     """Raised when the upstream host refuses connection"""
 
 
+class StatusRequest(RequestException):
+    """Client sent status request"""
+
+
 class FrontendRequest(RequestException):
     """Client sent frontend request"""
 
@@ -23,3 +27,7 @@ class UnknownRequest(RequestException):
 
 class MissingQuery(RequestException):
     """Could not parse query in request"""
+
+
+class InvalidChoices(ResponseException):
+    """The length of choices, choice ids, and choice values must be the same"""

@@ -1,18 +1,20 @@
-from nboost.helpers import prepare_response
+from nboost.helpers import prepare_response, dump_json
 from nboost.models.shuffle import ShuffleModel
+from nboost.protocol import HttpProtocol
 from nboost.server import SocketServer
+from nboost.models.qa import QAModel
 from nboost.proxy import Proxy
-from copy import deepcopy
 import requests
 import unittest
 
 
 class TestServer(SocketServer):
     def loop(self, client_socket, address):
-        client_socket.send(prepare_response(
-            request={'headers': {}, 'url': {'query': {'pretty': True}}},
-            response=deepcopy(RESPONSE)
-        ))
+        response = {}
+        protocol = HttpProtocol(2048)
+        protocol.set_response(response)
+        response['body'] = dump_json(RESPONSE)
+        client_socket.send(prepare_response(response))
         client_socket.close()
 
 
@@ -21,8 +23,8 @@ class TestProxy(unittest.TestCase):
 
         server = TestServer(port=9500, verbose=True)
         proxy = Proxy(host='0.0.0.0', port=8000, uhost='0.0.0.0',
-                      model=ShuffleModel, uport=9500, bufsize=2048,
-                      delim='. ', multiplier=5, verbose=True)
+                      model=ShuffleModel, qa_model=QAModel, uport=9500,
+                      bufsize=2048, delim='. ', multiplier=5, verbose=True)
         proxy.start()
         server.start()
         proxy.is_ready.wait()
@@ -58,52 +60,47 @@ class TestProxy(unittest.TestCase):
 
 
 RESPONSE = {
-    'headers': {},
-    'status': 200,
-    'version': 'HTTP/1.1',
-    "body": {
-        "took": 5,
-        "timed_out": False,
-        "_shards": {
-            "total": 1,
-            "successful": 1,
-            "skipped": 0,
-            "failed": 0
+    "took": 5,
+    "timed_out": False,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 1,
+            "relation": "eq"
         },
-        "hits": {
-            "total": {
-                "value": 1,
-                "relation": "eq"
-            },
-            "max_score": 1.3862944,
-            "hits": [
-                {
-                    "_index": "twitter",
-                    "_type": "_doc",
-                    "_id": "0",
-                    "_score": 1.4,
-                    "_source": {
-                        "message": "trying out Elasticsearch",
-                    }
-                }, {
-                    "_index": "twitter",
-                    "_type": "_doc",
-                    "_id": "1",
-                    "_score": 1.34245,
-                    "_source": {
-                        "message": "second result",
-                    }
-                },
-                {
-                    "_index": "twitter",
-                    "_type": "_doc",
-                    "_id": "2",
-                    "_score": 1.121234,
-                    "_source": {
-                        "message": "third result",
-                    }
+        "max_score": 1.3862944,
+        "hits": [
+            {
+                "_index": "twitter",
+                "_type": "_doc",
+                "_id": "0",
+                "_score": 1.4,
+                "_source": {
+                    "message": "trying out Elasticsearch",
                 }
-            ]
-        }
+            }, {
+                "_index": "twitter",
+                "_type": "_doc",
+                "_id": "1",
+                "_score": 1.34245,
+                "_source": {
+                    "message": "second result",
+                }
+            },
+            {
+                "_index": "twitter",
+                "_type": "_doc",
+                "_id": "2",
+                "_score": 1.121234,
+                "_source": {
+                    "message": "third result",
+                }
+            }
+        ]
     }
 }

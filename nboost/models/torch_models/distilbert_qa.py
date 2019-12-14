@@ -12,13 +12,12 @@ def _is_whitespace(c):
 
 
 class TorchDistilBertQAModel(QAModel):
-    def __init__(self, model='distilbert-base-uncased-distilled-squad',
-                 max_query_length=64,
-                 max_seq_length=512):
-        self.model = DistilBertForQuestionAnswering.from_pretrained(model)
-        self.tokenizer = DistilBertTokenizer.from_pretrained(model)
-        self.max_query_length = max_query_length
-        self.max_seq_length = max_seq_length
+    QA_MODEL_DIR = 'distilbert-base-uncased-distilled-squad'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.model = DistilBertForQuestionAnswering.from_pretrained(self.model_dir)
+        self.tokenizer = DistilBertTokenizer.from_pretrained(self.model_dir)
 
     def get_answer(self, question: str, context: str) -> Tuple[str, Tuple[int, int, int]]:
         """Return (answer, (candidate, start_pos, end_pos))"""
@@ -54,7 +53,7 @@ class TorchDistilBertQAModel(QAModel):
         encoded_dict = self.tokenizer.encode_plus(
             truncated_query,
             all_doc_tokens,
-            max_length=self.max_seq_length,
+            max_length=self.max_seq_len,
             return_tensors='pt'
         )
 
