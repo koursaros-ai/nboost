@@ -8,8 +8,8 @@ class TestTfBertModel(unittest.TestCase):
         self.model = TorchDistilBertQAModel()
 
     def test_rank(self):
-        answer, _ = self.model.get_answer('Who bears his memory?', CONTEXT)
-        self.assertEqual(answer, 'His tender heir')
+        answer, _ = self.model.get_answer('who bears his memory?', CONTEXT)
+        self.assertEqual(answer, 'His tender')
 
     def tearDown(self) -> None:
         self.model.close()
