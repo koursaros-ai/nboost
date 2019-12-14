@@ -16,8 +16,8 @@ class TorchDistilBertQAModel(QAModel):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.model = DistilBertForQuestionAnswering.from_pretrained(self.model_dir)
-        self.tokenizer = DistilBertTokenizer.from_pretrained(self.model_dir)
+        self.model = DistilBertForQuestionAnswering.from_pretrained(self.model_dir.name)
+        self.tokenizer = DistilBertTokenizer.from_pretrained(self.model_dir.name)
 
     def get_answer(self, query: str, choice: str) -> Tuple[str, Tuple[int, int, int]]:
         """Return (answer, (candidate, start_pos, end_pos))"""
