@@ -24,6 +24,7 @@ class BaseModel:
         if not os.path.exists(model_dir):
             self.model_dir = data_dir.joinpath(model_dir).absolute()
         else:
+            self.logger.info('Using custom model at path %s' % model_dir)
             self.model_dir = Path(model_dir)
         self.logger = set_logger(model_dir)
 
