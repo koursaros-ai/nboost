@@ -8,6 +8,11 @@ import requests
 import unittest
 
 
+class TestQAModel(QAModel):
+    def get_answer(self, question: str, context: str):
+        return 'answer', (10, 20, 1)
+
+
 class TestServer(SocketServer):
     def loop(self, client_socket, address):
         response = {}
@@ -20,10 +25,9 @@ class TestServer(SocketServer):
 
 class TestProxy(unittest.TestCase):
     def test_proxy(self):
-
         server = TestServer(port=9500, verbose=True)
         proxy = Proxy(host='0.0.0.0', port=8000, uhost='0.0.0.0',
-                      model=ShuffleModel, qa_model=QAModel, uport=9500,
+                      model=ShuffleModel, qa_model=TestQAModel, uport=9500,
                       bufsize=2048, delim='. ', multiplier=5, verbose=True)
         proxy.start()
         server.start()
@@ -36,7 +40,9 @@ class TestProxy(unittest.TestCase):
         proxy_res = requests.get('http://localhost:8000/test/_search', params=params)
         print(proxy_res.content)
         self.assertTrue(proxy_res.ok)
-        self.assertEqual(3, len(proxy_res.json()['hits']['hits']))
+        json = proxy_res.json()
+        self.assertEqual(3, len(json['hits']['hits']))
+        self.assertIn('qa_model', json['nboost'])
 
         # fallback
         server_res = requests.get('http://localhost:9500/test', params=params)

@@ -319,10 +319,8 @@ class Proxy(SocketServer):
 
                 if self.should_qa:
                     answer = self.qa_model.get_answer(query, choices[0])
-                    response['nboost'] = {'qa_model': answer}
-            self.logger.critical('asdfasdfa')
-            self.logger.critical(request)
-            self.logger.critical(response)
+                    response['body']['nboost'] = {'qa_model': answer}
+
             self.client_send(request, response, client_socket)
 
         except FrontendRequest:

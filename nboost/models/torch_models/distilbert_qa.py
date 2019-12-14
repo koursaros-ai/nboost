@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 from transformers import DistilBertForQuestionAnswering, DistilBertTokenizer
 import numpy as np
 import torch
@@ -19,7 +19,7 @@ class TorchDistilBertQAModel(QAModel):
         self.model = DistilBertForQuestionAnswering.from_pretrained(self.model_dir)
         self.tokenizer = DistilBertTokenizer.from_pretrained(self.model_dir)
 
-    def get_answer(self, question: str, context: str) -> Tuple[str, Tuple[int, int, int]]:
+    def get_answer(self, query: str, choice: str) -> Tuple[str, Tuple[int, int, int]]:
         """Return (answer, (candidate, start_pos, end_pos))"""
         doc_tokens = []
         char_to_word_offset = []
@@ -27,7 +27,7 @@ class TorchDistilBertQAModel(QAModel):
 
         # Split on whitespace so that different tokens may be attributed to
         # their original position.
-        for c in context:
+        for c in choice:
             if _is_whitespace(c):
                 prev_is_whitespace = True
             else:
@@ -46,7 +46,7 @@ class TorchDistilBertQAModel(QAModel):
                 tok_to_orig_index.append(i)
                 all_doc_tokens.append(sub_token)
 
-        truncated_query = self.tokenizer.encode(question,
+        truncated_query = self.tokenizer.encode(query,
                                                 add_special_tokens=False,
                                                 max_length=self.max_query_length)
 

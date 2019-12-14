@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 from nboost.models.base import BaseModel
 
 
@@ -11,5 +11,5 @@ class QAModel(BaseModel):
         self.model_dir = self.resolve_model_dir(qa_model_dir)
         self.max_query_length = max_query_length
 
-    def get_answer(self, question: str, context: str) -> Tuple[str, Tuple[int, int, int]]:
-        """Return (answer, (candidate, start_pos, end_pos))"""
+    def get_answer(self, query: str, choice: str) -> Tuple[str, Tuple[int, int, int]]:
+        """Return (answer, (start_pos, end_pos, cid))"""
