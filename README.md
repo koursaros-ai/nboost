@@ -79,7 +79,7 @@ Fine-tuned Models                                                               
 `bert-base-uncased-msmarco`(**default**)<a href='#benchmarks'><sup>[2]</sup></a> | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://www.msmarco.org/'>bing queries</a>                | **+74%** <sub><sup>(0.30 vs 0.17)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
 `bert-base-uncased-msmarco`                                                      | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://trec-car.cs.unh.edu/'>wiki search</a>             | **+71%** <sub><sup>(0.29 vs 0.17)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
 `biobert-base-uncased-msmarco`                                                   | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='https://github.com/naver/biobert-pretrained'>biomed</a>  | **+66%** <sub><sup>(0.17 vs 0.10)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
-`pt-tinybert-msmarco` (**fastest**)                                             | <img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-blue"/>          |  <a href ='http://www.msmarco.org/'>bing queries</a>               | **+45%** <sub><sup>(0.26 vs 0.18)</sup></sub>         | ~50ms/query <a href='#footnotes'> (~1s per query on CPU)
+`pt-tinybert-msmarco` (**fastest**)                                             | <img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-blue"/>          |  <a href ='http://www.msmarco.org/'>bing queries</a>               | **+45%** <sub><sup>(0.26 vs 0.18)</sup></sub>         | ~50ms/query <a href='#footnotes'>
 
 </center>
 
