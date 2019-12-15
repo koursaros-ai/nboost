@@ -10,7 +10,7 @@ class TestPtDistilBertQAModel(unittest.TestCase):
 
     def test_rank(self):
         answer, _ = self.proxy.qa_model.get_answer('Who bears his memory?', CONTEXT)
-        self.assertEqual(answer, 'His tender heir')
+        self.assertEqual(answer, 'His tender')
 
     def tearDown(self) -> None:
         self.proxy.qa_model.close()
