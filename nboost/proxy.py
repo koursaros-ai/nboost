@@ -387,7 +387,6 @@ class Proxy(SocketServer):
         except UnknownRequest:
             self.logger.info('Request (%s:%s): unknown path "%s"',
                              *address, request['url']['path'])
-            print(buffer)
             self.proxy_send(client_socket, server_socket, buffer)
             self.proxy_recv(client_socket, server_socket)
 

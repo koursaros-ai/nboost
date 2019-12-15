@@ -19,7 +19,7 @@ class HttpProtocol:
         self._parser = None  # type: PARSER_TYPE
         self._is_done = False
         self._body = bytes()
-        self.msg = {}
+        self.msg = None
 
     def add_url_hook(self, func: Callable):
         """Add hook to be executed during on_url()"""
