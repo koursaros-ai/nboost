@@ -204,6 +204,7 @@ class Proxy(SocketServer):
     def server_send(server_socket: socket.socket, request: dict):
         """Send magnified request to the server"""
         request['body'] = dump_json(request['body'])
+        request['headers']['content-type'] = 'application/json; charset=UTF-8'
         server_socket.send(prepare_request(request))
 
     @stats.time_context
@@ -375,9 +376,11 @@ class Proxy(SocketServer):
                 if true_cids is not None:
                     self.calculate_mrrs(true_cids, cids, ranks)
 
+                response['body']['nboost'] = {}
+
                 if self.qa:
                     answer = self.qa_model.get_answer(query, cvalues[0])
-                    response['body']['nboost'] = {'qa_model': answer}
+                    response['body']['nboost']['qa_model'] = answer
 
             self.client_send(request, response, client_socket)
 
