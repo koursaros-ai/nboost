@@ -33,7 +33,7 @@ setup(
         'jsonpath-ng'
     ],
     extras_require={
-        'torch': ['torch', 'transformers'],
+        'pt': ['torch', 'transformers'],
         'tf': ['tensorflow==1.15', 'sentencepiece'],
         'all': ['torch', 'tensorflow==1.15', 'transformers'],
     },

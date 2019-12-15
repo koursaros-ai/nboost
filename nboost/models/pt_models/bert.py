@@ -6,13 +6,11 @@ import torch
 from nboost.models.base import BaseModel
 
 
-class TorchBertModel(BaseModel):
+class PtBertModel(BaseModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.download()
-
-        self.logger.info('Loading from checkpoint %s' % str(self.model_dir))
+        self.logger.info('Loading from checkpoint %s' % self.model_dir)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         if self.device == torch.device("cpu"):
@@ -21,9 +19,8 @@ class TorchBertModel(BaseModel):
             self.logger.info("RUNNING ON CUDA")
             torch.cuda.synchronize(self.device)
 
-        self.rerank_model = AutoModelForSequenceClassification.from_pretrained(
-            str(self.model_dir))
-        self.tokenizer = AutoTokenizer.from_pretrained(str(self.model_dir))
+        self.rerank_model = AutoModelForSequenceClassification.from_pretrained(self.model_dir)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
         self.rerank_model.to(self.device, non_blocking=True)
 
     def rank(self, query: str, choices: List[str]):

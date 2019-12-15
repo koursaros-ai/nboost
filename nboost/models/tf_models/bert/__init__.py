@@ -8,12 +8,8 @@ from nboost.models.base import BaseModel
 
 
 class TfBertModel(BaseModel):
-    MODEL_DIR = 'bert-base-uncased-msmarco'
-
-    def __init__(self, verbose=False, **kwargs):
-        super().__init__(**kwargs)
-        self.download()
-
+    def __init__(self, *args, verbose=False, **kwargs):
+        super().__init__(*args, **kwargs)
         self.output_q = Queue()
         self.input_q = Queue()
 

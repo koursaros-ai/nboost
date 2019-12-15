@@ -1,23 +1,25 @@
 """NBoost Proxy Class"""
 
-from typing import Type, List, Tuple
+from typing import List, Tuple
 from contextlib import suppress
+from pathlib import Path
 import socket
 import re
 from httptools import HttpParserError
+from nboost.maps import CONFIG_MAP, MODULE_MAP, CLASS_MAP, URL_MAP
 from nboost.protocol import HttpProtocol
 from nboost.stats import ClassStatistics
-from nboost.models.base import BaseModel
 from nboost.server import SocketServer
-from nboost.models.qa import QAModel
 from nboost.logger import set_logger
-from nboost.maps import CONFIG_MAP
 from nboost import PKG_PATH
 from nboost.helpers import (
     prepare_response,
     prepare_request,
+    extract_tar_gz,
+    download_file,
     get_jsonpath,
     set_jsonpath,
+    import_class,
     dump_json,
     flatten)
 from nboost.exceptions import (
@@ -61,20 +63,71 @@ class Proxy(SocketServer):
     stats = ClassStatistics()
     STATIC_PATH = PKG_PATH.joinpath('resources/frontend')
 
-    def __init__(self, model: Type[BaseModel], qa_model: Type[QAModel],
-                 config: str = 'elasticsearch',
+    def __init__(self, data_dir: Path = PKG_PATH.joinpath('.cache'),
+                 model_dir: str = 'pt-bert-base-uncased-msmarco',
+                 qa_model_dir: str = 'distilbert-base-uncased-distilled-squad',
+                 qa_model: str = str(), model: str = str(),
+                 qa: bool = False, config: str = 'elasticsearch',
                  verbose: bool = False, **kwargs):
         super().__init__(**kwargs)
-        self.logger = set_logger(model.__name__, verbose=verbose)
+        self.qa = qa
+        self.data_dir = data_dir
+        self.data_dir.mkdir(parents=True, exist_ok=True)
 
-        # pass command line arguments to instantiate the model
-        self.model = model(verbose=verbose, **kwargs)
+        self.model_dir = data_dir.joinpath(model_dir).absolute()
+        self.model = self.resolve_model(self.model_dir, model, verbose=verbose, **kwargs)
+        self.logger = set_logger(self.model.__class__.__name__, verbose=verbose)
+
+        if qa:
+            self.qa_model_dir = data_dir.joinpath(qa_model_dir).absolute()
+            self.qa_model = self.resolve_model(self.qa_model_dir, qa_model, **kwargs)
 
         # these are global parameters that are overrided by nboost json key
-        self.config = {'model': model.__name__, **CONFIG_MAP[config], **kwargs}
+        self.config = {'model': self.model.__class__.__name__, **CONFIG_MAP[config], **kwargs}
 
-        self.qa_model = qa_model(**kwargs)
-        self.should_qa = qa_model != QAModel
+    def resolve_model(self, model_dir: Path, cls: str, **kwargs):
+        """Dynamically import class from a module in the CLASS_MAP. This is used
+        to manage dependencies within nboost. For example, you don't necessarily
+        want to import pytorch models everytime you boot up tensorflow..."""
+        if model_dir.exists():
+            self.logger.info('Using model cache from %s', model_dir)
+
+            if model_dir.name in CLASS_MAP:
+                cls = CLASS_MAP[model_dir.name]
+            elif cls not in MODULE_MAP:
+                raise ImportError('Class "%s" not in %s.' % CLASS_MAP.keys())
+
+            module = MODULE_MAP[cls]
+            model = import_class(module, cls)
+            return model(str(model_dir), **kwargs)
+        else:
+            if model_dir.name in CLASS_MAP:
+                cls = CLASS_MAP[model_dir.name]
+                module = MODULE_MAP[cls]
+                url = URL_MAP[model_dir.name]
+                binary_path = self.data_dir.joinpath(Path(url).name)
+
+                if binary_path.exists():
+                    self.logger.info('Found model cache in %s', binary_path)
+                else:
+                    self.logger.info('Downloading "%s" model.', self.model_dir)
+                    download_file(url, binary_path)
+
+                    self.logger.info('Extracting "%s" from %s', self.model_dir,
+                                     binary_path)
+                    if binary_path.suffixes == ['tar', 'gz']:
+                        extract_tar_gz(binary_path, self.data_dir)
+
+            else:
+                if cls in MODULE_MAP:
+                    module = MODULE_MAP[cls]
+                else:
+                    raise ImportError('model_dir %s not found in %s. You must '
+                                      'set --model class to continue.'
+                                      % (model_dir.name, CLASS_MAP.keys()))
+
+            model = import_class(module, cls)
+            return model(model_dir.name, **kwargs)
 
     def on_client_request_url(self, url: dict):
         """Method for screening the url path from the client request"""
@@ -317,8 +370,8 @@ class Proxy(SocketServer):
                 if true_cids is not None:
                     self.calculate_mrrs(true_cids, cids, ranks)
 
-                if self.should_qa:
-                    answer = self.qa_model.get_answer(query, choices[0])
+                if self.qa:
+                    answer = self.qa_model.get_answer(query, cvalues[0])
                     response['body']['nboost'] = {'qa_model': answer}
 
             self.client_send(request, response, client_socket)

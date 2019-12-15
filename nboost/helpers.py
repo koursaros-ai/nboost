@@ -6,10 +6,10 @@ from http.client import responses
 from contextlib import suppress
 from functools import reduce
 from pathlib import Path
+import importlib
 import operator
 import tarfile
 import json
-import gzip
 from jsonpath_ng.ext import parse
 from jsonpath_ng import jsonpath
 from tqdm import tqdm
@@ -167,3 +167,9 @@ def count_lines(path: Path):
 def flatten(array: list):
     """Flatten nested list to a single list"""
     return [item for sublist in array for item in sublist]
+
+
+def import_class(module: str, cls: str):
+    """import an nboost class from a module."""
+    file = 'nboost.%s' % module
+    return getattr(importlib.import_module(file), cls)

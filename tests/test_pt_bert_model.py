@@ -1,19 +1,19 @@
-from nboost.models.torch_models.bert import TorchBertModel
+from nboost.proxy import Proxy
 import unittest
 
 
-class TestTorchBertModel(unittest.TestCase):
-
+class TestPtTinyBertModel(unittest.TestCase):
     def setUp(self):
-        self.model = TorchBertModel(model_dir='pt-tinybert-msmarco')
+        self.proxy = Proxy(model_dir='pt-bert-base-uncased-msmarco')
 
     def test_rank(self):
-        ranks = self.model.rank('O wherefore art thou', CHOICES)
+        ranks = self.proxy.model.rank('O wherefore art thou', CHOICES)
+        self.assertEqual(self.proxy.model.__class__.__name__, 'PtBertModel')
         self.assertIsInstance(ranks, list)
         self.assertEqual(6, len(ranks))
 
     def tearDown(self) -> None:
-        self.model.close()
+        self.proxy.model.close()
 
 
 CHOICES = [

@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple
 from transformers import DistilBertForQuestionAnswering, DistilBertTokenizer
 import numpy as np
 import torch
@@ -11,13 +11,11 @@ def _is_whitespace(c):
     return False
 
 
-class TorchDistilBertQAModel(QAModel):
-    QA_MODEL_DIR = 'distilbert-base-uncased-distilled-squad'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.model = DistilBertForQuestionAnswering.from_pretrained(self.model_dir.name)
-        self.tokenizer = DistilBertTokenizer.from_pretrained(self.model_dir.name)
+class PtDistilBertQAModel(QAModel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.model = DistilBertForQuestionAnswering.from_pretrained(self.model_dir)
+        self.tokenizer = DistilBertTokenizer.from_pretrained(self.model_dir)
 
     def get_answer(self, query: str, choice: str) -> Tuple[str, Tuple[int, int, int]]:
         """Return (answer, (candidate, start_pos, end_pos))"""

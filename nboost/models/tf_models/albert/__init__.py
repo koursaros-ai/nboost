@@ -9,10 +9,8 @@ from nboost.models.base import BaseModel
 
 class AlbertModel(BaseModel):
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.download()
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.output_q = Queue()
         self.input_q = Queue()
 

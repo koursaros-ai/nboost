@@ -1,16 +1,9 @@
 from nboost.helpers import prepare_response, dump_json
-from nboost.models.shuffle import ShuffleModel
 from nboost.protocol import HttpProtocol
 from nboost.server import SocketServer
-from nboost.models.qa import QAModel
 from nboost.proxy import Proxy
 import requests
 import unittest
-
-
-class TestQAModel(QAModel):
-    def get_answer(self, question: str, context: str):
-        return 'answer', (10, 20, 1)
 
 
 class TestServer(SocketServer):
@@ -27,7 +20,7 @@ class TestProxy(unittest.TestCase):
     def test_proxy(self):
         server = TestServer(port=9500, verbose=True)
         proxy = Proxy(host='0.0.0.0', port=8000, uhost='0.0.0.0',
-                      model=ShuffleModel, qa_model=TestQAModel, uport=9500,
+                      model_dir='shuffle-model', uport=9500,
                       bufsize=2048, delim='. ', multiplier=5, verbose=True)
         proxy.start()
         server.start()
@@ -42,7 +35,6 @@ class TestProxy(unittest.TestCase):
         self.assertTrue(proxy_res.ok)
         json = proxy_res.json()
         self.assertEqual(3, len(json['hits']['hits']))
-        self.assertIn('qa_model', json['nboost'])
 
         # fallback
         server_res = requests.get('http://localhost:9500/test', params=params)

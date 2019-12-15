@@ -1,7 +1,8 @@
 """Build and push images"""
 
-from nboost import __version__, PKG_PATH, IMAGE_MAP
+from nboost import __version__, PKG_PATH
 from nboost.logger import set_logger
+from nboost.maps import IMAGE_MAP
 import subprocess
 
 REGISTRY = 'koursaros/nboost'

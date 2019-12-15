@@ -1,19 +1,19 @@
 import unittest
-from nboost.models.tf_models.bert import TfBertModel
+from nboost.proxy import Proxy
 
 
 class TestTfBertModel(unittest.TestCase):
 
     def setUp(self):
-        self.model = TfBertModel()
+        self.proxy = Proxy(model_dir='tf-bert-base-uncased-msmarco')
 
     def test_rank(self):
-        ranks = self.model.rank(b'O wherefore art thou', CHOICES)
+        ranks = self.proxy.model.rank(b'O wherefore art thou', CHOICES)
         self.assertIsInstance(ranks, list)
         self.assertEqual(6, len(ranks))
 
     def tearDown(self) -> None:
-        self.model.close()
+        self.proxy.model.close()
 
 
 CHOICES = [

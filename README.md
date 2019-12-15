@@ -103,8 +103,8 @@ For installing NBoost, follow the table below.
 
 Dependency                      | 🐳 Docker                                                 | 📦 Pypi                                           |  <a href="#kubernetes">🐙 Kubernetes</a>
 ------------------------------- | --------------------------------------------------------- | ------------------------------------------------- | -------------
-**Tensorflow** (*recommended*)  | <sub><sup>`koursaros/nboost:latest-tf`</sup></sub>        | <sub><sup>`pip install nboost[tf]`</sup></sub>    | <sub><sup>`helm install nboost/nboost --set image.tag=latest-tf`</sup></sub>
-**Pytorch**                     | <sub><sup>`koursaros/nboost:latest-torch`</sup></sub>     | <sub><sup>`pip install nboost[torch]`</sup></sub> | <sub><sup>`helm install nboost/nboost --set image.tag=latest-torch`</sup></sub>
+**Pytorch** (*recommended*)     | <sub><sup>`koursaros/nboost:latest-pt`</sup></sub>        | <sub><sup>`pip install nboost[pt]`</sup></sub>    | <sub><sup>`helm install nboost/nboost --set image.tag=latest-pt`</sup></sub>
+**Tensorflow**                  | <sub><sup>`koursaros/nboost:latest-tf`</sup></sub>        | <sub><sup>`pip install nboost[tf]`</sup></sub>    | <sub><sup>`helm install nboost/nboost --set image.tag=latest-tf`</sup></sub>
 **All**                         | <sub><sup>`koursaros/nboost:latest-all`</sup></sub>       | <sub><sup>`pip install nboost[all]`</sup></sub>   | <sub><sup>`helm install nboost/nboost --set image.tag=latest-all`</sup></sub>
 **-** (*for testing*)           | <sub><sup>`koursaros/nboost:latest-alpine`</sup></sub>    | <sub><sup>`pip install nboost`</sup></sub>        | <sub><sup>`helm install nboost/nboost --set image.tag=latest-alpine`</sup></sub>
 
@@ -156,7 +156,7 @@ In this example we will set up a proxy to sit in between the client and Elastics
 If you want to run the example on a GPU, make sure you have Tensorflow 1.14-1.15 (with CUDA) to support the modeling functionality. However, if you want to just run it on a CPU, don't worry about it. For both cases, just run:
 
 ```bash
-pip install nboost[tf]
+pip install nboost[pt]
 ```
 
 
@@ -248,8 +248,8 @@ All possible `--set` ([values.yaml](https://github.com/koursaros-ai/nboost/blob/
 | -------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------- |
 | `replicaCount`                               | Number of replicas to deploy                     | `3`                                                     |
 | `image.repository`                           | NBoost Image name                                | `koursaros/nboost`                                      |
-| `image.tag`                                  | NBoost Image tag                                 | `latest-tf`                                             |
-| `args.model_dir`                             | Name or directory of the finetuned model         | `bert-base-uncased-msmarco`                             |
+| `image.tag`                                  | NBoost Image tag                                 | `latest-pt`                                             |
+| `args.model_dir`                             | Name or directory of the finetuned model         | `pt-bert-base-uncased-msmarco`                             |
 | `args.model`                                 | Model Class                                      | `BertModel`                                             |
 | `args.host`                                  | Hostname of the proxy                            | `0.0.0.0`                                               |
 | `args.port`                                  | Port for the proxy to listen on                  | `8000`                                                  |

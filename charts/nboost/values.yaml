@@ -6,7 +6,7 @@ replicaCount: 3
 
 image:
   repository: koursaros/nboost
-  tag: latest-tf
+  tag: latest-pt
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -73,7 +73,7 @@ args:
   port: 8000
   uhost: elasticsearch-master
   uport: 9200
-  model_dir: bert-base-uncased-msmarco
+  model_dir: pt-bert-base-uncased-msmarco
   data_dir:
   max_seq_len: 64
   bufsize: 2048
