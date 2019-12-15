@@ -1,3 +1,25 @@
+# Release `0.0.8`
+> Dec 15th, 2019
+
+### ⌨️ Cli
+
+ - [[```05aaec7```](https://github.com/koursaros-ai/nboost/commit/05aaec7049fb69e9750566bb605b3c95f3543877)] configurable jsonpaths (*colethienes*) <span style="color:blue">△20</span>
+ - [[```7d0fafe```](https://github.com/koursaros-ai/nboost/commit/7d0fafe06bb4e6541da0a1f28c92b7b31ec666da)] tinybert default (*colethienes*) <span style="color:blue">△2</span>
+ - [[```bdd1365```](https://github.com/koursaros-ai/nboost/commit/bdd1365b9c589ac6f305b9cacf9dc8c62b8d4a0a)] add qa model (*colethienes*) <span style="color:blue">△61</span>
+
+### 📡 Proxy
+
+ - [[```d095b27```](https://github.com/koursaros-ai/nboost/commit/d095b271f484fcf48b152dea78b4905202c9824a)] model directory instantiation (*colethienes*) <span style="color:blue">△358</span>
+ - [[```af9f3a8```](https://github.com/koursaros-ai/nboost/commit/af9f3a8ba82d306fe7d1ad2508f2bbb7bdb77939)] refactor routing and protocols (*colethienes*) <span style="color:blue">△369</span>
+ - [[```1bf21e4```](https://github.com/koursaros-ai/nboost/commit/1bf21e451a27e98f000a6b35c58e6e9d9441a098)] refactor messaging to dict type (*colethienes*) <span style="color:blue">△2322</span>
+
+### 🧠 Models
+
+ - [[```3e8482e```](https://github.com/koursaros-ai/nboost/commit/3e8482eee504ee37b5eaf5972f85ad84440aa2ce)] Add / TinyBERT Model Code (*Jack Pertschuk*) <span style="color:blue">△5</span>
+ - [[```18d62ec```](https://github.com/koursaros-ai/nboost/commit/18d62ec21679c773f2c2a715f17866a5ad3f34af)] Add / QA Models Code (*Jack Pertschuk*) <span style="color:blue">△82</span>
+ - [[```8444a83```](https://github.com/koursaros-ai/nboost/commit/8444a8329c1d9712391342acc99155729f9b66bc)] Fix/ Clean up transformers (*Jack Pertschuk*) <span style="color:blue">△73</span>
+ - [[```7a142ec```](https://github.com/koursaros-ai/nboost/commit/7a142ec093ec00e1866b3607b1b1b430459894a9)] Fix/ Update transformers to latest version, remove online training functionality (*Jack Pertschuk*) <span style="color:blue">△55</span>
+
 # Release `0.0.7`
 > Dec 3rd, 2019
 
