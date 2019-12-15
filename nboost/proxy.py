@@ -113,7 +113,7 @@ class Proxy(SocketServer):
                     self.logger.info('Downloading "%s" model.', model_dir)
                     download_file(url, binary_path)
 
-                if binary_path.suffixes == ['tar', 'gz']:
+                if binary_path.suffixes == ['.tar', '.gz']:
                     self.logger.info('Extracting "%s" from %s', model_dir, binary_path)
                     extract_tar_gz(binary_path, self.data_dir)
 
