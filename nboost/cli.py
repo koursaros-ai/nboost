@@ -53,7 +53,7 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--data_dir', type=Path, default=PKG_PATH.joinpath('.cache'), help=DATA_DIR)
     parser.add_argument('--config', type=str, default='elasticsearch', choices=CONFIG_MAP.keys(), help=CONFIG)
     parser.add_argument('--model', type=str, default='', help=MODEL)
-    parser.add_argument('--model_dir', type=str, default='pt-bert-base-uncased-msmarco', help=MODEL_DIR)
+    parser.add_argument('--model_dir', type=str, default='pt-tinybert-msmarco', help=MODEL_DIR)
     parser.add_argument('--qa', type=bool, default=False, help=QA)
     parser.add_argument('--qa_model', type=str, default='', help=QA_MODEL)
     parser.add_argument('--qa_model_dir', type=str, default='distilbert-base-uncased-distilled-squad', help=QA_MODEL_DIR)
