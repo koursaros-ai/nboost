@@ -3,9 +3,8 @@ from argparse import ArgumentParser
 from typing import List, Type
 from pathlib import Path
 import termcolor
-from nboost.indexer.base import BaseIndexer
-from nboost.cli import import_class
-
+from nboost.indexers.base import BaseIndexer
+from nboost.indexers.es import ESIndexer
 
 TAG = termcolor.colored('NBoost Indexer', 'cyan', attrs=['underline'])
 DESCRIPTION = ('This is the %s. This command line utility can be used to send '
@@ -37,7 +36,7 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--port', type=int, default=9200, help=PORT)
     parser.add_argument('--delim', type=str, default='\t', help=DELIM)
     parser.add_argument('--shards', default=3, type=int)
-    parser.add_argument('--indexer', type=lambda x: import_class('indexers', x), default='ESIndexer', help=INDEXER)
+    parser.add_argument('--indexer', type=lambda x: ESIndexer, default='ESIndexer', help=INDEXER)
     parser.add_argument('--field', default='passage', type=str)
     return parser
 

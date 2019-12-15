@@ -1,7 +1,7 @@
 from elasticsearch.exceptions import RequestError
 from elasticsearch.helpers import streaming_bulk
 from elasticsearch import Elasticsearch
-from nboost.indexer.base import BaseIndexer
+from nboost.indexers.base import BaseIndexer
 
 
 class ESIndexer(BaseIndexer):
@@ -13,7 +13,7 @@ class ESIndexer(BaseIndexer):
     def format(self, cid: str, choice: str):
         """Format a choice for indexing"""
         return {
-            '_index': self.name, '_id': cid,
+            '_index': self.name, '_id': cid, '_type': '_doc',
             '_source': {self.field_name: choice}
         }
 

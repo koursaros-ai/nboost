@@ -1,4 +1,4 @@
-from nboost.indexer.cli import main
+from nboost.indexers.cli import main
 import subprocess
 import unittest
 import requests
