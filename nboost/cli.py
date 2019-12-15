@@ -1,10 +1,9 @@
 """NBoost command line interface"""
 
-import importlib
 from pathlib import Path
-from argparse import ArgumentParser
+from argparse import ArgumentParser, SUPPRESS
 import termcolor
-from nboost.maps import CLASS_MAP, CONFIG_MAP
+from nboost.maps import CONFIG_MAP
 from nboost.__version__ import __doc__
 from nboost import PKG_PATH
 
@@ -15,6 +14,12 @@ DESCRIPTION = ('%s: is a scalable, search-api-boosting platform for '
                'relevance of search results..' % TAG)
 QA_MODEL = 'adds the qa plugin which treats the query as a question and marks the answer offset'
 DELIM = 'the deliminator to concatenate multiple queries into a single query'
+CIDS_PATH = 'the jsonpath to find the ids of the choices (for benchmarking)'
+CVALUES_PATH = 'the jsonpath to find the string values of the choices'
+CHOICES_PATH = 'the jsonpath to find the array of choices to reorder'
+TOPK_PATH = 'the jsonpath to find the number of requested results'
+TRUE_CIDS_PATH = 'the path of the true choice ids in the request'
+QUERY_PATH = 'the jsonpath in the request to find the query'
 QA_MODEL_DIR = 'name or directory of the finetuned qa model'
 CONFIG = 'which search api nboost should be configured for'
 BATCH_SIZE = 'batch size for running through rerank model'
@@ -38,6 +43,12 @@ MODEL = 'model class'
 def set_parser() -> ArgumentParser:
     """Add default nboost cli arguments to a given parser"""
     parser = ArgumentParser(description=DESCRIPTION)
+    parser.add_argument('--query_path', type=str, default=SUPPRESS, help=QUERY_PATH)
+    parser.add_argument('--topk_path', type=str, default=SUPPRESS, help=TOPK_PATH)
+    parser.add_argument('--cvalues_path', type=str, default=SUPPRESS, help=CVALUES_PATH)
+    parser.add_argument('--cids_path', type=str, default=SUPPRESS, help=CIDS_PATH)
+    parser.add_argument('--true_cids_path', type=str, default=SUPPRESS, help=TRUE_CIDS_PATH)
+    parser.add_argument('--choices_path', type=str, default=SUPPRESS, help=CHOICES_PATH)
     parser.add_argument('--verbose', action='store_true', default=False, help=VERBOSE)
     parser.add_argument('--host', type=str, default='0.0.0.0', help=HOST)
     parser.add_argument('--port', type=int, default=8000, help=PORT)
@@ -58,6 +69,3 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--qa_model', type=str, default='', help=QA_MODEL)
     parser.add_argument('--qa_model_dir', type=str, default='distilbert-base-uncased-distilled-squad', help=QA_MODEL_DIR)
     return parser
-
-
-
