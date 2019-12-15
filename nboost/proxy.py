@@ -110,24 +110,26 @@ class Proxy(SocketServer):
                 if binary_path.exists():
                     self.logger.info('Found model cache in %s', binary_path)
                 else:
-                    self.logger.info('Downloading "%s" model.', self.model_dir)
+                    self.logger.info('Downloading "%s" model.', model_dir)
                     download_file(url, binary_path)
 
-                    self.logger.info('Extracting "%s" from %s', self.model_dir,
+                    self.logger.info('Extracting "%s" from %s', model_dir,
                                      binary_path)
                     if binary_path.suffixes == ['tar', 'gz']:
                         extract_tar_gz(binary_path, self.data_dir)
 
+                model = import_class(module, cls)
+                return model(str(model_dir), **kwargs)
+
             else:
                 if cls in MODULE_MAP:
                     module = MODULE_MAP[cls]
+                    model = import_class(module, cls)
+                    return model(model_dir.name, **kwargs)
                 else:
                     raise ImportError('model_dir %s not found in %s. You must '
                                       'set --model class to continue.'
                                       % (model_dir.name, CLASS_MAP.keys()))
-
-            model = import_class(module, cls)
-            return model(model_dir.name, **kwargs)
 
     def on_client_request_url(self, url: dict):
         """Method for screening the url path from the client request"""
@@ -171,9 +173,8 @@ class Proxy(SocketServer):
         client request"""
         protocol = self.get_protocol()
         protocol.set_request_parser()
-        server_socket.send(buffer)
-        protocol.feed(buffer)
         protocol.add_data_hook(server_socket.send)
+        protocol.feed(buffer)
         protocol.recv(client_socket)
 
     @stats.time_context
@@ -386,7 +387,7 @@ class Proxy(SocketServer):
 
         except UnknownRequest:
             self.logger.info('Request (%s:%s): unknown path %s.',
-                             request['url']['path'], *address)
+                             *address, request['url']['path'])
             self.proxy_send(client_socket, server_socket, buffer)
             self.proxy_recv(client_socket, server_socket)
 
