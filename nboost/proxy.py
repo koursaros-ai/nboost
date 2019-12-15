@@ -83,7 +83,12 @@ class Proxy(SocketServer):
             self.qa_model = self.resolve_model(self.qa_model_dir, qa_model, **kwargs)
 
         # these are global parameters that are overrided by nboost json key
-        self.config = {'model': self.model.__class__.__name__, **CONFIG_MAP[config], **kwargs}
+        self.config = {
+            'model': self.model.__class__.__name__, 'model_dir': model_dir,
+            'qa_model': self.qa_model.__class__.__name__ if qa else None,
+            'qa_model_dir': qa_model_dir if qa else None,
+            'data_dir': str(data_dir), **CONFIG_MAP[config], **kwargs
+        }
 
     def resolve_model(self, model_dir: Path, cls: str, **kwargs):
         """Dynamically import class from a module in the CLASS_MAP. This is used
