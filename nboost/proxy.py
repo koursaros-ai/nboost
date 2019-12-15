@@ -377,26 +377,27 @@ class Proxy(SocketServer):
             self.client_send(request, response, client_socket)
 
         except FrontendRequest:
-            self.logger.info('Request (%s:%s): frontend.', *address)
+            self.logger.info('Request (%s:%s): frontend request', *address)
             self.frontend_send(client_socket, request)
 
         except StatusRequest:
-            self.logger.info('Request (%s:%s): status.', *address)
+            self.logger.info('Request (%s:%s): status request', *address)
             self.status_send(client_socket, request)
 
         except UnknownRequest:
-            self.logger.info('Request (%s:%s): unknown path %s.',
+            self.logger.info('Request (%s:%s): unknown path "%s"',
                              *address, request['url']['path'])
+            print(buffer)
             self.proxy_send(client_socket, server_socket, buffer)
             self.proxy_recv(client_socket, server_socket)
 
         except MissingQuery:
-            self.logger.warning('Request (%s:%s): missing query.', *address)
+            self.logger.warning('Request (%s:%s): missing query', *address)
             self.proxy_send(client_socket, server_socket, buffer)
             self.proxy_recv(client_socket, server_socket)
 
         except InvalidChoices:
-            self.logger.warning('Request (%s:%s): invalid choices.', *address)
+            self.logger.warning('Request (%s:%s): invalid choices', *address)
             self.proxy_send(client_socket, server_socket, buffer)
             self.proxy_recv(client_socket, server_socket)
 

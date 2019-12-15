@@ -3,7 +3,7 @@ termcolor
 elasticsearch
 tensorflow==1.15
 torch
-transformers
+transformers==2.2.1
 tqdm
 httptools
 jsonpath-ng
