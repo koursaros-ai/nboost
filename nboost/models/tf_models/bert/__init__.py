@@ -17,7 +17,7 @@ class TfBertModel(BaseModel):
 
         ckpts = list(self.model_dir.glob('*.ckpt*'))
         if not len(ckpts) > 0:
-            raise FileNotFoundError("Tensorflow model not found")
+            raise FileNotFoundError("Tensorflow model not found %s" % self.model_dir)
         self.checkpoint = str(ckpts[0]).split('.ckpt')[0] + '.ckpt'
         self.vocab_file = str(self.model_dir.joinpath('vocab.txt'))
         self.bert_config_file = str(self.model_dir.joinpath('bert_config.json'))
@@ -125,7 +125,7 @@ class TfBertModel(BaseModel):
         bert_config = modeling.BertConfig.from_json_file(self.bert_config_file)
         assert self.max_seq_len <= bert_config.max_position_embeddings
 
-        run_config = tf.estimator.RunConfig(model_dir=str(self.data_dir))
+        run_config = tf.estimator.RunConfig(model_dir=str(self.model_dir))
 
         model_fn = self.model_fn_builder(
             bert_config=bert_config,
