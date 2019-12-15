@@ -9,5 +9,5 @@ nboost-index command line
 =========================
 
 .. argparse::
-   :ref: nboost.indexer.cli.set_parser
+   :ref: nboost.indexers.cli.set_parser
    :prog: nboost-index
