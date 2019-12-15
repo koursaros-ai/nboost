@@ -5,6 +5,7 @@ from queue import Queue
 import numpy as np
 from nboost.models.tf_models.bert import modeling, tokenization
 from nboost.models.base import BaseModel
+import glob, os
 
 
 class TfBertModel(BaseModel):
@@ -13,7 +14,7 @@ class TfBertModel(BaseModel):
         self.output_q = Queue()
         self.input_q = Queue()
 
-        ckpts = list(self.model_dir.glob('*.ckpt*'))
+        ckpts = list(glob.glob(os.path.join(self.model_dir, '*.ckpt*')))
         if not len(ckpts) > 0:
             raise FileNotFoundError("Tensorflow model not found")
         self.checkpoint = str(ckpts[0]).split('.ckpt')[0] + '.ckpt'
