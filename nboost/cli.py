@@ -1,7 +1,7 @@
 """NBoost command line interface"""
 
 from pathlib import Path
-from argparse import ArgumentParser, SUPPRESS
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, SUPPRESS
 import termcolor
 from nboost.maps import CONFIG_MAP
 from nboost.__version__ import __doc__
@@ -42,7 +42,7 @@ MODEL = 'model class'
 
 def set_parser() -> ArgumentParser:
     """Add default nboost cli arguments to a given parser"""
-    parser = ArgumentParser(description=DESCRIPTION)
+    parser = ArgumentParser(description=DESCRIPTION, formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('--query_path', type=str, default=SUPPRESS, help=QUERY_PATH)
     parser.add_argument('--topk_path', type=str, default=SUPPRESS, help=TOPK_PATH)
     parser.add_argument('--cvalues_path', type=str, default=SUPPRESS, help=CVALUES_PATH)
