@@ -30,11 +30,15 @@ class PtBertModel(BaseModel):
             logits = self.rerank_model(input_ids,
                                        attention_mask=attention_mask,
                                        token_type_ids=token_type_ids)[0]
-            scores = np.squeeze(logits.detach().cpu().numpy())
+            logits = logits.detach().cpu().numpy()
+            scores = np.squeeze(logits)
+            labels = np.argmax(logits, axis=-1)
             if len(scores.shape) > 1 and scores.shape[1] == 2:
                 scores = np.squeeze(scores[:,1])
             if len(logits) == 1:
                 scores = [scores]
+            if self.filter_results:
+                scores = filter(lambda label, score: label == 1, zip(labels, scores))
             return list(np.argsort(scores)[::-1])
 
     def encode(self, query: str, choices: List[str]):

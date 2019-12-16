@@ -37,6 +37,7 @@ PROTOCOL = 'protocol class'
 HOST = 'host of the proxy'
 PORT = 'port of the proxy'
 MODEL = 'model class'
+FILTER_RESULTS = 'whether to filter out results based on classification model'
 
 
 def set_parser() -> ArgumentParser:
@@ -68,4 +69,5 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--qa', type=bool, default=False, help=QA)
     parser.add_argument('--qa_model', type=str, default='', help=QA_MODEL)
     parser.add_argument('--qa_model_dir', type=str, default='distilbert-base-uncased-distilled-squad', help=QA_MODEL_DIR)
+    parser.add_argument('--filter_results', action='store_true', default=False, help=FILTER_RESULTS)
     return parser
