@@ -80,5 +80,3 @@ args:
   batch_size: 4
   multiplier: 5
   workers: 10
-  codex: ESCodex
-  model: BertModel
