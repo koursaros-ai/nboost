@@ -42,6 +42,8 @@ class PtBertModel(BaseModel):
             return list(np.argsort(scores)[::-1])
 
     def encode(self, query: str, choices: List[str]):
+        if len(choices) == 0:
+            raise NotImplementedError("Empty choice list")
         inputs = [self.tokenizer.encode_plus(query.lower(),
             choice.lower(), add_special_tokens=True) for choice in choices]
 
