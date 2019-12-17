@@ -24,6 +24,8 @@ class PtBertModel(BaseModel):
         self.rerank_model.to(self.device, non_blocking=True)
 
     def rank(self, query: str, choices: List[str]):
+        if len(choices) == 0:
+            return []
         input_ids, attention_mask, token_type_ids = self.encode(query, choices)
 
         with torch.no_grad():
@@ -42,8 +44,6 @@ class PtBertModel(BaseModel):
             return list(np.argsort(scores)[::-1])
 
     def encode(self, query: str, choices: List[str]):
-        if len(choices) == 0:
-            raise NotImplementedError("Empty choice list")
         inputs = [self.tokenizer.encode_plus(query.lower(),
             choice.lower(), add_special_tokens=True) for choice in choices]
 
