@@ -378,7 +378,7 @@ class Proxy(SocketServer):
 
                 response['body']['nboost'] = {}
 
-                if self.qa:
+                if self.qa and len(cvalues) > 0:
                     answer = self.qa_model.get_answer(query, cvalues[0])
                     response['body']['nboost']['qa_model'] = answer
 
