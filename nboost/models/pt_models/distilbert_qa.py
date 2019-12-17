@@ -64,7 +64,8 @@ class PtDistilBertQAModel(QAModel):
             end_logits = end_logits[0][len(truncated_query) + 2:-1]
 
         try:
-            assert len(end_logits) == len(tok_to_orig_index) or len(end_logits) == self.max_seq_len
+            assert len(end_logits) == len(tok_to_orig_index) or len(end_logits) == \
+                   self.max_seq_len - len(truncated_query) - 3
         except:
             import pdb
             pdb.set_trace()
