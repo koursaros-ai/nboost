@@ -12,6 +12,11 @@ class TestPtFilterModel(unittest.TestCase):
         self.assertIsInstance(ranks, list)
         self.assertEqual(1, len(ranks))
 
+        ranks = self.proxy.model.rank('His tender heir', CHOICES[:1])
+        self.assertEqual(self.proxy.model.__class__.__name__, 'PtBertModel')
+        self.assertIsInstance(ranks, list)
+        self.assertEqual(0, len(ranks))
+
     def tearDown(self) -> None:
         self.proxy.model.close()
 

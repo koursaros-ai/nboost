@@ -40,8 +40,8 @@ class PtBertModel(BaseModel):
             if len(logits) == 1:
                 scores = [scores]
             if self.filter_results:
-                scores = filter(lambda label, score: label == 1, zip(labels, scores))
-            return list(np.argsort(scores)[::-1])
+                scores = filter(lambda x: x[0] == 1, zip(labels, scores))
+            return list(np.argsort(list(scores))[::-1])
 
     def encode(self, query: str, choices: List[str]):
         inputs = [self.tokenizer.encode_plus(query.lower(),
