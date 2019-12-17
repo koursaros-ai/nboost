@@ -32,16 +32,13 @@ class PtBertModel(BaseModel):
             logits = self.rerank_model(input_ids,
                                        attention_mask=attention_mask,
                                        token_type_ids=token_type_ids)[0]
-            logits = logits.detach().cpu().numpy()
-            scores = np.squeeze(logits)
-            labels = np.argmax(logits, axis=-1)
-            if len(scores.shape) > 1 and scores.shape[1] == 2:
-                scores = np.squeeze(scores[:,1])
-            if len(logits) == 1:
-                scores = [scores]
+            scores = logits.detach().cpu().numpy()
             if self.filter_results:
-                scores = filter(lambda x: x[0] == 1, zip(labels, scores))
-            return list(np.argsort(list(scores))[::-1])
+                scores = np.extract(scores[:, 0] < scores[:, 1], scores)
+            if len(scores.shape) > 1 and scores.shape[1] == 2:
+                scores = np.squeeze(scores[:, 1])
+            return list(np.argsort(scores)[::-1])
+
 
     def encode(self, query: str, choices: List[str]):
         inputs = [self.tokenizer.encode_plus(query.lower(),
