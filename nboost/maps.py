@@ -44,12 +44,12 @@ IMAGE_MAP = {
 
 CONFIG_MAP = {
     'elasticsearch': {
-        'query_path': '(body.query.match) | (body.query.term.*) | ($.url.query.q)',
+        'query_path': '(body.query.match) | (body.query.term.*) | (url.query.q)',
         'topk_path': '(body.size) | (url.query.size)',
-        'cvalues_path': '$.body.hits.hits[*]._source.*',
-        'true_cids_path': '$.body.nboost.cids',
-        'cids_path': '$.body.hits.hits[*]._id',
-        'choices_path': '$.body.hits.hits',
+        'true_cids_path': 'body.nboost.cids',
+        'choices_path': 'body.hits.hits',
+        'cvalues_path': '[*]._source.*',
+        'cids_path': '[*]._id',
         'capture_path': '/.*/_search',
         'default_topk': 10
     }

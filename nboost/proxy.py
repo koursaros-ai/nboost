@@ -320,11 +320,9 @@ class Proxy(SocketServer):
     def get_response_paths(response, configs) -> Tuple[list, list, list]:
         """Get the request jsonpaths noted in the configs"""
         choices = get_jsonpath(response, configs['choices_path'])
-        cids = get_jsonpath(response, configs['cids_path'])
-        cvalues = get_jsonpath(response, configs['cvalues_path'])
-
-        # coerce response variables
         choices = flatten(choices)
+        cids = get_jsonpath(choices, configs['cids_path'])
+        cvalues = get_jsonpath(choices, configs['cvalues_path'])
 
         # check for errors
         if not len(choices) == len(cids) == len(cvalues):

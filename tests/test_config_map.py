@@ -1,5 +1,5 @@
 import unittest
-from nboost.helpers import get_jsonpath
+from nboost.helpers import get_jsonpath, flatten
 from nboost.maps import CONFIG_MAP
 
 
@@ -40,12 +40,13 @@ class TestConfigMap(unittest.TestCase):
         config = CONFIG_MAP['elasticsearch']
 
         choices = get_jsonpath(RESPONSE_1, config['choices_path'])
-        self.assertEqual(1.4, choices[0][0]['_score'])
+        choices = flatten(choices)
+        self.assertEqual(1.4, choices[0]['_score'])
 
-        cvalues = get_jsonpath(RESPONSE_1, config['cvalues_path'])
+        cvalues = get_jsonpath(choices, config['cvalues_path'])
         self.assertEqual(["trying out Elasticsearch", "second result", "third result"], cvalues)
 
-        cids = get_jsonpath(RESPONSE_1, config['cids_path'])
+        cids = get_jsonpath(choices, config['cids_path'])
         self.assertEqual(['0', '1', '2'], cids)
 
 

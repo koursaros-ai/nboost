@@ -95,12 +95,12 @@ def prepare_response(response: dict) -> bytes:
     return '{version} {status} {reason}{headers}\r\n\r\n'.format(**response).encode() + response['body']
 
 
-def get_jsonpath(obj: dict, path: str) -> List[JSONTYPES]:
+def get_jsonpath(obj: JSONTYPES, path: str) -> List[JSONTYPES]:
     """Return json values matching jsonpaths."""
     return [match.value for match in parse(path).find(obj)]
 
 
-def set_jsonpath(obj: dict, path: str, value: Any) -> None:
+def set_jsonpath(obj: JSONTYPES, path: str, value: Any) -> None:
     """Sets the value in each matching jsonpath key."""
     expression = parse(path)
     expression.update(obj, value)
