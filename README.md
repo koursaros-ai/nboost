@@ -246,43 +246,52 @@ helm install --name nboost --set replicaCount=4 nboost/nboost
 
 All possible `--set` ([values.yaml](https://github.com/koursaros-ai/nboost/blob/master/charts/nboost/values.yaml)) options are listed below:
 
-| Parameter                                    | Description                                      | Default                                                 |
-| -------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------- |
-| `replicaCount`                               | Number of replicas to deploy                     | `3`                                                     |
-| `image.repository`                           | NBoost Image name                                | `koursaros/nboost`                                      |
-| `image.tag`                                  | NBoost Image tag                                 | `latest-pt`                                             |
-| `args.model_dir`                             | Name or directory of the finetuned model         | `pt-bert-base-uncased-msmarco`                             |
-| `args.model`                                 | Model Class                                      | `BertModel`                                             |
-| `args.host`                                  | Hostname of the proxy                            | `0.0.0.0`                                               |
-| `args.port`                                  | Port for the proxy to listen on                  | `8000`                                                  |
-| `args.uhost`                                 | Hostname of the upstream search api server       | `elasticsearch-master`                                  |
-| `args.uport`                                 | Port of the upstream server                      | `9200`                                                  |
-| `args.data_dir`                              | Directory to cache model binary                  | `nil`                                                   |
-| `args.max_seq_len`                           | Max combined token length                        | `64`                                                    |
-| `args.bufsize`                               | Size of the http buffer in bytes                 | `2048`                                                  |
-| `args.batch_size`                            | Batch size for running through rerank model      | `4`                                                     |
-| `args.multiplier`                            | Factor to increase results by                    | `5`                                                     |
-| `args.workers`                               | Number of threads serving the proxy              | `10`                                                    |
-| `args.codex`                                 | Codex Class                                      | `ESCodex`                                               |
-| `service.type`                               | Kubernetes Service type                          | `LoadBalancer`                                          |
-| `resources`                                  | resource needs and limits to apply to the pod    | `{}`                                                    |
-| `nodeSelector`                               | Node labels for pod assignment                   | `{}`                                                    |
-| `affinity`                                   | Affinity settings for pod assignment             | `{}`                                                    |
-| `tolerations`                                | Toleration labels for pod assignment             | `[]`                                                    |
-| `image.pullPolicy`                           | Image pull policy                                | `IfNotPresent`                                          |
-| `imagePullSecrets`                           | Docker registry secret names as an array         | `[]` (does not add image pull secrets to deployed pods) |
-| `nameOverride`                               | String to override Chart.name                    | `nil`                                                   |
-| `fullnameOverride`                           | String to override Chart.fullname                | `nil`                                                   |
-| `serviceAccount.create`                      | Specifies whether a service account is created   | `nil`                                                   |
+| Parameter                                    | Description                                      | Default                                                     |
+| -------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------- |
+| `replicaCount`                               | Number of replicas to deploy                     | `3`                                                         |
+| `image.repository`                           | NBoost Image name                                | `koursaros/nboost`                                          |
+| `image.tag`                                  | NBoost Image tag                                 | `latest-pt`                                                 |
+| `args.model`                                 | Name of the model class                          | `nil`                                                       |
+| `args.model_dir`                             | Name or directory of the finetuned model         | `pt-bert-base-uncased-msmarco`                              |
+| `args.qa`                                    | Whether to use the qa plugin                     | `False`                                                     |
+| `args.qa_model_dir`                          | Name or directory of the qa model                | `distilbert-base-uncased-distilled-squad`                   |
+| `args.model`                                 | Name of the model class                          | `nil`                                                       |
+| `args.host`                                  | Hostname of the proxy                            | `0.0.0.0`                                                   |
+| `args.port`                                  | Port for the proxy to listen on                  | `8000`                                                      |
+| `args.uhost`                                 | Hostname of the upstream search api server       | `elasticsearch-master`                                      |
+| `args.uport`                                 | Port of the upstream server                      | `9200`                                                      |
+| `args.data_dir`                              | Directory to cache model binary                  | `nil`                                                       |
+| `args.max_seq_len`                           | Max combined token length                        | `64`                                                        |
+| `args.bufsize`                               | Size of the http buffer in bytes                 | `2048`                                                      |
+| `args.batch_size`                            | Batch size for running through rerank model      | `4`                                                         |
+| `args.multiplier`                            | Factor to increase results by                    | `5`                                                         |
+| `args.workers`                               | Number of threads serving the proxy              | `10`                                                        |
+| `args.query_path`                            | Jsonpath in the request to find the query        | `nil`                                                       |
+| `args.topk_path`                             | Jsonpath to find the number of requested results | `nil`                                                       |
+| `args.choices_path`                          | Jsonpath to find the array of choices to reorder | `nil`                                                       |
+| `args.cvalues_path`                          | Jsonpath to find the str values of the choices   | `nil`                                                       |
+| `args.cids_path`                             | Jsonpath to find the ids of the choices          | `nil`                                                       |
+| `args.true_cids_path`                        | Jsonpath of the true choice ids in the request   | `nil`                                                       |
+| `args.capture_path`                          | The url path to tag for reranking via nboost     | `nil`                                                       |
+| `service.type`                               | Kubernetes Service type                          | `LoadBalancer`                                              |
+| `resources`                                  | resource needs and limits to apply to the pod    | `{}`                                                        |
+| `nodeSelector`                               | Node labels for pod assignment                   | `{}`                                                        |
+| `affinity`                                   | Affinity settings for pod assignment             | `{}`                                                        |
+| `tolerations`                                | Toleration labels for pod assignment             | `[]`                                                        |
+| `image.pullPolicy`                           | Image pull policy                                | `IfNotPresent`                                              |
+| `imagePullSecrets`                           | Docker registry secret names as an array         | `[]` (does not add image pull secrets to deployed pods)     |
+| `nameOverride`                               | String to override Chart.name                    | `nil`                                                       |
+| `fullnameOverride`                           | String to override Chart.fullname                | `nil`                                                       |
+| `serviceAccount.create`                      | Specifies whether a service account is created   | `nil`                                                       |
 | `serviceAccount.name`                        | The name of the service account to use. If not set and create is true, a name is generated using the fullname template   | `nil`  |
-| `serviceAccount.create`                      | Specifies whether a service account is created   | `nil`                                                   |
-| `podSecurityContext.fsGroup`                 | Group ID for the container                       | `nil`                                                   |
-| `securityContext.runAsUser`                  | User ID for the container                        | `1001`                                                  |
-| `ingress.enabled`                            | Enable ingress resource                          | `false`                                                 |
-| `ingress.hostName`                           | Hostname to your installation                    | `nil`                                                   |
-| `ingress.path`                               | Path within the url structure                    | `[]`                                                    |
-| `ingress.tls`                                | enable ingress with tls                          | `[]`                                                    |
-| `ingress.tls.secretName`                     | tls type secret to be used                       | `chart-example-tls`                                     |
+| `serviceAccount.create`                      | Specifies whether a service account is created   | `nil`                                                       |
+| `podSecurityContext.fsGroup`                 | Group ID for the container                       | `nil`                                                       |
+| `securityContext.runAsUser`                  | User ID for the container                        | `1001`                                                      |
+| `ingress.enabled`                            | Enable ingress resource                          | `false`                                                     |
+| `ingress.hostName`                           | Hostname to your installation                    | `nil`                                                       |
+| `ingress.path`                               | Path within the url structure                    | `[]`                                                        |
+| `ingress.tls`                                | enable ingress with tls                          | `[]`                                                        |
+| `ingress.tls.secretName`                     | tls type secret to be used                       | `chart-example-tls`                                         |
 
 
 
