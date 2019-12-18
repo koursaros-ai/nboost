@@ -17,7 +17,7 @@ class PtDistilBertQAModel(QAModel):
         self.model = DistilBertForQuestionAnswering.from_pretrained(self.model_dir)
         self.tokenizer = DistilBertTokenizer.from_pretrained(self.model_dir)
 
-    def get_answer(self, query: str, choice: str) -> Tuple[str, Tuple[int, int, int]]:
+    def get_answer(self, query: str, choice: str) -> Tuple[str, Tuple[int, int, int], float]:
         """Return (answer, (candidate, start_pos, end_pos))"""
         doc_tokens = []
         char_to_word_offset = []
@@ -66,11 +66,24 @@ class PtDistilBertQAModel(QAModel):
         assert len(end_logits) == len(tok_to_orig_index) or len(end_logits) == \
                self.max_seq_len - len(truncated_query) - 3
 
-        start_tok = int(np.argmax(start_logits))
-        end_tok = int(np.argmax(end_logits[start_tok + 1:])) + start_tok
+        max_score = start_logits[0] + end_logits[-1]
+        start_tok = 0
+        end_tok = len(end_logits) - 1
+        for i, start_logit in enumerate(start_logits[:-1]):
+            end_logit_pos = np.argmax(end_logits[i+1:]) + i + 1
+            score = start_logit + end_logits[end_logit_pos]
+            if score > max_score:
+                max_score = score
+                start_tok = i
+                end_tok = 2
 
         answer = ' '.join(doc_tokens[
                           tok_to_orig_index[start_tok]:tok_to_orig_index[
                                                            end_tok] + 1])
-        # TODO: Add actual start / end and source passage id
-        return answer, (start_tok, end_tok, 0)
+        start_char_offset = sum([len(doc_tokens[tok]) for tok in
+                                 tok_to_orig_index[:start_tok]])
+        end_char_offset = sum([len(doc_tokens[tok]) for tok in
+                               tok_to_orig_index[:end_tok]])
+        # start_char_offset = char_to_word_offset.index(tok_to_orig_index[start_tok])
+        # end_char_offset = char_to_word_offset.index(tok_to_orig_index[end_tok])
+        return answer, (start_char_offset, end_char_offset, 0), max_score
