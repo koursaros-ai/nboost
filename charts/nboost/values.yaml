@@ -73,10 +73,28 @@ args:
   port: 8000
   uhost: elasticsearch-master
   uport: 9200
-  model_dir: pt-bert-base-uncased-msmarco
   data_dir:
+  model: ""
+  model_dir: pt-bert-base-uncased-msmarco
+  qa: False
+  qa_model: ""
+  qa_model_dir: distilbert-base-uncased-distilled-squad
+  config: elasticsearch
+  lr: 0.01
   max_seq_len: 64
   bufsize: 2048
   batch_size: 4
   multiplier: 5
   workers: 10
+  query_path:
+  topk_path:
+  true_cids_path:
+  choices_path:
+  cvalues_path:
+  cids_path:
+  capture_path:
+  default_topk:
+  delim: ". "
+
+
+
