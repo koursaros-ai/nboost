@@ -320,13 +320,17 @@ class Proxy(SocketServer):
     def get_response_paths(response, configs) -> Tuple[list, list, list]:
         """Get the request jsonpaths noted in the configs"""
         choices = get_jsonpath(response, configs['choices_path'])
+
+        if not isinstance(choices, list):
+            raise InvalidChoices('choices were not a list')
+
         choices = flatten(choices)
-        cids = get_jsonpath(choices, configs['cids_path'])
-        cvalues = get_jsonpath(choices, configs['cvalues_path'])
+        cids = get_jsonpath(choices, '[*].' + configs['cids_path'])
+        cvalues = get_jsonpath(choices, '[*].' + configs['cvalues_path'])
 
         # check for errors
         if not len(choices) == len(cids) == len(cvalues):
-            raise InvalidChoices
+            raise InvalidChoices('number of choices, cids, and cvalues differ')
 
         return choices, cids, cvalues
 
@@ -401,8 +405,8 @@ class Proxy(SocketServer):
             self.proxy_send(client_socket, server_socket, buffer)
             self.proxy_recv(client_socket, server_socket)
 
-        except InvalidChoices:
-            self.logger.warning('Request (%s:%s): invalid choices', *address)
+        except InvalidChoices as exc:
+            self.logger.warning('Request (%s:%s): %s', *address, *exc.args)
             self.proxy_send(client_socket, server_socket, buffer)
             self.proxy_recv(client_socket, server_socket)
 
