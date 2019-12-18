@@ -1,3 +1,11 @@
+# Release `0.0.9`
+> Dec 16th, 2019
+
+### 🧠 Models
+
+ - [[```03745d1```](https://github.com/koursaros-ai/nboost/commit/03745d12276d3b293baef8cf5718cfb95f880c94)] Add / Feature filter results based on classification model (*Jack Pertschuk*) <span style="color:blue">△37</span>
+
+
 # Release `0.0.8`
 > Dec 15th, 2019
 

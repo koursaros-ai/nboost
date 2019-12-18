@@ -24,18 +24,21 @@ class PtBertModel(BaseModel):
         self.rerank_model.to(self.device, non_blocking=True)
 
     def rank(self, query: str, choices: List[str]):
+        if len(choices) == 0:
+            return []
         input_ids, attention_mask, token_type_ids = self.encode(query, choices)
 
         with torch.no_grad():
             logits = self.rerank_model(input_ids,
                                        attention_mask=attention_mask,
                                        token_type_ids=token_type_ids)[0]
-            scores = np.squeeze(logits.detach().cpu().numpy())
+            scores = logits.detach().cpu().numpy()
+            if self.filter_results:
+                scores = np.extract(scores[:, 0] < scores[:, 1], scores)
             if len(scores.shape) > 1 and scores.shape[1] == 2:
-                scores = np.squeeze(scores[:,1])
-            if len(logits) == 1:
-                scores = [scores]
+                scores = np.squeeze(scores[:, 1])
             return list(np.argsort(scores)[::-1])
+
 
     def encode(self, query: str, choices: List[str]):
         inputs = [self.tokenizer.encode_plus(query.lower(),
