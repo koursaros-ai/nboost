@@ -24,6 +24,7 @@ URL_MAP = {
     "tf-biobert-base-uncased-msmarco": "https://storage.googleapis.com/koursaros/biobert-base-uncased-msmarco.tar.gz",
     "pt-tinybert-msmarco": "https://storage.googleapis.com/koursaros/pt-tinybert-msmarco.tar.gz",
     "pt-bert-base-uncased-msmarco":  "https://storage.googleapis.com/koursaros/pt-bert-base-uncased-msmarco.tar.gz",
+    "pt-tinybert-mrpc.tar.gz" : "https://storage.googleapis.com/koursaros/pt-tinybert-mrpc.tar.gz",
     "shuffle-model": "https://example.com"
 }
 
