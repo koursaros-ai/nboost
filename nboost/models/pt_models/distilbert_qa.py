@@ -75,15 +75,13 @@ class PtDistilBertQAModel(QAModel):
             if score > max_score:
                 max_score = score
                 start_tok = i
-                end_tok = 2
+                end_tok = end_logit_pos
 
         answer = ' '.join(doc_tokens[
-                          tok_to_orig_index[start_tok]:tok_to_orig_index[
-                                                           end_tok] + 1])
-        start_char_offset = sum([len(doc_tokens[tok]) for tok in
-                                 tok_to_orig_index[:start_tok]])
-        end_char_offset = sum([len(doc_tokens[tok]) for tok in
-                               tok_to_orig_index[:end_tok]])
-        # start_char_offset = char_to_word_offset.index(tok_to_orig_index[start_tok])
-        # end_char_offset = char_to_word_offset.index(tok_to_orig_index[end_tok])
+                          tok_to_orig_index[start_tok]
+                          :tok_to_orig_index[end_tok] + 1])
+        start_char_offset = char_to_word_offset.index(
+            tok_to_orig_index[start_tok])
+        end_char_offset = char_to_word_offset.index(
+            tok_to_orig_index[min(end_tok+1, len(tok_to_orig_index)-1)]) - 1
         return answer, (start_char_offset, end_char_offset, 0), max_score
