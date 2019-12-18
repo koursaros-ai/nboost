@@ -1,3 +1,15 @@
+# Release `0.1.0`
+> Dec 18th, 2019
+
+### 📡 Proxy
+
+ - [[```7b7feda```](https://github.com/koursaros-ai/nboost/commit/7b7feda9840cba0cfd46a015f4358e0b9aff73d1)] relative response choices jsonpath (*colethienes*) <span style="color:blue">△29</span>
+
+### 🧠 Models
+
+ - [[```03745d1```](https://github.com/koursaros-ai/nboost/commit/03745d12276d3b293baef8cf5718cfb95f880c94)] Add / Feature filter results based on classification model (*Jack Pertschuk*) <span style="color:blue">△37</span>
+
+
 # Release `0.0.9`
 > Dec 16th, 2019
 
