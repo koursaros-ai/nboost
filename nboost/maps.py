@@ -16,6 +16,7 @@ CLASS_MAP = {
     "pt-tinybert-msmarco": "PtBertModel",
     "pt-bert-base-uncased-msmarco": "PtBertModel",
     "shuffle-model": "ShuffleModel",
+    "pt-tinybert-mrpc": "PtBertModel"
 }
 
 URL_MAP = {
@@ -24,7 +25,7 @@ URL_MAP = {
     "tf-biobert-base-uncased-msmarco": "https://storage.googleapis.com/koursaros/biobert-base-uncased-msmarco.tar.gz",
     "pt-tinybert-msmarco": "https://storage.googleapis.com/koursaros/pt-tinybert-msmarco.tar.gz",
     "pt-bert-base-uncased-msmarco":  "https://storage.googleapis.com/koursaros/pt-bert-base-uncased-msmarco.tar.gz",
-    "pt-tinybert-mrpc.tar.gz" : "https://storage.googleapis.com/koursaros/pt-tinybert-mrpc.tar.gz",
+    "pt-tinybert-mrpc" : "https://storage.googleapis.com/koursaros/pt-tinybert-mrpc.tar.gz",
     "shuffle-model": "https://example.com"
 }
 
