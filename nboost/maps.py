@@ -50,8 +50,8 @@ CONFIG_MAP = {
         'topk_path': '(body.size) | (url.query.size)',
         'true_cids_path': 'body.nboost.cids',
         'choices_path': 'body.hits.hits',
-        'cvalues_path': '[*]._source.*',
-        'cids_path': '[*]._id',
+        'cvalues_path': '_source.*',
+        'cids_path': '_id',
         'capture_path': '/.*/_search',
         'default_topk': 10
     }

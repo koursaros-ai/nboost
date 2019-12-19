@@ -1,3 +1,14 @@
+# Release `0.1.1`
+> Dec 18th, 2019
+
+### 📡 Proxy
+
+ - [[```c54b0aa```](https://github.com/koursaros-ai/nboost/commit/c54b0aa0eb864480021d94b5e9d2536c33e2d6cd)] assume choices are list (*colethienes*) <span style="color:blue">△22</span>
+
+### 🧠 Models
+
+ - [[```498b96b```](https://github.com/koursaros-ai/nboost/commit/498b96b3c36e30dd4d8c1c08e54503d155050773)] Fix / char offsets for QA model (*Jack Pertschuk*) <span style="color:blue">△16</span>
+
 # Release `0.1.0`
 > Dec 18th, 2019
 
