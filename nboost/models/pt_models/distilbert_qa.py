@@ -84,6 +84,4 @@ class PtDistilBertQAModel(QAModel):
             tok_to_orig_index[start_tok])
         end_char_offset = char_to_word_offset.index(
             tok_to_orig_index[min(end_tok+1, len(tok_to_orig_index)-1)]) - 1
-        import pdb
-        pdb.set_trace()
         return answer, (start_char_offset, end_char_offset, 0), float(max_score)
