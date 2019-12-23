@@ -382,8 +382,6 @@ class Proxy(SocketServer):
 
                 if self.qa and len(cvalues) > 0:
                     answer, offsets, score = self.qa_model.get_answer(query, cvalues[ranks.index(min(ranks))])
-                    import pdb
-                    pdb.set_trace()
                     response['body']['nboost']['qa_model'] = answer
                     response['body']['nboost']['qa_model_offsets'] = offsets
                     response['body']['nboost']['qa_model_score'] = score
