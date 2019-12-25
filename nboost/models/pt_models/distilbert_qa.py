@@ -16,6 +16,8 @@ class PtDistilBertQAModel(QAModel):
         super().__init__(*args, **kwargs)
         self.model = DistilBertForQuestionAnswering.from_pretrained(self.model_dir)
         self.tokenizer = DistilBertTokenizer.from_pretrained(self.model_dir)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model.to(self.device)
 
     def get_answer(self, query: str, choice: str) -> Tuple[str, Tuple[int, int, int], float]:
         """Return (answer, (candidate, start_pos, end_pos))"""
@@ -58,7 +60,7 @@ class PtDistilBertQAModel(QAModel):
         self.model.eval()
         with torch.no_grad():
             start_logits, end_logits = self.model(
-                input_ids=encoded_dict['input_ids'])
+                input_ids=encoded_dict['input_ids'].to(self.device))
             # add +2 for [CLS] and [SEP], and cut out last [SEP]
             start_logits = start_logits[0][len(truncated_query) + 2:-1]
             end_logits = end_logits[0][len(truncated_query) + 2:-1]
