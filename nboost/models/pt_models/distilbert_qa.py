@@ -61,6 +61,7 @@ class PtDistilBertQAModel(QAModel):
         with torch.no_grad():
             start_logits, end_logits = self.model(
                 input_ids=encoded_dict['input_ids'].to(self.device))
+            start_logits, end_logits = start_logits.cpu(), end_logits.cpu()
             # add +2 for [CLS] and [SEP], and cut out last [SEP]
             start_logits = start_logits[0][len(truncated_query) + 2:-1]
             end_logits = end_logits[0][len(truncated_query) + 2:-1]
