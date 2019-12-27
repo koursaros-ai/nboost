@@ -19,7 +19,7 @@ CVALUES_PATH = 'the jsonpath to find the string values of the choices'
 CHOICES_PATH = 'the jsonpath to find the array of choices to reorder'
 TOPK_PATH = 'the jsonpath to find the number of requested results'
 TRUE_CIDS_PATH = 'the path of the true choice ids in the request'
-CAPTURE_PATH = 'the url path to tag for reranking via nboost'
+SEARCH_PATH = 'the url path to tag for reranking via nboost'
 QUERY_PATH = 'the jsonpath in the request to find the query'
 QA_MODEL_DIR = 'name or directory of the finetuned qa model'
 CONFIG = 'which search api nboost should be configured for'
@@ -45,7 +45,7 @@ def set_parser() -> ArgumentParser:
     """Add default nboost cli arguments to a given parser"""
     parser = ArgumentParser(prog='nboost', description=DESCRIPTION,
                             formatter_class=lambda prog: AdHf(prog, max_help_position=100, width=100))
-    parser.add_argument('--capture_path', type=str, default=SUPPRESS, help=CAPTURE_PATH)
+    parser.add_argument('--search_path', type=str, default=SUPPRESS, help=SEARCH_PATH)
     parser.add_argument('--query_path', type=str, default=SUPPRESS, help=QUERY_PATH)
     parser.add_argument('--topk_path', type=str, default=SUPPRESS, help=TOPK_PATH)
     parser.add_argument('--cvalues_path', type=str, default=SUPPRESS, help=CVALUES_PATH)

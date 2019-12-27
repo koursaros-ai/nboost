@@ -29,5 +29,9 @@ class MissingQuery(RequestException):
     """Could not parse query in request"""
 
 
+class UpstreamServerError(ResponseException):
+    """Raised when the upstream server sends an error status code."""
+
+
 class InvalidChoices(ResponseException):
     """The length of choices, choice ids, and choice values must be the same"""

@@ -13,9 +13,6 @@ class TestConfigMap(unittest.TestCase):
         topks = get_jsonpath(REQUEST_1, config['topk_path'])
         self.assertEqual(20, topks[0])
 
-        true_cids = get_jsonpath(REQUEST_1, config['true_cids_path'])
-        self.assertEqual(['0', '2'], true_cids[0])
-
     def test_request_2(self):
         config = CONFIG_MAP['elasticsearch']
 

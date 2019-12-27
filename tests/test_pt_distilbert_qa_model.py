@@ -10,14 +10,13 @@ class TestPtDistilBertQAModel(unittest.TestCase):
 
     def test_rank(self):
         QUESTION = 'Who bears his memory?'
-        answer, offsets, score = self.proxy.qa_model.get_answer(QUESTION, CONTEXT)
+        answer, start_pos, end_pos, score = self.proxy.qa_model.get_answer(QUESTION, CONTEXT)
         self.assertEqual(answer, 'His tender heir')
-        start_char, end_char, passage = offsets
-        self.assertEqual(answer, CONTEXT[start_char:end_char])
+        self.assertEqual(answer, CONTEXT[start_pos:end_pos])
 
     def test_long_rank(self):
         QUESTION = 'Who contracted to thine own bright eyes?'
-        answer, offsets, score = self.proxy.qa_model.get_answer(QUESTION*10, CONTEXT)
+        answer, start_pos, end_pos, score = self.proxy.qa_model.get_answer(QUESTION*10, CONTEXT)
         self.assertEqual(answer, 'thou contracted to thine own bright eyes')
 
     def tearDown(self) -> None:

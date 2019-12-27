@@ -164,6 +164,22 @@ def count_lines(path: Path):
     return count
 
 
+def calculate_mrr(correct: list, guesses: list):
+    """Calculate mean reciprocal rank as the first correct result index"""
+    for i, guess in enumerate(guesses, 1):
+        if guess in correct:
+            return 1 / i
+    return 0
+
+
+def calculate_overlap(min1, max1, min2, max2):
+    """Calculate the overlap of two lines in average percent overlap."""
+    dist = max(0, min(max1, max2) - max(min1, min2))
+    len1 = max1 - min1
+    len2 = max2 - min2
+    return (dist / len1 if len1 else 0 + dist / len2 if len2 else 0) / 2
+
+
 def flatten(array: list):
     """Flatten nested list to a single list"""
     return [item for sublist in array for item in sublist]

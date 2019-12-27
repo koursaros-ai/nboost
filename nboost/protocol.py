@@ -3,7 +3,7 @@
 from typing import List, Union, Callable
 import socket
 import gzip
-from httptools import HttpRequestParser, HttpResponseParser
+from httptools import HttpRequestParser, HttpResponseParser, HttpParserError
 from nboost.helpers import parse_url, load_json
 
 PARSER_TYPE = Union[HttpRequestParser, HttpResponseParser]
@@ -63,15 +63,20 @@ class HttpProtocol:
         response['status'] = 200
         response['reason'] = 'OK'
         response['headers'] = {}
-        response['body'] = {}
+        response['body'] = {'nboost': {}}
         self.msg = response
 
     def feed(self, data: bytes):
-        """feed data to the underlying parser"""
+        """feed data to the underlying parser. Exceptions raised in the http
+        parser must be reraised from __context__ because they are caught by
+        the MagicStack implementation."""
         for hook in self._data_hooks:
             hook(data)
 
-        self._parser.feed_data(data)
+        try:
+            self._parser.feed_data(data)
+        except HttpParserError as exc:
+            raise exc.__context__ if exc.__context__ else exc
 
     def recv(self, sock: socket.socket):
         """Receive all incoming http data on a socket and execute hooks"""

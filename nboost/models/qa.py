@@ -7,5 +7,5 @@ class QAModel(BaseModel):
         super().__init__(*args, **kwargs)
         self.max_query_length = max_query_length
 
-    def get_answer(self, query: str, choice: str) -> Tuple[str, Tuple[int, int, int], float]:
-        """Return (answer, (start_pos, end_pos, cid), score)"""
+    def get_answer(self, query: str, choice: str) -> Tuple[str, int, int, float]:
+        """Return answer, start_pos, end_pos, score"""

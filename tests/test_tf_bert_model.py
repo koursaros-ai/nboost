@@ -8,7 +8,7 @@ class TestTfBertModel(unittest.TestCase):
         self.proxy = Proxy(model_dir='tf-bert-base-uncased-msmarco')
 
     def test_rank(self):
-        ranks = self.proxy.model.rank(b'O wherefore art thou', CHOICES)
+        ranks = self.proxy.model.rank('O wherefore art thou', CHOICES)
         self.assertIsInstance(ranks, list)
         self.assertEqual(6, len(ranks))
 

@@ -19,8 +19,8 @@ class PtDistilBertQAModel(QAModel):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
 
-    def get_answer(self, query: str, choice: str) -> Tuple[str, Tuple[int, int, int], float]:
-        """Return (answer, (candidate, start_pos, end_pos))"""
+    def get_answer(self, query: str, choice: str) -> Tuple[str, int, int, float]:
+        """Return (answer, (start_pos, end_pos), score)"""
         doc_tokens = []
         char_to_word_offset = []
         prev_is_whitespace = True
@@ -87,4 +87,4 @@ class PtDistilBertQAModel(QAModel):
             tok_to_orig_index[start_tok])
         end_char_offset = char_to_word_offset.index(
             tok_to_orig_index[min(end_tok+1, len(tok_to_orig_index)-1)]) - 1
-        return answer, (start_char_offset, end_char_offset, 0), float(max_score)
+        return answer, start_char_offset, end_char_offset, float(max_score)
