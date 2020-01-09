@@ -150,7 +150,7 @@ class Proxy(SocketServer):
                     self.update_averages(qa_time=qa_time)
 
                     first_choice_id = session.cids[0]
-                    if first_choice_id in session.qa_cids:
+                    if session.qa_cids and first_choice_id in session.qa_cids:
                         qa_start_pos, qa_end_pos = session.qa_cids[first_choice_id]
                         overlap = calculate_overlap(qa_start_pos,qa_end_pos, qa_start_pos, qa_end_pos)
                         self.update_averages(qa_overlap=overlap)
