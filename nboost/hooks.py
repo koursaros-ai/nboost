@@ -24,7 +24,7 @@ def connect_to_server(server_socket, uhost, uport):
 def on_frontend_request(client_socket: socket.socket, session: Session):
     """Send a the static frontend to the client."""
     protocol = HttpProtocol()
-    frontend_path = Path(__file__).parent.parent.joinpath('resources/frontend')
+    frontend_path = Path(__file__).parent.joinpath('resources/frontend')
     protocol.set_response(session.response)
     url_path = session.request['url']['path']
 
