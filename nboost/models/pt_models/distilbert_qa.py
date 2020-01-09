@@ -86,5 +86,5 @@ class PtDistilBertQAModel(QAModel):
         start_char_offset = char_to_word_offset.index(
             tok_to_orig_index[start_tok])
         end_char_offset = char_to_word_offset.index(
-            tok_to_orig_index[min(end_tok+1, len(tok_to_orig_index)-1)]) - 1
+            tok_to_orig_index[min(end_tok, len(tok_to_orig_index)-1)] + 1) - 1
         return answer, start_char_offset, end_char_offset, float(max_score)

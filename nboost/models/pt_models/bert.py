@@ -41,8 +41,8 @@ class PtBertModel(BaseModel):
 
 
     def encode(self, query: str, choices: List[str]):
-        inputs = [self.tokenizer.encode_plus(query.lower(),
-            choice.lower(), add_special_tokens=True) for choice in choices]
+        inputs = [self.tokenizer.encode_plus(query, choice, add_special_tokens=True)
+                  for choice in choices]
 
         max_len = min(max(len(t['input_ids']) for t in inputs), self.max_seq_len)
         input_ids = [t['input_ids'][:max_len] +
