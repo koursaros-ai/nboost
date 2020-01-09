@@ -19,9 +19,8 @@ class TestServer(SocketServer):
 class TestProxy(unittest.TestCase):
     def test_proxy(self):
         server = TestServer(port=9500, verbose=True)
-        proxy = Proxy(host='0.0.0.0', port=8000, uhost='0.0.0.0',
-                      model_dir='shuffle-model', uport=9500, model='ShuffleModel',
-                      bufsize=2048, delim='. ', multiplier=5, verbose=True)
+        proxy = Proxy(model_dir='shuffle-model', model='ShuffleModel', uport=9500,
+                      verbose=True)
         proxy.start()
         server.start()
         proxy.is_ready.wait()
