@@ -42,23 +42,28 @@ Just like the Elasticsearch tutorial, we will go through the three ways to confi
    In a python script, we can run:
     ```python
     import requests
+    from pprint import pprint
     
-    requests.get(
-       url='http://localhost:8000/travel/_search',
-       params={'q': 'how old is obama'},
-       json={
-           'nboost': {
-               'uhost': 'api.cognitive.microsoft.com',
-               'uport': 443,
-               'topn': 50,
-               'query_path': 'url.query.q',
-               'topk_path': 'count',
-               'default_topk': 10,
-               'choices_path': 'body.webPages.value',
-               'cvalues_path': 'snippet'
-           }
-       }
-   )
+    response = requests.get(
+        url='http://localhost:8000/bing/v7.0/search',
+        headers={'Ocp-Apim-Subscription-Key': '<BING API KEY>'},
+        params={'q': 'how old is obama', 'responseFilter': 'Webpages'},
+        json={
+            'nboost': {
+                'uhost': 'api.cognitive.microsoft.com',
+                'uport': 443,
+                'ussl': True,
+                'topn': 50,
+                'query_path': 'url.query.q',
+                'topk_path': 'count',
+                'default_topk': 10,
+                'choices_path': 'body.webPages.value',
+                'cvalues_path': 'snippet'
+            }
+        }
+    )
+    
+    pprint(response.json())
    ```
    
 3. Via query params.
@@ -71,13 +76,17 @@ Just like the Elasticsearch tutorial, we will go through the three ways to confi
    In a python script, we can run:
     ```python
     import requests
+    from pprint import pprint
     
-    requests.get(
-       url='http://localhost:8000/travel/_search',
+    response = requests.get(
+       url='http://localhost:8000/bing/v7.0/search',
+       headers={'Ocp-Apim-Subscription-Key': '<BING API KEY>'},
        params={
            'q': 'how old is obama',
+           'responseFilter': 'Webpages',
            'uhost': 'api.cognitive.microsoft.com',
            'uport': 443,
+           'ussl': True,
            'topn': 50,
            'query_path': 'url.query.q',
            'topk_path': 'count',
@@ -87,9 +96,35 @@ Just like the Elasticsearch tutorial, we will go through the three ways to confi
        }
    )
    
+   pprint(response.json())
+   
 No matter how we query, the json response will look like this:
 
 ```json
+{"_type": "SearchResponse",
+ "nboost": {"answer_start_pos": 145,
+            "answer_stop_pos": 157,
+            "answer_text": "Born in 1961"},
+ "queryContext": {"originalQuery": "how old is obama"},
+ "webPages": {"totalEstimatedMatches": 81800000,
+              "value": [{"about": [{"name": "Barack Obama"}],
+                         "dateLastCrawled": "2020-01-06T13:40:00.0000000Z",
+                         "displayUrl": "https://www.myagecalculator.com/how-old-is-barack-obama",
+                         "id": "https://api.cognitive.microsoft.com/api/v7/#WebPages.9",
+                         "isFamilyFriendly": true,
+                         "isNavigational": false,
+                         "language": "en",
+                         "name": "How old is Barack Obama? - MyAgeCalculator",
+                         "snippet": "Barack Obama is a prominent American "
+                                    "politician, a Democrat and the 44th "
+                                    "President of the United States who served "
+                                    "two terms, from 2009 to 2017. Born in "
+                                    "1961 in Hawaii, Obama spent some parts of "
+                                    "his childhood in the continental US and "
+                                    "in Indonesia.",
+                         "url": "https://www.myagecalculator.com/how-old-is-barack-obama"},
+                        {"about": [{"name": "Family of Barack Obama"}],
+    ...
 
 ```
    

@@ -84,6 +84,7 @@ Now we're ready to deploy our Neural Proxy! There are three ways to configure NB
    )
    ```
 3. Via query params.
+
     On the command line, let's run:
     ```bash
    nboost --search_path /.*/_search
