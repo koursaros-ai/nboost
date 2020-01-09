@@ -6,5 +6,4 @@ elasticsearch
 tqdm
 termcolor
 numpy
-tensorflow
 httptools
