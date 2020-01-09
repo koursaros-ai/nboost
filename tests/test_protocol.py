@@ -43,6 +43,6 @@ class TestHttpProtocol(unittest.TestCase):
         protocol.feed(RESPONSE_PART_2)
         self.assertTrue(protocol._is_done)
         self.assertEqual(session.response['headers']['test-header'], '2')
-        self.assertEqual({'test': 'response'}, session.response['body'])
+        self.assertEqual({'nboost': {}, 'test': 'response'}, session.response['body'])
 
 
