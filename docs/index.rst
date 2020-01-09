@@ -15,9 +15,15 @@ Nboost leverages finetuned models to produce domain-specific neural search engin
 
 .. toctree::
    :maxdepth: 2
-   :caption: Getting Started
+   :caption: Elasticsearch
 
-   chapter/getting-started.md
+   chapter/elasticsearch.md
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Bing API
+
+   chapter/bing-api.md
 
 .. toctree::
    :maxdepth: 3
