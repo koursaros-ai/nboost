@@ -175,9 +175,17 @@ docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elastics
 ```
 
 #### Deploying the proxy
-Now we're ready to deploy our Neural Proxy! It is very simple to do this, simply run:
+Now we're ready to deploy our Neural Proxy! It is very simple to do this, run:
 ```bash
-nboost --uport 9200
+nboost                              \
+    --uhost localhost               \
+    --uport 9200                    \
+    --search_path /.*/_search       \
+    --query_path url.query.q        \
+    --topk_path url.query.size      \
+    --default_topk 10               \
+    --choices_path body.hits.hits   \
+    --cvalues_path _source.passage
 ```
 > 📢 The `--uhost` and `--uport` should be the same as the Elasticsearch server above! Uhost and uport are short for upstream-host and upstream-port (referring to the upstream server).
 
