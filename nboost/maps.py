@@ -41,15 +41,3 @@ IMAGE_MAP = {
     'tf': '../Dockerfiles/tf',
     'pt': '../Dockerfiles/pt'
 }
-
-CONFIG_MAP = {
-    'elasticsearch': {
-        'query_path': '(body.query.match) | (body.query.term.*) | (url.query.q)',
-        'topk_path': '(body.size) | (url.query.size)',
-        'choices_path': 'body.hits.hits',
-        'cvalues_path': '_source.*',
-        'cids_path': '_id',
-        'search_path': '/.*/_search',
-        'default_topk': 10
-    }
-}

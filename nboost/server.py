@@ -3,13 +3,17 @@ from threading import Thread, Event, get_ident
 from typing import Tuple
 import socket
 from nboost.logger import set_logger
+from nboost import defaults
 
 
 class SocketServer(Thread):
     """Base Socket Server class for the proxy"""
 
-    def __init__(self, host: str = '0.0.0.0', port: int = 8000,
-                 backlog: int = 100, workers: int = 10, **kwargs):
+    def __init__(self, host: type(defaults.host) = defaults.host,
+                 port: type(defaults.port) = defaults.port,
+                 backlog: type(defaults.backlog) = defaults.backlog,
+                 workers: type(defaults.workers) = defaults.workers,
+                 **kwargs):
         super().__init__()
         self.address = (host, port)
         self.backlog = backlog
