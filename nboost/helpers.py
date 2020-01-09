@@ -69,7 +69,10 @@ def prepare_request(request: dict) -> bytes:
 
     # cast request sections to strings
     request['headers'].pop('content-encoding', '')
-    request['headers']['content-length'] = len(request['body'])
+
+    if request['body']:
+        request['headers']['content-length'] = len(request['body'])
+
     request = {
         'body': request['body'],
         'url': unparse_url(request['url']),
@@ -89,6 +92,7 @@ def prepare_response(response: dict) -> bytes:
         body: bytes"""
     response['reason'] = responses[response['status']]
     response['headers'].pop('content-encoding', '')
+    response['headers'].pop('transfer-encoding', '')
     response['headers']['content-length'] = str(len(response['body']))
     response['headers'] = ''.join('\r\n%s: %s' % (k, v) for k, v in response['headers'].items())
 

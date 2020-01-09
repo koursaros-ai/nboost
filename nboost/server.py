@@ -15,7 +15,7 @@ class SocketServer(Thread):
                  workers: type(defaults.workers) = defaults.workers,
                  **kwargs):
         super().__init__()
-        self.address = (host, port)
+        self.address = (socket.gethostbyname(host), port)
         self.backlog = backlog
         self.workers = workers
         self.is_ready = Event()
