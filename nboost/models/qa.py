@@ -1,9 +1,12 @@
 from typing import Tuple
 from nboost.models.base import BaseModel
+from nboost import defaults
 
 
 class QAModel(BaseModel):
-    def __init__(self, *args, max_query_length=64, **kwargs):
+    def __init__(self, *args,
+                 max_query_length: type(defaults.max_query_length) = defaults.max_query_length,
+                 **kwargs):
         super().__init__(*args, **kwargs)
         self.max_query_length = max_query_length
 
