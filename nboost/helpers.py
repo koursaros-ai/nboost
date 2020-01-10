@@ -70,31 +70,6 @@ def unparse_url(url: dict) -> str:
     ))
 
 
-def prepare_request(request: dict) -> bytes:
-    """Prepares a request with the following keys:
-        version: str
-        headers: dict
-        url: dict
-        body: bytes
-        method: str"""
-
-    # cast request sections to strings
-    request['headers'].pop('content-encoding', '')
-
-    if request['body']:
-        request['headers']['content-length'] = len(request['body'])
-
-    request = {
-        'body': request['body'],
-        'url': unparse_url(request['url']),
-        'headers': ''.join('\r\n%s: %s' % (k, v) for k, v in request['headers'].items()),
-        'method': request['method'],
-        'version': request['version']
-    }
-
-    return '{method} {url} {version}{headers}\r\n\r\n'.format(**request).encode() + request['body']
-
-
 def prepare_response(response: dict) -> bytes:
     """Prepares a request with the following keys:
         version: str
@@ -119,11 +94,6 @@ def set_jsonpath(obj: JSONTYPES, path: str, value: Any) -> None:
     """Sets the value in each matching jsonpath key."""
     expression = parse(path)
     expression.update(obj, value)
-
-if __name__ == "__main__":
-    x = {'hello': {}}
-    set_jsonpath(x, 'hello', 'sup')
-    print(x)
 
 
 def download_file(url: str, path: Path):

@@ -5,8 +5,10 @@ from nboost.models.base import BaseModel
 from nboost.models.qa import QAModel
 from nboost.session import Session
 from nboost.exceptions import *
+from nboost import defaults
 from pathlib import Path
 from requests import ConnectionError
+from copy import deepcopy
 import requests
 import socket
 import time
@@ -97,18 +99,23 @@ def on_client_request(client_socket, session: Session, search_path: str):
 
 def on_server_request(session: Session):
     """Send magnified request to the server"""
-    session.request['headers'].pop('host', '')
+    request = deepcopy(session.request)
+    request['headers'].pop('host', '')
+
+    for default in defaults.__dict__:
+        request['url']['query'].pop(default, '')
+
     try:
         response = requests.request(
-            method=session.request['method'],
+            method=request['method'],
             url='{protocol}://{host}:{port}{path}'.format(
                 protocol='https' if session.ussl else 'http',
                 host=session.uhost,
                 port=session.uport,
-                path=unparse_url(session.request['url'])
+                path=unparse_url(request['url'])
             ),
-            headers=session.request['headers'],
-            json=session.request['body']
+            headers=request['headers'],
+            json=request['body']
         )
 
     except ConnectionError as exc:
