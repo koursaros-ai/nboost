@@ -16,10 +16,10 @@ Just like the Elasticsearch tutorial, we will go through the three ways to confi
         --uhost api.cognitive.microsoft.com \
         --uport 443                         \
         --ussl True                         \
-        --topn 50                           \
+        --topn 20                           \
         --search_path /bing/v7.0/search     \
         --query_path url.query.q            \
-        --topk_path count                   \
+        --topk_path url.query.count         \
         --default_topk 10                   \
         --choices_path body.webPages.value  \
         --cvalues_path snippet              \
@@ -53,9 +53,9 @@ Just like the Elasticsearch tutorial, we will go through the three ways to confi
                 'uhost': 'api.cognitive.microsoft.com',
                 'uport': 443,
                 'ussl': True,
-                'topn': 50,
+                'topn': 20,
                 'query_path': 'url.query.q',
-                'topk_path': 'count',
+                'topk_path': 'url.query.count',
                 'default_topk': 10,
                 'choices_path': 'body.webPages.value',
                 'cvalues_path': 'snippet'
@@ -87,9 +87,9 @@ Just like the Elasticsearch tutorial, we will go through the three ways to confi
            'uhost': 'api.cognitive.microsoft.com',
            'uport': 443,
            'ussl': True,
-           'topn': 50,
+           'topn': 20,
            'query_path': 'url.query.q',
-           'topk_path': 'count',
+           'topk_path': 'url.query.count',
            'default_topk': 10,
            'choices_path': 'body.webPages.value',
            'cvalues_path': 'snippet'
@@ -97,6 +97,7 @@ Just like the Elasticsearch tutorial, we will go through the three ways to confi
    )
    
    pprint(response.json())
+   ```
    
 No matter how we query, the json response will look like this:
 
