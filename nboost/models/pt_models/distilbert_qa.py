@@ -66,8 +66,8 @@ class PtDistilBertQAModel(QAModel):
             start_logits = start_logits[0][len(truncated_query) + 2:-1]
             end_logits = end_logits[0][len(truncated_query) + 2:-1]
 
-        assert len(end_logits) == len(tok_to_orig_index) or len(end_logits) == \
-               self.max_seq_len - len(truncated_query)
+        assert len(end_logits) == len(tok_to_orig_index) or len(end_logits) - \
+               self.max_seq_len - len(truncated_query) <= 3
 
         if len(start_logits) == 0:
             return '', 0, 0, 0
