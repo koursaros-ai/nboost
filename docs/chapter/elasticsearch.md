@@ -62,26 +62,29 @@ Now we're ready to deploy our Neural Proxy! There are three ways to configure NB
    In a python script, we can run:
     ```python
     import requests
+    from pprint import pprint
     
-    requests.get(
-       url='http://localhost:8000/travel/_search',
-       json={
-           'nboost': {
-               'uhost': 'localhost',
-               'uport': 9200,
-               'query_path': 'body.query.match.passage',
-               'topk_path': 'body.size',
-               'default_topk': 10,
-               'topn': 50,
-               'choices_path': 'body.hits.hits',
-               'cvalues_path': '_source.passage'
-           },
-           'query': {
-               'match': {'passage': 'I want a vegas hotel with a pool'},
-               'size': 2
-           }
-       }
-   )
+    response = requests.get(
+        url='http://localhost:8000/travel/_search',
+        json={
+            'nboost': {
+                'uhost': 'localhost',
+                'uport': 9200,
+                'query_path': 'body.query.match.passage',
+                'topk_path': 'body.size',
+                'default_topk': 10,
+                'topn': 50,
+                'choices_path': 'body.hits.hits',
+                'cvalues_path': '_source.passage'
+            },
+            'size': 2,
+            'query': {
+                'match': {'passage': 'I want a Louisiana hotel with a pool'}
+            }
+        }
+    )
+    
+    pprint(response.json())
    ```
 3. Via query params.
 
@@ -93,22 +96,25 @@ Now we're ready to deploy our Neural Proxy! There are three ways to configure NB
       In a python script, we can run:
     ```python
    import requests
+   from pprint import pprint
     
-   requests.get(
-       url='http://localhost:8000/travel/_search',
-       params={
-           'uhost': 'localhost',
-           'uport': 9200,
-           'query_path': 'url.query.q',
-           'topk_path': 'url.query.size',
-           'default_topk': 10,
-           'topn': 50,
-           'choices_path': 'body.hits.hits',
-           'cvalues_path': '_source.passage',
-           'q': 'passage:I want a vegas hotel with a pool',
-           'size': 2
-       }
+   response = requests.get(
+        url='http://localhost:8000/travel/_search',
+        params={
+            'uhost': 'localhost',
+            'uport': 9200,
+            'query_path': 'url.query.q',
+            'topk_path': 'url.query.size',
+            'default_topk': 10,
+            'topn': 50,
+            'choices_path': 'body.hits.hits',
+            'cvalues_path': '_source.passage',
+            'q': 'passage:I want a vegas hotel with a pool',
+            'size': 2
+        }
    )
+    
+   pprint(response.json())
    ```
 
 No matter how we configure NBoost, if the Elasticsearch result has the `nboost` tag in it, congratulations it's working!
