@@ -79,12 +79,13 @@ class Proxy(SocketServer):
                 session.set_request_path(session.topk_path, session.topn)
 
             hooks.on_server_request(session)
+            stats['choices'] = len(session.choices)
 
             if self.rerank:
                 if session.rerank_cids:
                     stats['server_mrr'] = calculate_mrr(session.rerank_cids, session.cids)
 
-                stats['rerank_time'] = hooks.on_rerank(self.model, session)
+                stats['rerank_time'] = hooks.on_rerank(self.model, session, stats['topk'])
 
                 if session.rerank_cids:
                     stats['model_mrr'] = calculate_mrr(session.rerank_cids, session.cids)

@@ -143,10 +143,10 @@ def on_proxy_error(client_socket, exc: Exception):
     client_socket.send(prepared_response)
 
 
-def on_rerank(model: BaseModel, session: Session) -> float:
+def on_rerank(model: BaseModel, session: Session, topk: int) -> float:
     """Returns the time the model takes to rerank."""
     start_time = time.perf_counter()
-    ranks = model.rank(session.query, session.cvalues)[:session.topk]
+    ranks = model.rank(session.query, session.cvalues)[:topk]
     total_time = time.perf_counter() - start_time
     reranked_choices = [session.choices[rank] for rank in ranks]
     session.set_response_path(session.choices_path, reranked_choices)
