@@ -11,14 +11,14 @@ import operator
 import tarfile
 import json
 from jsonpath_ng.ext import parse
-from jsonpath_ng import jsonpath
+from jsonpath_ng import jsonpath, DatumInContext
 from tqdm import tqdm
 import requests
 
 JSONTYPES = Union[dict, list, str, int, float]
 
 
-def update(self, data, val):
+def update_union(self, data, val):
     """JsonPath Union class patch to support updating."""
     with suppress(TypeError):
         self.left.update(data, val)
@@ -27,7 +27,18 @@ def update(self, data, val):
         self.right.update(data, val)
 
 
-jsonpath.Union.update = update
+def update_field(self, data, val):
+    """JsonPath Fields class patch to support adding new keys."""
+    for field in self.reified_fields(DatumInContext.wrap(data)):
+        if hasattr(val, '__call__'):
+            val(data[field], data, field)
+        else:
+            data[field] = val
+    return data
+
+
+jsonpath.Union.update = update_union
+jsonpath.Fields.update = update_field
 
 
 def parse_url(url: bytes) -> dict:
@@ -108,6 +119,11 @@ def set_jsonpath(obj: JSONTYPES, path: str, value: Any) -> None:
     """Sets the value in each matching jsonpath key."""
     expression = parse(path)
     expression.update(obj, value)
+
+if __name__ == "__main__":
+    x = {'hello': {}}
+    set_jsonpath(x, 'hello', 'sup')
+    print(x)
 
 
 def download_file(url: str, path: Path):
