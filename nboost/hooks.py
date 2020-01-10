@@ -101,6 +101,7 @@ def on_server_request(session: Session):
     """Send magnified request to the server"""
     request = deepcopy(session.request)
     request['headers'].pop('host', '')
+    request['body'].pop('nboost', '')
 
     for default in defaults.__dict__:
         request['url']['query'].pop(default, '')
