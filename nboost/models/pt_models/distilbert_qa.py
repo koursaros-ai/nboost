@@ -67,7 +67,10 @@ class PtDistilBertQAModel(QAModel):
             end_logits = end_logits[0][len(truncated_query) + 2:-1]
 
         assert len(end_logits) == len(tok_to_orig_index) or len(end_logits) == \
-               self.max_seq_len - len(truncated_query) - 3
+               self.max_seq_len - len(truncated_query)
+
+        if len(start_logits) == 0:
+            return '', 0, 0, 0
 
         max_score = start_logits[0] + end_logits[-1]
         start_tok = 0
@@ -86,5 +89,5 @@ class PtDistilBertQAModel(QAModel):
         start_char_offset = char_to_word_offset.index(
             tok_to_orig_index[start_tok])
         end_char_offset = char_to_word_offset.index(
-            tok_to_orig_index[min(end_tok, len(tok_to_orig_index)-1)] + 1) - 1
+            tok_to_orig_index[min(end_tok, len(tok_to_orig_index)-2)] + 1) - 1
         return answer, start_char_offset, end_char_offset, float(max_score)
