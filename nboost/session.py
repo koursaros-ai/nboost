@@ -177,5 +177,5 @@ class Session:
     @property
     def qa_cids(self) -> dict:
         qa_cids = self.get_config('qa_cids')
-        return qa_cids[0] if qa_cids else None
+        return qa_cids[0] if qa_cids else {}
 
