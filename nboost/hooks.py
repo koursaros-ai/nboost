@@ -98,11 +98,10 @@ def on_client_request(client_socket, session: Session, search_path: str):
 def on_server_request(session: Session):
     """Send magnified request to the server"""
     session.request['headers'].pop('host', '')
-
     try:
         response = requests.request(
             method=session.request['method'],
-            url='{protocol}://{host}:{port}/{path}'.format(
+            url='{protocol}://{host}:{port}{path}'.format(
                 protocol='https' if session.ussl else 'http',
                 host=session.uhost,
                 port=session.uport,
@@ -111,8 +110,9 @@ def on_server_request(session: Session):
             headers=session.request['headers'],
             json=session.request['body']
         )
-    except ConnectionError:
-        raise UpstreamServerError
+
+    except ConnectionError as exc:
+        raise UpstreamServerError(exc)
 
     session.response['status'] = response.status_code
     session.response['headers'] = {k.lower(): v for k, v in response.headers.items()}
@@ -121,7 +121,7 @@ def on_server_request(session: Session):
     session.response['reason'] = response.reason
 
     if response.status_code >= 400:
-        raise UpstreamServerError
+        raise UpstreamServerError(response.text)
 
 
 def on_client_response(session: Session, client_socket):

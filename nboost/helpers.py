@@ -54,7 +54,7 @@ def unparse_url(url: dict) -> str:
         url['netloc'],
         url['path'],
         url['params'],
-        urlencode(url['query']),
+        urlencode(url['query'], quote_via=lambda x, *a: x),
         url['fragment']
     ))
 

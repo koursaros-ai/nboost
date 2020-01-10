@@ -118,8 +118,8 @@ class Proxy(SocketServer):
             self.logger.warning(prefix + 'missing query')
             hooks.on_unhandled_request(client_socket, server_socket, session)
 
-        except UpstreamServerError:
-            self.logger.error(prefix + 'server status %s' % session.response['status'])
+        except UpstreamServerError as exc:
+            self.logger.error(prefix + 'server status %s' % exc)
             hooks.on_client_response(session, client_socket)
 
         except InvalidChoices as exc:
