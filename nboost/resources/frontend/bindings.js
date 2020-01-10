@@ -65,27 +65,37 @@ const vm = new Vue({
                     vm.first_deck = [];
                     vm.second_deck = [];
                     vm.third_deck = [];
-                    // add to top deck, high priority
-                    console.log(vm.results)
-                    Object.keys(vm.results.time).forEach(
-                        function (value, index) {
-                            prop = vm.results.time[value];
-                            if (Object.prototype.hasOwnProperty.call(vm.results.time, value)) {
-                                value = value + " (ms)";
-                                if (vm.first_deck.length < 4) {
-                                    vm.addToDeck(value, prop.avg, vm.first_deck, false);
-                                } else {
-                                    vm.addToDeck(value, prop.avg, vm.second_deck, false);
-                                }
+                    vm.fourth_deck = [];
+                    vm.fifth_deck = [];
+                    vm.sixth_deck = [];
+
+                    Object.keys(vm.results).forEach(
+
+                        function (key, index) {
+                            value = vm.results[key]
+
+                            if (vm.first_deck.length < 4) {
+                                vm.addToDeck(key, value, vm.first_deck, false);
+                            } else if (vm.second_deck.length < 4) {
+                                vm.addToDeck(key, value, vm.second_deck, false);
+                            } else if (vm.third_deck.length < 4) {
+                                vm.addToDeck(key, value, vm.third_deck, false);
+                            } else if (vm.fourth_deck.length < 4) {
+                                vm.addToDeck(key, value, vm.fourth_deck, false);
+                            } else if (vm.fifth_deck.length < 4) {
+                                vm.addToDeck(key, value, vm.fifth_deck, false);
+                            } else if (vm.sixth_deck.length < 4) {
+                                vm.addToDeck(key, value, vm.sixth_deck, false);
                             }
+//
                         })
-                    Object.keys(vm.results.vars).forEach(
-                        function (value, index) {
-                            prop = vm.results.vars[value];
-                            if (Object.prototype.hasOwnProperty.call(vm.results.vars, value)) {
-                                vm.addToDeck(value, prop.avg, vm.third_deck, false);
-                            }
-                        })
+//                    Object.keys(vm.results.vars).forEach(
+//                        function (value, index) {
+//                            prop = vm.results.vars[value];
+//                            if (Object.prototype.hasOwnProperty.call(vm.results.vars, value)) {
+//                                vm.addToDeck(value, prop.avg, vm.third_deck, false);
+//                            }
+//                        })
                 },
                 complete: function () {
                     console.log('Finished all tasks');
@@ -95,7 +105,7 @@ const vm = new Vue({
         addToDeck: function (text, value, deck, round) {
             round = typeof round !== 'undefined' ? round : true;
             round = (!isNaN(parseFloat(value)) && isFinite(value)) ? round : false;
-            deck.push({'text': text, 'value': round ? Math.round(value) : value.toFixed(2)})
+            deck.push({'text': text, 'value': round ? Math.round(value) : value})
         },
         addNewTimeData: function (ds, new_val, delta) {
             if (ds.last >= 0)

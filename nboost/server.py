@@ -13,14 +13,15 @@ class SocketServer(Thread):
                  port: type(defaults.port) = defaults.port,
                  backlog: type(defaults.backlog) = defaults.backlog,
                  workers: type(defaults.workers) = defaults.workers,
+                 verbose: type(defaults.verbose) = defaults.verbose,
                  **kwargs):
         super().__init__()
-        self.address = (host, port)
+        self.address = (socket.gethostbyname(host), port)
         self.backlog = backlog
         self.workers = workers
         self.is_ready = Event()
         self.sock = self.set_socket()
-        self.logger = set_logger(self.__class__.__name__)
+        self.logger = set_logger(self.__class__.__name__, verbose=verbose)
 
     @staticmethod
     def set_socket() -> socket.socket:

@@ -43,28 +43,13 @@ class HttpProtocol:
 
     def set_request(self, request: dict):
         """Set new request"""
-        request['version'] = 'HTTP/1.1'
-        request['method'] = 'GET'
-        request['headers'] = {}
-        request['body'] = {}
-        request['url'] = {
-            'scheme': '',
-            'netloc': '',
-            'path': '',
-            'params': '',
-            'query': {},
-            'fragment': ''
-        }
         self.msg = request
+        self.set_request_parser()
 
     def set_response(self, response: dict):
         """Set new response"""
-        response['version'] = 'HTTP/1.1'
-        response['status'] = 200
-        response['reason'] = 'OK'
-        response['headers'] = {}
-        response['body'] = {'nboost': {}}
         self.msg = response
+        self.set_response_parser()
 
     def feed(self, data: bytes):
         """feed data to the underlying parser. Exceptions raised in the http
@@ -125,7 +110,8 @@ class HttpProtocol:
 
             if self.msg['headers'].get('content-encoding', '') == 'gzip':
                 self._body = gzip.decompress(self._body)
-            self.msg['body'] = load_json(self._body)
+
+            self.msg['body'].update(load_json(self._body))
 
         self._is_done = True
 

@@ -1,6 +1,6 @@
 from nboost.helpers import prepare_response, dump_json
-from nboost.protocol import HttpProtocol
 from nboost.server import SocketServer
+from nboost.session import Session
 from nboost.proxy import Proxy
 import requests
 import unittest
@@ -8,11 +8,10 @@ import unittest
 
 class TestServer(SocketServer):
     def loop(self, client_socket, address):
-        response = {}
-        protocol = HttpProtocol(2048)
-        protocol.set_response(response)
-        response['body'] = dump_json(RESPONSE)
-        client_socket.send(prepare_response(response))
+        session = Session()
+        session.response['body'] = dump_json(RESPONSE)
+        prepared_response = prepare_response(session.response)
+        client_socket.send(prepared_response)
         client_socket.close()
 
 
@@ -44,11 +43,9 @@ class TestProxy(unittest.TestCase):
         status_res = requests.get('http://localhost:8000/nboost/status')
         self.assertTrue(status_res.ok)
         print(status_res.content.decode())
-        # self.assertEqual(0.5, status_res.json()['vars']['upstream_mrr']['avg'])
 
         # invalid host
-        proxy.uport = 2000
-        invalid_res = requests.get('http://localhost:8000')
+        invalid_res = requests.get('http://localhost:8000', params={'uport': 2000})
         print(invalid_res.content)
         self.assertFalse(invalid_res.ok)
 

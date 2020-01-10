@@ -33,7 +33,7 @@ html {
 }
 
 .card-text {
-    font-size: 60px;
+    font-size: 16px;
     font-family: "Courier New", Courier, monospace;
     white-space: nowrap;
     text-overflow: ellipsis;

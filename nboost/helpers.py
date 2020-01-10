@@ -11,14 +11,14 @@ import operator
 import tarfile
 import json
 from jsonpath_ng.ext import parse
-from jsonpath_ng import jsonpath
+from jsonpath_ng import jsonpath, DatumInContext
 from tqdm import tqdm
 import requests
 
 JSONTYPES = Union[dict, list, str, int, float]
 
 
-def update(self, data, val):
+def update_union(self, data, val):
     """JsonPath Union class patch to support updating."""
     with suppress(TypeError):
         self.left.update(data, val)
@@ -27,7 +27,18 @@ def update(self, data, val):
         self.right.update(data, val)
 
 
-jsonpath.Union.update = update
+def update_field(self, data, val):
+    """JsonPath Fields class patch to support adding new keys."""
+    for field in self.reified_fields(DatumInContext.wrap(data)):
+        if hasattr(val, '__call__'):
+            val(data[field], data, field)
+        else:
+            data[field] = val
+    return data
+
+
+jsonpath.Union.update = update_union
+jsonpath.Fields.update = update_field
 
 
 def parse_url(url: bytes) -> dict:
@@ -54,31 +65,9 @@ def unparse_url(url: dict) -> str:
         url['netloc'],
         url['path'],
         url['params'],
-        urlencode(url['query']),
+        urlencode(url['query'], quote_via=lambda x, *a: x),
         url['fragment']
     ))
-
-
-def prepare_request(request: dict) -> bytes:
-    """Prepares a request with the following keys:
-        version: str
-        headers: dict
-        url: dict
-        body: bytes
-        method: str"""
-
-    # cast request sections to strings
-    request['headers'].pop('content-encoding', '')
-    request['headers']['content-length'] = len(request['body'])
-    request = {
-        'body': request['body'],
-        'url': unparse_url(request['url']),
-        'headers': ''.join('\r\n%s: %s' % (k, v) for k, v in request['headers'].items()),
-        'method': request['method'],
-        'version': request['version']
-    }
-
-    return '{method} {url} {version}{headers}\r\n\r\n'.format(**request).encode() + request['body']
 
 
 def prepare_response(response: dict) -> bytes:
@@ -89,6 +78,7 @@ def prepare_response(response: dict) -> bytes:
         body: bytes"""
     response['reason'] = responses[response['status']]
     response['headers'].pop('content-encoding', '')
+    response['headers'].pop('transfer-encoding', '')
     response['headers']['content-length'] = str(len(response['body']))
     response['headers'] = ''.join('\r\n%s: %s' % (k, v) for k, v in response['headers'].items())
 

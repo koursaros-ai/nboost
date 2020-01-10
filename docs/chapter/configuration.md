@@ -46,23 +46,7 @@ The url is in the form of `scheme://netloc/path;parameters?query#fragment`, but 
   "choices_path":  "(str) the jsonpath to find the array of choices to reorder",
   "cvalues_path": "(str) the jsonpath to find the string values of the choices",
   "cids_path": "(str) the jsonpath to find the ids of the choices (for benchmarking)",
-  "capture_path": "(str) the route to capture for reranking search results",
+  "search_path": "(str) the route to capture for reranking search results",
   "default_topk": "(int) the default number of results to return if the topk_path is not found"
 }
-```
-
-Depending on value of the `key` switch that you use when you run NBoost on the cli, it will use a configuration in the CONFIG_MAP.
-
-For example, the default Elasticsearch configuration is:
-```json
-{
-    "query_path": "(body.query.match) | (body.query.term.*) | ($.url.query.q)",
-    "topk_path": "(body.size) | (url.query.size)",
-    "cvalues_path": "$.body.hits.hits[*]._source.*",
-    "true_cids_path": "$.body.nboost.cids",
-    "cids_path": "$.body.hits.hits[*]._id",
-    "choices_path": "$.body.hits.hits",
-    "capture_path": "/.*/_search",
-    "default_topk": 10
-  }
 ```
