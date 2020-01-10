@@ -1,6 +1,6 @@
 ### Setting up NBoost for the Bing Search API
 
-The Bing Search API offers a handy REST service that we can use to get prelimanry results before we rerank with NBoost, or for usage with question answering. We will walk through an example of how to set up a Bing-Powered QA system.
+The Bing Search API offers a handy REST service that we can use to get preliminary results before we rerank with NBoost, or for usage with question answering. We will walk through an example of how to set up a Bing-Powered QA system.
 
 #### Preliminaries
 1. Get your [Bing API key](https://azure.microsoft.com/en-us/try/cognitive-services/my-apis/?api=bing-web-search-api).
