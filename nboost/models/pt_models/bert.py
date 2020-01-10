@@ -4,6 +4,7 @@ import numpy as np
 import torch.nn
 import torch
 from nboost.models.base import BaseModel
+from nboost import defaults
 
 
 class PtBertModel(BaseModel):
@@ -23,7 +24,9 @@ class PtBertModel(BaseModel):
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
         self.rerank_model.to(self.device, non_blocking=True)
 
-    def rank(self, query: str, choices: List[str]):
+    def rank(self, query: str, choices: List[str],
+             filter_results: type(defaults.filter_results) = defaults.filter_results):
+
         if len(choices) == 0:
             return []
         input_ids, attention_mask, token_type_ids = self.encode(query, choices)
@@ -33,7 +36,7 @@ class PtBertModel(BaseModel):
                                        attention_mask=attention_mask,
                                        token_type_ids=token_type_ids)[0]
             scores = logits.detach().cpu().numpy()
-            if self.filter_results:
+            if filter_results:
                 scores = np.extract(scores[:, 0] < scores[:, 1], scores)
             if len(scores.shape) > 1 and scores.shape[1] == 2:
                 scores = np.squeeze(scores[:, 1])

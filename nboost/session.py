@@ -11,6 +11,7 @@ class Session:
                  ussl: type(defaults.ussl) = defaults.ussl,
                  delim: type(defaults.delim) = defaults.delim,
                  topn: type(defaults.topn) = defaults.topn,
+                 filter_results: type(defaults.filter_results) = defaults.filter_results,
                  qa_threshold: type(defaults.qa_threshold) = defaults.qa_threshold,
                  query_path: type(defaults.query_path) = defaults.query_path,
                  topk_path: type(defaults.topk_path) = defaults.topk_path,
@@ -55,6 +56,7 @@ class Session:
             'cids_path': cids_path,
             'choices_path': choices_path,
             'qa_threshold': qa_threshold,
+            'filter_results': filter_results,
             'rerank_cids': [],
             'qa_cids': {}
         }
@@ -106,6 +108,10 @@ class Session:
     @property
     def topn(self) -> type(defaults.topn):
         return self.get_config('topn')
+
+    @property
+    def filter_results(self) -> type(defaults.filter_results):
+        return self.get_config('filter_results')
 
     @property
     def qa_threshold(self) -> type(defaults.qa_threshold):
