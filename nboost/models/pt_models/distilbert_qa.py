@@ -88,6 +88,9 @@ class PtDistilBertQAModel(QAModel):
                           :tok_to_orig_index[end_tok] + 1])
         start_char_offset = char_to_word_offset.index(
             tok_to_orig_index[start_tok])
-        end_char_offset = char_to_word_offset.index(
-            tok_to_orig_index[min(end_tok, len(tok_to_orig_index)-2)] + 1) - 1
+        end_tok_offset = tok_to_orig_index[end_tok] + 1
+        if end_tok_offset in char_to_word_offset:
+            end_char_offset = char_to_word_offset.index(end_tok_offset) - 1
+        else:
+            end_char_offset = len(char_to_word_offset) - 1
         return answer, start_char_offset, end_char_offset, float(max_score)
