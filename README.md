@@ -220,12 +220,11 @@ Let's check out the **NBoost frontend**. Go to your browser and visit [localhost
 
 The frontend recorded everything that happened:
 
-1. NBoost got a request for **2 search results**. *(0.32 ms)*
-2. NBoost connected to the server. *(0.13 ms)*
-3. NBoost sent a request for 10 search results to the server. *(0.12 ms)* 
-4. NBoost received **10 search results** from the server. *(120.33 ms)*
-5. The model picked the best 2 search results. *(300 ms)*
-6. NBoost returned the search results to the client. *(0.10 ms)* 
+1. NBoost got a request for **2 search results**. *(average_topk)*
+2. NBoost connected to the server at `localhost:9200`.
+3. NBoost sent a request for 50 search results to the server. *(topn)* 
+4. NBoost received **50 search results** from the server. *(average_choices)*
+5. The model picked the best 2 search results and returned them to the client.
 
 #### Elastic made easy
 To increase the number of parallel proxies, simply increase `--workers`. For a more robust deployment approach, you can distribute the proxy via Kubernetes (see below).
@@ -235,6 +234,9 @@ To increase the number of parallel proxies, simply increase `--workers`. For a m
 <p align="center">
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/sailboat.svg?sanitize=true" width="100%">
 </p>
+
+#### See also
+For in-depth query DSL and other search API solutions (such as the Bing API), see the [docs](https://nboost.readthedocs.io/en/latest/chapter/bing-api.html).
 
 ### Deploying NBoost via Kubernetes
 We can easily deploy NBoost in a Kubernetes cluster using [Helm](https://helm.sh/).
