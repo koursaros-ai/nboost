@@ -1,14 +1,14 @@
 """NBoost Proxy Class"""
 
+from typing import Tuple, Callable
 from numbers import Number
 from copy import deepcopy
-from typing import Tuple
 import socket
-from nboost.helpers import calculate_overlap, calculate_mrr, dump_json
-from nboost.models.base import BaseModel
+from nboost.models.rerank.base import RerankModel
+from nboost.models.qa.base import QAModel
 from nboost.models import resolve_model
 from nboost.server import SocketServer
-from nboost.models.qa import QAModel
+from nboost.helpers import dump_json
 from nboost.session import Session
 from nboost import hooks, defaults
 from nboost.exceptions import *
@@ -25,11 +25,11 @@ class Proxy(SocketServer):
                  qa_model_dir: type(defaults.qa_model_dir) = defaults.qa_model_dir,
                  data_dir: type(defaults.data_dir) = defaults.data_dir, **kwargs):
         super().__init__(**kwargs)
+        self.kwargs = kwargs
         self.averages = {}
         self.search_path = search_path
         self.rerank = rerank
         self.qa = qa
-        self.kwargs = kwargs
 
         self.status = deepcopy(self.get_session().cli_configs)
         self.status['search_path'] = search_path
@@ -39,7 +39,7 @@ class Proxy(SocketServer):
             self.model = resolve_model(
                 data_dir=data_dir,
                 model_dir=model_dir,
-                model_cls=model, **kwargs)  # type: BaseModel
+                model_cls=model, **kwargs)  # type: RerankModel
             self.status['model_class'] = type(self.model).__name__
             self.status['model_dir'] = model_dir
 
@@ -68,37 +68,24 @@ class Proxy(SocketServer):
         server_socket = self.set_socket()
         session = self.get_session()
         prefix = 'Request (%s:%s): ' % address
-        stats = {}
 
         try:
-            hooks.on_client_request(client_socket, session, self.search_path)
+            hooks.on_client_request(session, client_socket, self.search_path)
             self.logger.debug(prefix + 'search request.')
 
             if self.rerank:
-                stats['topk'] = session.topk
-                session.set_request_path(session.topk_path, session.topn)
+                hooks.on_rerank_request(session)
 
             hooks.on_server_request(session)
-            stats['choices'] = len(session.choices)
 
             if self.rerank:
-                if session.rerank_cids:
-                    stats['server_mrr'] = calculate_mrr(session.rerank_cids, session.cids)
-
-                stats['rerank_time'] = hooks.on_rerank(self.model, session, stats['topk'])
-
-                if session.rerank_cids:
-                    stats['model_mrr'] = calculate_mrr(session.rerank_cids, session.cids)
+                hooks.on_rerank_response(session, self.model)
 
             if self.qa:
-                if session.cvalues:
-                    stats['qa_time'] = hooks.on_qa(self.qa_model, session)
+                hooks.on_qa(session, self.qa_model)
 
-                    if session.cids:
-                        first_choice_id = session.cids[0]
-                        if first_choice_id in session.qa_cids:
-                            qa_start_pos, qa_end_pos = session.qa_cids[first_choice_id]
-                            stats['qa_overlap'] = calculate_overlap(qa_start_pos,qa_end_pos, qa_start_pos, qa_end_pos)
+            if session.debug:
+                hooks.on_debug(session)
 
             hooks.on_client_response(session, client_socket)
 
@@ -133,7 +120,7 @@ class Proxy(SocketServer):
             hooks.on_proxy_error(client_socket, exc)
 
         finally:
-            self.update_averages(**stats)
+            self.update_averages(**session.stats)
             client_socket.close()
             server_socket.close()
 

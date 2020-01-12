@@ -3,11 +3,11 @@ from typing import List
 import numpy as np
 import torch.nn
 import torch
-from nboost.models.base import BaseModel
+from nboost.models.rerank.base import RerankModel
 from nboost import defaults
 
 
-class PtBertModel(BaseModel):
+class PtBertModel(RerankModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -25,7 +25,7 @@ class PtBertModel(BaseModel):
         self.rerank_model.to(self.device, non_blocking=True)
 
     def rank(self, query: str, choices: List[str],
-             filter_results: type(defaults.filter_results) = defaults.filter_results):
+             filter_results=defaults.filter_results):
 
         if len(choices) == 0:
             return []
@@ -41,7 +41,6 @@ class PtBertModel(BaseModel):
             if len(scores.shape) > 1 and scores.shape[1] == 2:
                 scores = np.squeeze(scores[:, 1])
             return list(np.argsort(scores)[::-1])
-
 
     def encode(self, query: str, choices: List[str]):
         inputs = [self.tokenizer.encode_plus(query, choice, add_special_tokens=True)

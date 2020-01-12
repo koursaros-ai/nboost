@@ -1,21 +1,22 @@
 
 # class => module
 MODULE_MAP = {
-    'QAModel': 'models.qa',
-    'ShuffleModel': 'models.shuffle',
-    'PtBertModel': 'models.pt_models.bert',
-    'TfBertModel': 'models.tf_models.bert',
-    'TfAlbertModel': 'models.tf_models.albert',
-    'PtDistilBertQAModel': 'models.pt_models.distilbert_qa',
+    'QAModel': 'models.qa.base',
+    'RerankModel': 'models.rerank.base',
+    'ShuffleModel': 'models.rerank.shuffle',
+    'PtBertModel': 'models.rerank.pt.bert',
+    'TfBertModel': 'models.rerank.tf.bert',
+    'TfAlbertModel': 'models.rerank.tf.albert',
+    'PtDistilBertQAModel': 'models.qa.pt.distilbert',
 }
 
 CLASS_MAP = {
-    "tf-bert-base-uncased-msmarco": "TfBertModel",
-    "tf-albert-tiny-uncased-msmarco": "TfAlbertModel",
-    "tf-biobert-base-uncased-msmarco": "TfBertModel",
+    "pt-tinybert-mrpc": "PtBertModel",
     "pt-tinybert-msmarco": "PtBertModel",
     "pt-bert-base-uncased-msmarco": "PtBertModel",
-    "pt-tinybert-mrpc": "PtBertModel"
+    "tf-bert-base-uncased-msmarco": "TfBertModel",
+    "tf-albert-tiny-uncased-msmarco": "TfAlbertModel",
+    "tf-biobert-base-uncased-msmarco": "TfBertModel"
 }
 
 URL_MAP = {

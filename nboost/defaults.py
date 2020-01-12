@@ -26,6 +26,8 @@ qa_model_dir = 'distilbert-base-uncased-distilled-squad'
 qa_threshold = 0
 max_query_length = 64
 filter_results = False
+query_prep = 'lambda query: query'
+debug = False
 
 # by default, nboost is configured for elasticsearch
 search_path = '/.*/_search'

@@ -13,6 +13,7 @@ QA_MODEL = 'adds the qa plugin which treats the query as a question and marks th
 FILTER_RESULTS = 'whether to filter out results based on classification model'
 DELIM = 'the deliminator to concatenate multiple queries into a single query'
 CIDS_PATH = 'the jsonpath to find the ids of the choices (for benchmarking)'
+QUERY_PREP = 'preprocessing filter applied to the query string after request and before reranking'
 CVALUES_PATH = 'the jsonpath to find the string values of the choices'
 CHOICES_PATH = 'the jsonpath to find the array of choices to reorder'
 TOPK_PATH = 'the jsonpath to find the number of requested results'
@@ -40,12 +41,14 @@ PORT = 'port of the proxy'
 MODEL = 'model class'
 RERANK = 'whether to rerank the query results using the model'
 USSL = 'use ssl for the upstream connection'
+DEBUG = 'return the session parameters and parsed objects for that session'
 
 
 def set_parser() -> ArgumentParser:
     """Add default nboost cli arguments to a given parser"""
     parser = ArgumentParser(prog='nboost', description=DESCRIPTION,
                             formatter_class=lambda prog: AdHf(prog, max_help_position=100, width=100))
+    parser.add_argument('--debug', type=type(defaults.debug), default=defaults.debug, help=DEBUG)
     parser.add_argument('--rerank', type=type(defaults.rerank), default=defaults.rerank, help=RERANK)
     parser.add_argument('--search_path', type=type(defaults.search_path), default=defaults.search_path, help=SEARCH_PATH)
     parser.add_argument('--query_path', type=type(defaults.query_path), default=defaults.query_path, help=QUERY_PATH)
@@ -54,6 +57,7 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--cvalues_path', type=type(defaults.cvalues_path), default=defaults.cvalues_path, help=CVALUES_PATH)
     parser.add_argument('--cids_path', type=type(defaults.cids_path), default=defaults.cids_path, help=CIDS_PATH)
     parser.add_argument('--choices_path', type=type(defaults.choices_path), default=defaults.choices_path, help=CHOICES_PATH)
+    parser.add_argument('--query_prep', type=type(defaults.query_prep), default=defaults.query_prep, help=QUERY_PREP)
     parser.add_argument('--verbose', type=type(defaults.verbose), default=defaults.verbose, help=VERBOSE)
     parser.add_argument('--host', type=type(defaults.host), default=defaults.host, help=HOST)
     parser.add_argument('--port', type=type(defaults.port), default=defaults.port, help=PORT)

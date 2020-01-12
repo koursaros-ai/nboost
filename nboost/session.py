@@ -1,4 +1,5 @@
 
+from typing import Callable
 from nboost import defaults
 from nboost.helpers import get_jsonpath, set_jsonpath, flatten
 from nboost.exceptions import *
@@ -11,9 +12,11 @@ class Session:
                  ussl: type(defaults.ussl) = defaults.ussl,
                  delim: type(defaults.delim) = defaults.delim,
                  topn: type(defaults.topn) = defaults.topn,
+                 debug: type(defaults.debug) = defaults.debug,
                  filter_results: type(defaults.filter_results) = defaults.filter_results,
                  qa_threshold: type(defaults.qa_threshold) = defaults.qa_threshold,
                  query_path: type(defaults.query_path) = defaults.query_path,
+                 query_prep: type(defaults.query_prep) = defaults.query_prep,
                  topk_path: type(defaults.topk_path) = defaults.topk_path,
                  default_topk: type(defaults.default_topk) = defaults.default_topk,
                  choices_path: type(defaults.choices_path) = defaults.choices_path,
@@ -49,6 +52,7 @@ class Session:
             'ussl': ussl,
             'delim': delim,
             'topn': topn,
+            'debug': debug,
             'query_path': query_path,
             'topk_path': topk_path,
             'default_topk': default_topk,
@@ -56,10 +60,12 @@ class Session:
             'cids_path': cids_path,
             'choices_path': choices_path,
             'qa_threshold': qa_threshold,
+            'query_prep': query_prep,
             'filter_results': filter_results,
             'rerank_cids': [],
             'qa_cids': {}
         }
+        self.stats = {}
 
     def get_request_path(self, path: str):
         return get_jsonpath(self.request, path)
@@ -73,20 +79,17 @@ class Session:
     def set_response_path(self, path: str, value):
         return set_jsonpath(self.response, path, value)
 
-    @property
-    def nboost_configs(self) -> dict:
-        query_configs = self.request['url']['query']
-        body_configs = self.request['body'].get('nboost', {})
-        return {**query_configs, **body_configs}
-
-    @property
-    def nboost_response(self) -> dict:
-        return self.response['body']['nboost']
+    def add_nboost_response(self, key: str, value) -> None:
+        self.response['body']['nboost'][key] = value
 
     def get_config(self, key: str):
-        """Config can be overriden by the nboost key."""
+        """Configs are set on either the command line, the json request body
+        under the "nboost" key, or in the query parameters."""
+        query_configs = self.request['url']['query']
+        body_configs = self.request['body'].get('nboost', {})
+        request_configs = {**query_configs, **body_configs}
         cli_config = self.cli_configs[key]
-        config = self.nboost_configs.get(key, cli_config)
+        config = request_configs.get(key, cli_config)
         return type(cli_config)(config)
 
     @property
@@ -104,6 +107,14 @@ class Session:
     @property
     def delim(self) -> type(defaults.delim):
         return self.get_config('delim')
+
+    @property
+    def debug(self) -> type(defaults.debug):
+        return self.get_config('debug')
+
+    @property
+    def query_prep(self) -> type(defaults.query_prep):
+        return self.get_config('query_prep')
 
     @property
     def topn(self) -> type(defaults.topn):
@@ -155,7 +166,7 @@ class Session:
         if not query:
             raise MissingQuery
 
-        return query
+        return eval(self.query_prep)(query)
 
     @property
     def choices(self) -> list:

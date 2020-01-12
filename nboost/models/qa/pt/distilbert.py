@@ -2,7 +2,7 @@ from typing import Tuple
 from transformers import DistilBertForQuestionAnswering, DistilBertTokenizer
 import numpy as np
 import torch
-from nboost.models.qa import QAModel
+from nboost.models.qa.base import QAModel
 
 
 def _is_whitespace(c):

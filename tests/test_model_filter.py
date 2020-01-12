@@ -4,15 +4,15 @@ import unittest
 
 class TestPtFilterModel(unittest.TestCase):
     def setUp(self):
-        self.proxy = Proxy(model_dir='pt-bert-base-uncased-msmarco', filter_results=True)
+        self.proxy = Proxy(model_dir='pt-bert-base-uncased-msmarco')
 
     def test_rank(self):
-        ranks = self.proxy.model.rank('His tender heir', CHOICES)
+        ranks = self.proxy.model.rank('His tender heir', CHOICES, filter_results=True)
         self.assertEqual(self.proxy.model.__class__.__name__, 'PtBertModel')
         self.assertIsInstance(ranks, list)
         self.assertEqual(1, len(ranks))
 
-        ranks = self.proxy.model.rank('His tender heir', CHOICES[:1])
+        ranks = self.proxy.model.rank('His tender heir', CHOICES[:1], filter_results=True)
         self.assertEqual(self.proxy.model.__class__.__name__, 'PtBertModel')
         self.assertIsInstance(ranks, list)
         self.assertEqual(0, len(ranks))

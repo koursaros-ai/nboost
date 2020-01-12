@@ -1,6 +1,5 @@
 """Base Class for ranking models"""
 
-from typing import List
 from nboost.logger import set_logger
 from nboost import defaults
 
@@ -21,8 +20,5 @@ class BaseModel:
         self.batch_size = batch_size
         self.logger = set_logger(model_dir, verbose=verbose)
 
-    def rank(self, query: str, choices: List[str], **kwargs) -> List[int]:
-        """assign relative ranks to each choice"""
-
     def close(self):
-        """Close the model"""
+        """Close model method."""

@@ -5,7 +5,7 @@ from nboost.proxy import Proxy
 class TestPtDistilBertQAModel(unittest.TestCase):
 
     def setUp(self):
-        self.proxy = Proxy(qa_model_dir='distilbert-base-uncased-distilled-squad',
+        self.proxy = Proxy(qa_model_dir='distilbert-base-uncased-distilled-squad', rerank=False,
                            qa_model='PtDistilBertQAModel', max_seq_length=32, qa=True)
 
     # def test_rank(self):

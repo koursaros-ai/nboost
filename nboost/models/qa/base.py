@@ -4,10 +4,9 @@ from nboost import defaults
 
 
 class QAModel(BaseModel):
-    def __init__(self, *args,
-                 max_query_length: type(defaults.max_query_length) = defaults.max_query_length,
+    def __init__(self, max_query_length: type(defaults.max_query_length) = defaults.max_query_length,
                  **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.max_query_length = max_query_length
 
     def get_answer(self, query: str, choice: str) -> Tuple[str, int, int, float]:

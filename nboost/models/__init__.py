@@ -1,5 +1,7 @@
 from pathlib import Path
+from typing import Type
 from nboost.helpers import import_class, download_file, extract_tar_gz
+from nboost.models.base import BaseModel
 from nboost.maps import CLASS_MAP, MODULE_MAP, URL_MAP
 from nboost.logger import set_logger
 
@@ -22,8 +24,8 @@ def resolve_model(data_dir: Path, model_dir: str, model_cls: str, **kwargs):
             raise ImportError('Class "%s" not in %s.' % CLASS_MAP.keys())
 
         module = MODULE_MAP[model_cls]
-        model = import_class(module, model_cls)
-        return model(str(model_dir), **kwargs)
+        model = import_class(module, model_cls)  # type: Type[BaseModel]
+        return model(model_dir=str(model_dir), **kwargs)
     else:
         if model_dir.name in CLASS_MAP:
             model_cls = CLASS_MAP[model_dir.name]
@@ -41,14 +43,14 @@ def resolve_model(data_dir: Path, model_dir: str, model_cls: str, **kwargs):
                 logger.info('Extracting "%s" from %s', model_dir, binary_path)
                 extract_tar_gz(binary_path, data_dir)
 
-            model = import_class(module, model_cls)
-            return model(str(model_dir), **kwargs)
+            model = import_class(module, model_cls)  # type: Type[BaseModel]
+            return model(model_dir=str(model_dir), **kwargs)
 
         else:
             if model_cls in MODULE_MAP:
                 module = MODULE_MAP[model_cls]
-                model = import_class(module, model_cls)
-                return model(model_dir.name, **kwargs)
+                model = import_class(module, model_cls)  # type: Type[BaseModel]
+                return model(model_dir=model_dir.name, **kwargs)
             else:
                 raise ImportError('model_dir %s not found in %s. You must '
                                   'set --model class to continue.'

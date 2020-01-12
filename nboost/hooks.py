@@ -1,18 +1,24 @@
 """Called at specific times during the proxy loop."""
-from nboost.helpers import prepare_response, dump_json, unparse_url
-from nboost.protocol import HttpProtocol
-from nboost.models.base import BaseModel
-from nboost.models.qa import QAModel
-from nboost.session import Session
-from nboost.exceptions import *
-from nboost import defaults
+
 from pathlib import Path
-from requests import ConnectionError
 from copy import deepcopy
 import requests
 import socket
 import time
 import re
+from requests import ConnectionError
+from nboost.protocol import HttpProtocol
+from nboost.models.rerank.base import RerankModel
+from nboost.models.qa.base import QAModel
+from nboost.session import Session
+from nboost.exceptions import *
+from nboost import defaults
+from nboost.helpers import (
+    prepare_response,
+    dump_json,
+    unparse_url,
+    calculate_mrr,
+    calculate_overlap)
 
 
 def connect_to_server(server_socket, uhost, uport):
@@ -76,7 +82,7 @@ def on_unhandled_request(client_socket, server_socket, session: Session):
         protocol.recv(server_socket)
 
 
-def on_client_request(client_socket, session: Session, search_path: str):
+def on_client_request(session: Session, client_socket, search_path: str):
     """Receive client request and pipe to buffer in case of exceptions"""
 
     def on_url(url: dict):
@@ -131,6 +137,8 @@ def on_server_request(session: Session):
     if response.status_code >= 400:
         raise UpstreamServerError(response.text)
 
+    session.stats['choices'] = len(session.choices)
+
 
 def on_client_response(session: Session, client_socket):
     """Send the ranked results to the client"""
@@ -151,27 +159,60 @@ def on_proxy_error(client_socket, exc: Exception):
     client_socket.send(prepared_response)
 
 
-def on_rerank(model: BaseModel, session: Session, topk: int) -> float:
+def on_rerank_request(session: Session):
+    """Magnify the size of the request to topn results."""
+    session.stats['topk'] = session.topk
+    session.set_request_path(session.topk_path, session.topn)
+
+
+def on_rerank_response(session: Session, model: RerankModel):
     """Returns the time the model takes to rerank."""
+    if session.rerank_cids:
+        session.stats['server_mrr'] = calculate_mrr(session.rerank_cids, session.cids)
+
+    # this is hacky and needs to be fixed
+    topk = session.stats['topk']
+
     start_time = time.perf_counter()
     ranks = model.rank(session.query, session.cvalues,
                        filter_results=session.filter_results)[:topk]
-    total_time = time.perf_counter() - start_time
+    session.stats['rerank_time'] = time.perf_counter() - start_time
     reranked_choices = [session.choices[rank] for rank in ranks]
     session.set_response_path(session.choices_path, reranked_choices)
-    return total_time
+
+    if session.rerank_cids:
+        session.stats['model_mrr'] = calculate_mrr(session.rerank_cids, session.cids)
 
 
-def on_qa(qa_model: QAModel, session: Session) -> float:
+def on_qa(session: Session, qa_model: QAModel):
     """Returns the qa time."""
-    start_time = time.perf_counter()
-    answer, start_pos, stop_pos, score = qa_model.get_answer(session.query, session.cvalues[0])
-    total_time = time.perf_counter() - start_time
 
-    if score > session.qa_threshold:
-        session.nboost_response['answer_text'] = answer
-        session.nboost_response['answer_start_pos'] = start_pos
-        session.nboost_response['answer_stop_pos'] = stop_pos
+    if session.cvalues:
+        start_time = time.perf_counter()
+        answer, start_pos, stop_pos, score = qa_model.get_answer(session.query, session.cvalues[0])
+        session.stats['qa_time'] = time.perf_counter() - start_time
 
-    return total_time
+        if score > session.qa_threshold:
+            session.add_nboost_response('answer_text', answer)
+            session.add_nboost_response('answer_start_pos', start_pos)
+            session.add_nboost_response('answer_stop_pos', stop_pos)
+
+        if session.cids:
+            first_choice_id = session.cids[0]
+            if first_choice_id in session.qa_cids:
+                qa_start_pos, qa_end_pos = session.qa_cids[first_choice_id]
+                session.stats['qa_overlap'] = calculate_overlap(qa_start_pos,
+                                                                qa_end_pos,
+                                                                qa_start_pos,
+                                                                qa_end_pos)
+
+
+def on_debug(session: Session):
+    """Add session configs to nboost response for debugging."""
+    for config in session.cli_configs:
+        session.add_nboost_response(config, getattr(session, config))
+
+    session.add_nboost_response('query', session.query)
+    session.add_nboost_response('topk', session.stats['topk'])
+    session.add_nboost_response('cvalues', session.cvalues)
 

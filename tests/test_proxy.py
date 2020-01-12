@@ -1,9 +1,11 @@
+
+from pprint import pprint
+import unittest
+import requests
 from nboost.helpers import prepare_response, dump_json
 from nboost.server import SocketServer
 from nboost.session import Session
 from nboost.proxy import Proxy
-import requests
-import unittest
 
 
 class TestServer(SocketServer):
@@ -19,23 +21,32 @@ class TestProxy(unittest.TestCase):
     def test_proxy(self):
         server = TestServer(port=9500, verbose=True)
         proxy = Proxy(model_dir='shuffle-model', model='ShuffleModel', uport=9500,
-                      verbose=True)
+                      verbose=True, query_prep='lambda query: query.split(";")[-1]')
         proxy.start()
         server.start()
         proxy.is_ready.wait()
         server.is_ready.wait()
 
         # search
-        params = dict(q='test_field;test query', size=3)
-
-        proxy_res = requests.get('http://localhost:8000/test/_search', params=params)
-        print(proxy_res.content)
+        proxy_res = requests.get(
+            'http://localhost:8000/test/_search',
+            params={
+                'q': 'test_field;test query',
+                'size': 3,
+                'debug': True,
+                'topn': 20
+            }
+        )
         self.assertTrue(proxy_res.ok)
-        json = proxy_res.json()
-        self.assertEqual(3, len(json['hits']['hits']))
+        pprint(proxy_res.json())
+        session = proxy_res.json()['nboost']
+        self.assertEqual('test query', session['query'])
+        self.assertEqual(3, session['topk'])
+        self.assertEqual(20, session['topn'])
+        self.assertEqual(3, len(session['cvalues']))
 
         # fallback
-        server_res = requests.get('http://localhost:9500/test', params=params)
+        server_res = requests.get('http://localhost:9500/test')
         print(server_res.content)
         self.assertTrue(server_res.ok)
 
