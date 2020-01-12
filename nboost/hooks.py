@@ -104,7 +104,7 @@ def on_client_request(session: Session, client_socket, search_path: str):
 
 
 def on_server_request(session: Session):
-    """Send magnified request to the server"""
+    """Send magnified response to the server"""
     request = deepcopy(session.request)
     request['headers'].pop('host', '')
     request['body'].pop('nboost', '')

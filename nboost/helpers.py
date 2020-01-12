@@ -71,7 +71,7 @@ def unparse_url(url: dict) -> str:
 
 
 def prepare_response(response: dict) -> bytes:
-    """Prepares a request with the following keys:
+    """Prepares a response with the following keys:
         version: str
         status: int
         headers: dict
