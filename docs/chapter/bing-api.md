@@ -102,29 +102,26 @@ Just like the Elasticsearch tutorial, we will go through the three ways to confi
 No matter how we query, the json response will look like this:
 
 ```json
+
 {"_type": "SearchResponse",
- "nboost": {"answer_start_pos": 145,
-            "answer_stop_pos": 157,
-            "answer_text": "Born in 1961"},
+ "nboost": {"answer_start_pos": 115,
+            "answer_stop_pos": 127,
+            "answer_text": "53 years old."},
  "queryContext": {"originalQuery": "how old is obama"},
- "webPages": {"totalEstimatedMatches": 81800000,
+ "webPages": {"totalEstimatedMatches": 81700000,
               "value": [{"about": [{"name": "Barack Obama"}],
-                         "dateLastCrawled": "2020-01-06T13:40:00.0000000Z",
-                         "displayUrl": "https://www.myagecalculator.com/how-old-is-barack-obama",
-                         "id": "https://api.cognitive.microsoft.com/api/v7/#WebPages.9",
+                         "dateLastCrawled": "2019-11-28T01:11:00.0000000Z",
+                         "displayUrl": "https://www.answers.com/Q/How_old_is_Barack_Obama",
+                         "id": "https://api.cognitive.microsoft.com/api/v7/#WebPages.11",
                          "isFamilyFriendly": true,
                          "isNavigational": false,
                          "language": "en",
-                         "name": "How old is Barack Obama? - MyAgeCalculator",
-                         "snippet": "Barack Obama is a prominent American "
-                                    "politician, a Democrat and the 44th "
-                                    "President of the United States who served "
-                                    "two terms, from 2009 to 2017. Born in "
-                                    "1961 in Hawaii, Obama spent some parts of "
-                                    "his childhood in the continental US and "
-                                    "in Indonesia.",
-                         "url": "https://www.myagecalculator.com/how-old-is-barack-obama"},
-                        {"about": [{"name": "Family of Barack Obama"}],
+                         "name": "How old is Barack Obama - Answers",
+                         "snippet": "The correct spelling Barack Obama. Barack "
+                                    "Obama was born on August 4th, 1961. As of "
+                                    "February 2015, Barack Obama is 53 years "
+                                    "old.",
+                         "url": "https://www.answers.com/Q/How_old_is_Barack_Obama"},
     ...
 
 ```

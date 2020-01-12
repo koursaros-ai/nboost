@@ -122,19 +122,3 @@ No matter how we configure NBoost, if the Elasticsearch result has the `nboost` 
 <p align="center">
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/travel-tutorial.svg?sanitize=true" alt="success installation of NBoost">
 </p>
-
-
-#### What just happened?
-Let's check out the **NBoost frontend**. Go to your browser and visit [localhost:8000/nboost](http://localhost:8000/nboost).
-> If you don't have access to a browser, you can `curl http://localhost:8000/nboost/status` for the same information.
-
-<p align="center">
-<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/frontend-tutorial.png">
-</p>
-
-The frontend recorded everything that happened:
-
-1. NBoost got a request for **2 search results**.
-2. NBoost sent a request for **50 search results** to the server.
-3. The model picked the best 2 search results. *(300 ms)*
-4. NBoost returned the search results to the client.
