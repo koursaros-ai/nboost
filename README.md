@@ -215,7 +215,7 @@ Let's check out the **NBoost frontend**. Go to your browser and visit [localhost
 > If you don't have access to a browser, you can `curl http://localhost:8000/nboost/status` for the same information.
 
 <p align="center">
-<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/frontend-tutorial.png">
+<img src="https://github.com/koursaros-ai/nboost/raw/master/.github/frontend-example.png">
 </p>
 
 The frontend recorded everything that happened:
