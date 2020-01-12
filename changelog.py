@@ -16,13 +16,14 @@ FMT = (
 
 EMOJIS = {
     'proxy': '📡',
-    'map': '📖',
+    'maps': '📖',
     'helpers': '🧰',
     'protocol': '🌐',
     'server': '🖥️',
-    'stats': '⏱',
     'cli': '⌨️',
-    'models': '🧠'
+    'models': '🧠',
+    'session': '📞',
+    'hooks': '🎣',
 }
 
 

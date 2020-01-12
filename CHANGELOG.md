@@ -1,3 +1,31 @@
+# Release `0.2.0`
+> Jan 12th, 2019
+
+### 🧠 Models
+
+ - [[```3641fa7```](https://github.com/koursaros-ai/nboost/commit/3641fa7057e170c2ce5caea08983dedb958f1e68)] add filtering methods (*colethienes*) <span style="color:blue">△20</span>
+ - [[```6b83a08```](https://github.com/koursaros-ai/nboost/commit/6b83a08d44a5b08ff786bbca0b67e0bc16dc7257)] qa model benchmarking (*colethienes*) <span style="color:blue">△853</span>
+ - [[```afb1dd1```](https://github.com/koursaros-ai/nboost/commit/afb1dd1f4e09434dc0dad52aae762bd1ef15de14)] Feature / Run QA model on GPU (*Jack Pertschuk*) <span style="color:blue">△4</span>
+
+### 🎣 Hooks
+
+ - [[```edcc676```](https://github.com/koursaros-ai/nboost/commit/edcc676310759e3293cadc0e12c898e4f987bd65)] setting topn/topk (*colethienes*) <span style="color:blue">△7</span>
+ - [[```6cbc5cf```](https://github.com/koursaros-ai/nboost/commit/6cbc5cfa722cdfc33313bfb6a560741f41c09315)] fix request hook url (*colethienes*) <span style="color:blue">△19</span>
+
+### 📡 Proxy
+
+ - [[```a479650```](https://github.com/koursaros-ai/nboost/commit/a4796500fad7d4501468077042086774a24b4d21)] add debugging mode and session hooks (*colethienes*) <span style="color:blue">△289</span>
+ - [[```8fd9148```](https://github.com/koursaros-ai/nboost/commit/8fd9148ba8b4e6570438c426982491e3a75450ad)] refactor to session format (*colethienes*) <span style="color:blue">△698</span>
+ - [[```6b83a08```](https://github.com/koursaros-ai/nboost/commit/6b83a08d44a5b08ff786bbca0b67e0bc16dc7257)] qa model benchmarking (*colethienes*) <span style="color:blue">△853</span>
+
+### 📞 Session
+
+ - [[```3093247```](https://github.com/koursaros-ai/nboost/commit/3093247980fa5f72c4a24b9e0a49c0d5294d511a)] add session and refactor defaults (*colethienes*) <span style="color:blue">△562</span>
+
+### 🧰 Helpers
+
+ - [[```75c0352```](https://github.com/koursaros-ai/nboost/commit/75c0352c80c2d80689431b395fd5e74348f126cc)] patch jsonpath setter (*colethienes*) <span style="color:blue">△22</span>
+
 # Release `0.1.1`
 > Dec 18th, 2019
 
