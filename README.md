@@ -281,8 +281,7 @@ All possible `--set` ([values.yaml](https://github.com/koursaros-ai/nboost/blob/
 | `args.choices_path`                          | Jsonpath to find the array of choices to reorder | `nil`                                                       |
 | `args.cvalues_path`                          | Jsonpath to find the str values of the choices   | `nil`                                                       |
 | `args.cids_path`                             | Jsonpath to find the ids of the choices          | `nil`                                                       |
-| `args.true_cids_path`                        | Jsonpath of the true choice ids in the request   | `nil`                                                       |
-| `args.capture_path`                          | The url path to tag for reranking via nboost     | `nil`                                                       |
+| `args.search_path`                           | The url path to tag for reranking via nboost     | `nil`                                                       |
 | `service.type`                               | Kubernetes Service type                          | `LoadBalancer`                                              |
 | `resources`                                  | resource needs and limits to apply to the pod    | `{}`                                                        |
 | `nodeSelector`                               | Node labels for pod assignment                   | `{}`                                                        |
