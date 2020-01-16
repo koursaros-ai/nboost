@@ -68,12 +68,13 @@ affinity: {}
 
 args:
   # nboost command line arguments
-  verbose:
+  verbose: False
   host: 0.0.0.0
   port: 8000
   uhost: elasticsearch-master
   uport: 9200
-  data_dir:
+  ussl: False
+  rerank: True
   model: ""
   model_dir: pt-bert-base-uncased-msmarco
   qa: False
@@ -86,15 +87,17 @@ args:
   batch_size: 4
   multiplier: 5
   workers: 10
-  query_path:
-  topk_path:
+  query_path: "(body.query.match) | (body.query.term.*) | (url.query.q)"
+  topk_path: "(body.size) | (url.query.size)"
   true_cids_path:
-  choices_path:
-  cvalues_path:
-  cids_path:
-  capture_path:
-  default_topk:
+  choices_path: "body.hits.hits"
+  cvalues_path: "_source.*"
+  cids_path: "_id"
+  search_path: "/.*/_search"
+  topn: "50"
+  default_topk: "10"
   delim: ". "
+  filter_results: False
 
 
 

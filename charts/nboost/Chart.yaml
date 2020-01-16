@@ -4,5 +4,5 @@ description: A Helm chart for NBoost
 name: nboost
 fullname: nboost
 serviceAccountName: nboost
-version: 0.0.2
+version: 0.0.3
 icon: https://raw.githubusercontent.com/koursaros-ai/nboost/master/.github/banner.svg?sanitize=true
