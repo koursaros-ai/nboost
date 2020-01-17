@@ -1,3 +1,92 @@
+# Release `0.2.1`
+> Jan 17th, 2019
+
+###  Indexers
+
+ - [[```4dcc035```](https://github.com/koursaros-ai/nboost/commit/4dcc03521e8536e09c2a15510edb6dcb21f17aa3)] ability to index multiple cols (*colethienes*) <span style="color:blue">△128</span>
+
+
+# Release `0.2.0`
+> Jan 12th, 2019
+
+### 🧠 Models
+
+ - [[```3641fa7```](https://github.com/koursaros-ai/nboost/commit/3641fa7057e170c2ce5caea08983dedb958f1e68)] add filtering methods (*colethienes*) <span style="color:blue">△20</span>
+ - [[```6b83a08```](https://github.com/koursaros-ai/nboost/commit/6b83a08d44a5b08ff786bbca0b67e0bc16dc7257)] qa model benchmarking (*colethienes*) <span style="color:blue">△853</span>
+ - [[```afb1dd1```](https://github.com/koursaros-ai/nboost/commit/afb1dd1f4e09434dc0dad52aae762bd1ef15de14)] Feature / Run QA model on GPU (*Jack Pertschuk*) <span style="color:blue">△4</span>
+
+### 🎣 Hooks
+
+ - [[```edcc676```](https://github.com/koursaros-ai/nboost/commit/edcc676310759e3293cadc0e12c898e4f987bd65)] setting topn/topk (*colethienes*) <span style="color:blue">△7</span>
+ - [[```6cbc5cf```](https://github.com/koursaros-ai/nboost/commit/6cbc5cfa722cdfc33313bfb6a560741f41c09315)] fix request hook url (*colethienes*) <span style="color:blue">△19</span>
+
+### 📡 Proxy
+
+ - [[```a479650```](https://github.com/koursaros-ai/nboost/commit/a4796500fad7d4501468077042086774a24b4d21)] add debugging mode and session hooks (*colethienes*) <span style="color:blue">△289</span>
+ - [[```8fd9148```](https://github.com/koursaros-ai/nboost/commit/8fd9148ba8b4e6570438c426982491e3a75450ad)] refactor to session format (*colethienes*) <span style="color:blue">△698</span>
+ - [[```6b83a08```](https://github.com/koursaros-ai/nboost/commit/6b83a08d44a5b08ff786bbca0b67e0bc16dc7257)] qa model benchmarking (*colethienes*) <span style="color:blue">△853</span>
+
+### 📞 Session
+
+ - [[```3093247```](https://github.com/koursaros-ai/nboost/commit/3093247980fa5f72c4a24b9e0a49c0d5294d511a)] add session and refactor defaults (*colethienes*) <span style="color:blue">△562</span>
+
+### 🧰 Helpers
+
+ - [[```75c0352```](https://github.com/koursaros-ai/nboost/commit/75c0352c80c2d80689431b395fd5e74348f126cc)] patch jsonpath setter (*colethienes*) <span style="color:blue">△22</span>
+
+# Release `0.1.1`
+> Dec 18th, 2019
+
+### 📡 Proxy
+
+ - [[```c54b0aa```](https://github.com/koursaros-ai/nboost/commit/c54b0aa0eb864480021d94b5e9d2536c33e2d6cd)] assume choices are list (*colethienes*) <span style="color:blue">△22</span>
+
+### 🧠 Models
+
+ - [[```498b96b```](https://github.com/koursaros-ai/nboost/commit/498b96b3c36e30dd4d8c1c08e54503d155050773)] Fix / char offsets for QA model (*Jack Pertschuk*) <span style="color:blue">△16</span>
+
+# Release `0.1.0`
+> Dec 18th, 2019
+
+### 📡 Proxy
+
+ - [[```7b7feda```](https://github.com/koursaros-ai/nboost/commit/7b7feda9840cba0cfd46a015f4358e0b9aff73d1)] relative response choices jsonpath (*colethienes*) <span style="color:blue">△29</span>
+
+### 🧠 Models
+
+ - [[```03745d1```](https://github.com/koursaros-ai/nboost/commit/03745d12276d3b293baef8cf5718cfb95f880c94)] Add / Feature filter results based on classification model (*Jack Pertschuk*) <span style="color:blue">△37</span>
+
+
+# Release `0.0.9`
+> Dec 16th, 2019
+
+### 🧠 Models
+
+ - [[```03745d1```](https://github.com/koursaros-ai/nboost/commit/03745d12276d3b293baef8cf5718cfb95f880c94)] Add / Feature filter results based on classification model (*Jack Pertschuk*) <span style="color:blue">△37</span>
+
+
+# Release `0.0.8`
+> Dec 15th, 2019
+
+### ⌨️ Cli
+
+ - [[```05aaec7```](https://github.com/koursaros-ai/nboost/commit/05aaec7049fb69e9750566bb605b3c95f3543877)] configurable jsonpaths (*colethienes*) <span style="color:blue">△20</span>
+ - [[```7d0fafe```](https://github.com/koursaros-ai/nboost/commit/7d0fafe06bb4e6541da0a1f28c92b7b31ec666da)] tinybert default (*colethienes*) <span style="color:blue">△2</span>
+ - [[```bdd1365```](https://github.com/koursaros-ai/nboost/commit/bdd1365b9c589ac6f305b9cacf9dc8c62b8d4a0a)] add qa model (*colethienes*) <span style="color:blue">△61</span>
+
+### 📡 Proxy
+
+ - [[```d095b27```](https://github.com/koursaros-ai/nboost/commit/d095b271f484fcf48b152dea78b4905202c9824a)] model directory instantiation (*colethienes*) <span style="color:blue">△358</span>
+ - [[```af9f3a8```](https://github.com/koursaros-ai/nboost/commit/af9f3a8ba82d306fe7d1ad2508f2bbb7bdb77939)] refactor routing and protocols (*colethienes*) <span style="color:blue">△369</span>
+ - [[```1bf21e4```](https://github.com/koursaros-ai/nboost/commit/1bf21e451a27e98f000a6b35c58e6e9d9441a098)] refactor messaging to dict type (*colethienes*) <span style="color:blue">△2322</span>
+
+### 🧠 Models
+
+ - [[```3e8482e```](https://github.com/koursaros-ai/nboost/commit/3e8482eee504ee37b5eaf5972f85ad84440aa2ce)] Add / TinyBERT Model Code (*Jack Pertschuk*) <span style="color:blue">△5</span>
+ - [[```18d62ec```](https://github.com/koursaros-ai/nboost/commit/18d62ec21679c773f2c2a715f17866a5ad3f34af)] Add / QA Models Code (*Jack Pertschuk*) <span style="color:blue">△82</span>
+ - [[```8444a83```](https://github.com/koursaros-ai/nboost/commit/8444a8329c1d9712391342acc99155729f9b66bc)] Fix/ Clean up transformers (*Jack Pertschuk*) <span style="color:blue">△73</span>
+ - [[```7a142ec```](https://github.com/koursaros-ai/nboost/commit/7a142ec093ec00e1866b3607b1b1b430459894a9)] Fix/ Update transformers to latest version, remove online training functionality (*Jack Pertschuk*) <span style="color:blue">△55</span>
+
 # Release `0.0.7`
 > Dec 3rd, 2019
 
