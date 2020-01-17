@@ -33,7 +33,7 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--port', type=type(defaults.port), default=defaults.port, help=PORT)
     parser.add_argument('--delim', type=type(defaults.delim), default=defaults.delim, help=DELIM)
     parser.add_argument('--shards', type=type(defaults.shards), default=defaults.shards)
-    parser.add_argument('--id_col', type=type(defaults.id_col), default=defaults.id_col, help=ID_COL)
+    parser.add_argument('--id_col', action='store_true', help=ID_COL)
     parser.add_argument('--indexer', type=type(defaults.indexer), default=defaults.indexer, help=INDEXER)
     return parser
 

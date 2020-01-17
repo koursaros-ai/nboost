@@ -17,6 +17,7 @@ class TestESIndexer(unittest.TestCase):
             '--port', '9200',
             '--file', 'travel.csv',
             '--index_name', 'travel',
+            '--id_col',
             '--delim', ','
         ])
 
