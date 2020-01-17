@@ -13,12 +13,10 @@ class TestESIndexer(unittest.TestCase):
 
         # dump es index
         main([
-            '--verbose',
+            '--verbose', 'True',
             '--port', '9200',
             '--file', 'travel.csv',
-            '--name', 'travel',
-            '--id_col', '0',
-            '--body_col', '1',
+            '--index_name', 'travel',
             '--delim', ','
         ])
 

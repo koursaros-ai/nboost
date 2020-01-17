@@ -42,3 +42,7 @@ IMAGE_MAP = {
     'tf': '../Dockerfiles/tf',
     'pt': '../Dockerfiles/pt'
 }
+
+INDEXER_MAP = {
+    'ESIndexer': 'indexers.es'
+}

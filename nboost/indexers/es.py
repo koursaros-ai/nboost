@@ -1,3 +1,4 @@
+from typing import Dict
 from elasticsearch.exceptions import RequestError
 from elasticsearch.helpers import streaming_bulk
 from elasticsearch import Elasticsearch
@@ -10,23 +11,29 @@ class ESIndexer(BaseIndexer):
         super().__init__(**kwargs)
         self.mapping = {'settings': {'index': {'number_of_shards': shards}}}
 
-    def format(self, cid: str, choice: str):
+    def format(self, choices: Dict[str, str], cid: str = None):
         """Format a choice for indexing"""
-        return {
-            '_index': self.name, '_id': cid, '_type': '_doc',
-            '_source': {self.field_name: choice}
+        body = {
+            '_index': self.index_name,
+            '_type': '_doc',
+            '_source': choices
         }
+
+        if cid is not None:
+            body['_id'] = cid
+
+        return body
 
     def index(self):
         """send csv to ES index"""
         self.logger.info('Setting up Elasticsearch index...')
         elastic = Elasticsearch(host=self.host, port=self.port, timeout=10000)
         try:
-            self.logger.info('Creating index %s...' % self.name)
-            elastic.indices.create(self.name, self.mapping)
+            self.logger.info('Creating index %s...' % self.index_name)
+            elastic.indices.create(self.index_name, self.mapping)
         except RequestError:
             self.logger.info('Index already exists, skipping...')
 
         self.logger.info('Indexing %s...' % self.file)
-        act = (self.format(cid, choice) for cid, choice in self.csv_generator())
+        act = (self.format(choices, cid=cid) for cid, choices in self.csv_generator())
         list(streaming_bulk(elastic, actions=act))
