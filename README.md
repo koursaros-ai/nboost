@@ -1,3 +1,5 @@
+> 🚸 We're looking for beta testers for our <a href='https://answerbot.app'>virtual assistant</a> widget. <a href = 'mailto:jp954@cornell.edu'>Contact me</a> if you're interested in using it on your website.
+
 <p align="center">
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/banner.svg?sanitize=true" alt="Nboost" width="70%">
 </p>
