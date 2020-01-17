@@ -14,7 +14,7 @@ class BaseIndexer:
 
     def __init__(self, file: type(defaults.file) = defaults.file,
                  index_name: type(defaults.index_name) = defaults.index_name,
-                 cid_col: type(defaults.id_col) = defaults.id_col,
+                 id_col: type(defaults.id_col) = defaults.id_col,
                  host: type(defaults.host) = defaults.host,
                  port: type(defaults.port) = defaults.port,
                  delim: type(defaults.delim) = defaults.delim,
@@ -31,7 +31,7 @@ class BaseIndexer:
         """
         self.file = file
         self.index_name = index_name
-        self.cid_col = cid_col
+        self.id_col = id_col
         self.host = host
         self.port = port
         self.delim = delim
@@ -63,7 +63,7 @@ class BaseIndexer:
                 for line in csv.DictReader(file, delimiter=self.delim):
                     cid = None
 
-                    if self.cid_col:
+                    if self.id_col:
                         cid = line.popitem(last=False)[1]
 
                     yield cid, dict(line)
