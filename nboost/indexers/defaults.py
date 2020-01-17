@@ -10,4 +10,4 @@ port = 9200
 delim = '\t'
 shards = 5
 indexer = 'ESIndexer'
-id_col = True
+id_col = False
