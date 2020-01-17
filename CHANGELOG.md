@@ -1,3 +1,11 @@
+# Release `0.2.1`
+> Jan 17th, 2019
+
+###  Indexers
+
+ - [[```4dcc035```](https://github.com/koursaros-ai/nboost/commit/4dcc03521e8536e09c2a15510edb6dcb21f17aa3)] ability to index multiple cols (*colethienes*) <span style="color:blue">△128</span>
+
+
 # Release `0.2.0`
 > Jan 12th, 2019
 
