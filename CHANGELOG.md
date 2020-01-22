@@ -1,5 +1,17 @@
+# Release `0.2.2`
+> Jan 22nd, 2020
+
+### 🎣 Hooks
+
+ - [[```f8974b4```](https://github.com/koursaros-ai/nboost/commit/f8974b4d3663e8b95548c3ab9f17a21834a6a58c)] fix benchmarking functionality (*colethienes*) <span style="color:blue">△52</span>
+
+### 🧠 Models
+
+ - [[```244e547```]](https://github.com/koursaros-ai/nboost/commit/244e5470c60e0ff7e4eb1f7a1ec4bda4afc47689) add filter_results arg compatibility to rank fn (*TeoZosa*) <span style="color:blue">△8</span>
+
+
 # Release `0.2.1`
-> Jan 17th, 2019
+> Jan 17th, 2020
 
 ###  Indexers
 
@@ -7,7 +19,7 @@
 
 
 # Release `0.2.0`
-> Jan 12th, 2019
+> Jan 12th, 2020
 
 ### 🧠 Models
 
