@@ -5,6 +5,7 @@ from queue import Queue
 import numpy as np
 from nboost.models.rerank.tf.bert import modeling, tokenization
 from nboost.models.rerank.base import RerankModel
+from nboost import defaults
 import pathlib
 
 
@@ -186,7 +187,8 @@ class TfBertModel(RerankModel):
             candidates += ['PADDING DOC'] * (self.batch_size - (len(candidates) % self.batch_size))
             return candidates
 
-    def rank(self, query: bytes, choices: List[str]) -> List[int]:
+    def rank(self, query: bytes, choices: List[str],
+             filter_results=defaults.filter_results) -> List[int]:
 
         actual_length = len(choices)
         candidates = self.pad(choices)
@@ -197,6 +199,10 @@ class TfBertModel(RerankModel):
         log_probs = np.stack(log_probs).reshape(-1, 2)
         scores = log_probs[:, 1]
         assert len(scores) == actual_length
+        if filter_results:
+            scores = np.extract(scores[:, 0] < scores[:, 1], scores)
+        if len(scores.shape) > 1 and scores.shape[1] == 2:
+            scores = np.squeeze(scores[:, 1])
         return list(scores.argsort()[::-1])
 
     def close(self):
