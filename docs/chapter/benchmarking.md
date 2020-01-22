@@ -46,8 +46,6 @@ with open('queries.tsv') as file:
         )
 ```
 
-That's it! This just sends `http://localhost:8000/trec_car?nboost=id1,id2,id3...&q=passage:query` for every query.
-
 Now check out the frontend at [localhost:8000/nboost](http://localhost:8000/nboost)!
 
 You should find the model latency and calculated MRR for Elasticsearch vs NBoost. Here's our output:
