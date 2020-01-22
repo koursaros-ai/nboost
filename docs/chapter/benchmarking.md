@@ -54,4 +54,6 @@ You should find the model latency and calculated MRR for Elasticsearch vs NBoost
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/frontend-benchmark.png">
 </p>
 
-Even though this model was finetuned on [a different dataset](http://www.msmarco.org/), it was generalizable enough to increase Elasticsearch search relevancy by **70%**!  
+
+
+MRR is short for mean reciprocal rank. Even though this model was finetuned on [a different dataset](http://www.msmarco.org/), it was generalizable enough to increase Elasticsearch search relevancy by **70%** (0.29 / 0.17)!
