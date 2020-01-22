@@ -109,8 +109,8 @@ def on_server_request(session: Session):
     request['headers'].pop('host', '')
     request['body'].pop('nboost', '')
 
-    for default in defaults.__dict__:
-        request['url']['query'].pop(default, '')
+    for config in session.cli_configs:
+        request['url']['query'].pop(config, '')
 
     try:
         response = requests.request(
@@ -166,22 +166,28 @@ def on_rerank_request(session: Session):
 
 
 def on_rerank_response(session: Session, model: RerankModel):
-    """Returns the time the model takes to rerank."""
     if session.rerank_cids:
         session.stats['server_mrr'] = calculate_mrr(session.rerank_cids, session.cids)
 
-    # this is hacky and needs to be fixed
-    topk = session.stats['topk']
-
     start_time = time.perf_counter()
-    ranks = model.rank(session.query, session.cvalues,
-                       filter_results=session.filter_results)[:topk]
+
+    ranks = model.rank(
+        query=session.query,
+        choices=session.cvalues,
+        filter_results=session.filter_results
+    )
+
     session.stats['rerank_time'] = time.perf_counter() - start_time
     reranked_choices = [session.choices[rank] for rank in ranks]
     session.set_response_path(session.choices_path, reranked_choices)
 
     if session.rerank_cids:
         session.stats['model_mrr'] = calculate_mrr(session.rerank_cids, session.cids)
+
+    # this is hacky and needs to be fixed
+    topk = session.stats['topk']
+
+    session.set_response_path(session.choices_path, session.choices[:topk])
 
 
 def on_qa(session: Session, qa_model: QAModel):

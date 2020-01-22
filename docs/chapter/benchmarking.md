@@ -19,9 +19,9 @@ nboost-index --file paragraphs.tsv --name trec_car --host <Elasticsearch host>
 
 Start the NBoost proxy using one of the main methods:
 
-1. `nboost --uport 9200`
-2. `docker run koursaros/nboost:latest-tf --uport 9200`
-3. `helm install --name nboost --set uport=9200 nboost/nboost`
+1. `nboost --uhost <Elasticsearch host> --uport 9200`
+2. `docker run koursaros/nboost:latest-tf --uhost <Elasticsearch host> --uport 9200`
+3. `helm install --name nboost --set uhost=<Elasticsearch host> --set uport=9200 nboost/nboost`
 
 #### Benchmark on the test set
 
@@ -32,8 +32,18 @@ import requests, csv
 
 with open('queries.tsv') as file:
     for query, cids in csv.reader(file, delimiter='\t'):
-        params = dict(q='passage:' + query, nboost=cids)
-        requests.post('http://localhost:8000/trec_car/_search', params=params)
+        requests.post(
+            url='http://localhost:8000/trec_car/_search',
+            json={
+                'nboost': {
+                    'rerank_cids': cids.split(','),
+                    'query_prep': 'lambda query: ":".join( query.split(":")[1:] )'
+                }
+            },
+            params={
+              'q': 'passage:' + query,
+            }
+        )
 ```
 
 That's it! This just sends `http://localhost:8000/trec_car?nboost=id1,id2,id3...&q=passage:query` for every query.

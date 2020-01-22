@@ -179,8 +179,7 @@ class Session:
 
     @property
     def cids(self) -> list:
-        cids = self.get_response_path(self.cids_path)
-        return flatten(cids)
+        return self.get_response_path(self.cids_path)
 
     @property
     def cvalues(self) -> list:
@@ -188,8 +187,7 @@ class Session:
 
     @property
     def rerank_cids(self) -> list:
-        rerank_cids = self.get_config('rerank_cids')
-        return flatten(rerank_cids)
+        return self.get_config('rerank_cids')
 
     @property
     def qa_cids(self) -> dict:

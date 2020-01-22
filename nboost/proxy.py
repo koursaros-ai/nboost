@@ -32,8 +32,10 @@ class Proxy(SocketServer):
         self.qa = qa
 
         self.status = deepcopy(self.get_session().cli_configs)
+        self.status.pop('delim', '')
+        self.status.pop('qa_cids', '')
+        self.status.pop('rerank_cids', '')
         self.status['search_path'] = search_path
-        self.status['description'] = 'NBoost, for neural boosting.'
 
         if self.rerank:
             self.model = resolve_model(
