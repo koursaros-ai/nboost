@@ -28,7 +28,7 @@ class TestProxy(unittest.TestCase):
 
         t = Thread(target=proxy.run)
         t.start()
-        time.sleep(20)
+        time.sleep(2)
 
         # search
         proxy_res = requests.get(
