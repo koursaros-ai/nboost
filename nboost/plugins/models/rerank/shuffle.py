@@ -1,10 +1,10 @@
 """Shuffle model"""
 
-from nboost.models.rerank.base import RerankModel
+from nboost.plugins.models.rerank.base import RerankModelPlugin
 import random
 
 
-class ShuffleModel(RerankModel):
+class ShuffleRerankModelPlugin(RerankModelPlugin):
     """Model that randomly shuffles choices. Useful for benchmarking/testing"""
     def rank(self, query, choices, **kwargs):
         """random shuffle with no regard for query"""

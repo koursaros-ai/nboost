@@ -8,10 +8,7 @@ def main():
     parser = set_parser()
     args = parser.parse_args()
     proxy = Proxy(**vars(args))
-    try:
-        proxy.start()
-    except KeyboardInterrupt:
-        proxy.close()
+    proxy.run()
 
 
 if __name__ == '__main__':

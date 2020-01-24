@@ -2,7 +2,7 @@ from typing import Tuple
 from transformers import DistilBertForQuestionAnswering, DistilBertTokenizer
 import numpy as np
 import torch
-from nboost.models.qa.base import QAModel
+from nboost.plugins.models.qa.base import QAModelPlugin
 
 
 def _is_whitespace(c):
@@ -11,7 +11,7 @@ def _is_whitespace(c):
     return False
 
 
-class PtDistilBertQAModel(QAModel):
+class PtDistilBertQAModelPlugin(QAModelPlugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.model = DistilBertForQuestionAnswering.from_pretrained(self.model_dir)

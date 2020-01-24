@@ -1,29 +1,26 @@
-from threading import Thread
-from typing import List
-import tensorflow as tf
 from queue import Queue
+from threading import Thread
 import numpy as np
-from nboost.models.rerank.tf.bert import modeling, tokenization
-from nboost.models.rerank.base import RerankModel
-from nboost import defaults
-import pathlib
+import tensorflow as tf
+from nboost.plugins.models.rerank.tf.albert import modeling, tokenization as bert_tokenization
+from nboost.plugins.models.rerank.base import RerankModelPlugin
 
 
-class TfBertModel(RerankModel):
-    def __init__(self, *args, verbose=False, **kwargs):
+class AlbertRerankModelPlugin(RerankModelPlugin):
+
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output_q = Queue()
         self.input_q = Queue()
-        self.model_dir = pathlib.Path(self.model_dir)
 
-        ckpts = list(self.model_dir.glob('*.ckpt*'))
+        ckpts = list(self.model_dir.glob('*.ckpt.*'))
         if not len(ckpts) > 0:
-            raise FileNotFoundError("Tensorflow model not found %s" % self.model_dir)
+            raise FileNotFoundError("Tensorflow model not found")
         self.checkpoint = str(ckpts[0]).split('.ckpt')[0] + '.ckpt'
-        self.vocab_file = str(self.model_dir.joinpath('vocab.txt'))
-        self.bert_config_file = str(self.model_dir.joinpath('bert_config.json'))
-        if not verbose:
-            tf.logging.set_verbosity(tf.logging.ERROR)
+        self.vocab_file = str(self.model_dir.joinpath('vocab/30k-clean.vocab'))
+        self.spm_model_file = str(self.model_dir.joinpath('vocab/30k-clean.model'))
+        self.bert_config_file = str(self.model_dir.joinpath('config.json'))
+
         self.model_thread = Thread(target=self.run_model)
         self.model_thread.start()
 
@@ -31,7 +28,7 @@ class TfBertModel(RerankModel):
     def create_model(bert_config, input_ids, input_mask, segment_ids,
                      labels, num_labels):
         """Creates a classification model."""
-        model = modeling.BertModel(
+        model = modeling.AlbertModel(
             config=bert_config,
             is_training=False,
             input_ids=input_ids,
@@ -123,10 +120,10 @@ class TfBertModel(RerankModel):
         return dataset
 
     def run_model(self):
-        bert_config = modeling.BertConfig.from_json_file(self.bert_config_file)
+        bert_config = modeling.AlbertConfig.from_json_file(self.bert_config_file)
         assert self.max_seq_len <= bert_config.max_position_embeddings
 
-        run_config = tf.estimator.RunConfig(model_dir=str(self.model_dir))
+        run_config = tf.estimator.RunConfig(model_dir=str(self.data_dir))
 
         model_fn = self.model_fn_builder(
             bert_config=bert_config,
@@ -144,19 +141,22 @@ class TfBertModel(RerankModel):
             self.output_q.put((item["log_probs"], item["label_ids"]))
 
     def feature_generator(self):
-        tokenizer = tokenization.FullTokenizer(vocab_file=self.vocab_file, do_lower_case=True)
+        tokenizer = tokenization.FullTokenizer(vocab_file=self.vocab_file,
+                    spm_model_file=self.spm_model_file, do_lower_case=True)
         while True:
             next = self.input_q.get()
             if not next:
                 break
+
             query, candidates = next
+
             query = tokenization.convert_to_unicode(query)
-            query_token_ids = tokenization.convert_to_bert_input(
+            query_token_ids = bert_tokenization.convert_to_bert_input(
                 text=query, max_seq_length=self.max_seq_len, tokenizer=tokenizer,
                 add_cls=True)
 
             for i, doc_text in enumerate(candidates):
-                doc_token_id = tokenization.convert_to_bert_input(
+                doc_token_id = bert_tokenization.convert_to_bert_input(
                     text=tokenization.convert_to_unicode(doc_text),
                     max_seq_length=self.max_seq_len - len(query_token_ids),
                     tokenizer=tokenizer,
@@ -187,9 +187,7 @@ class TfBertModel(RerankModel):
             candidates += ['PADDING DOC'] * (self.batch_size - (len(candidates) % self.batch_size))
             return candidates
 
-    def rank(self, query: bytes, choices: List[str],
-             filter_results=defaults.filter_results) -> List[int]:
-
+    def rank(self, query, choices):
         actual_length = len(choices)
         candidates = self.pad(choices)
         self.input_q.put((query, choices))
@@ -199,11 +197,7 @@ class TfBertModel(RerankModel):
         log_probs = np.stack(log_probs).reshape(-1, 2)
         scores = log_probs[:, 1]
         assert len(scores) == actual_length
-        if filter_results:
-            scores = np.extract(scores[:, 0] < scores[:, 1], scores)
-        if len(scores.shape) > 1 and scores.shape[1] == 2:
-            scores = np.squeeze(scores[:, 1])
-        return list(scores.argsort()[::-1])
+        return scores.argsort()[::-1]
 
     def close(self):
         self.input_q.put(None)

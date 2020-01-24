@@ -1,138 +1,145 @@
-"""NBoost Proxy Class"""
+from time import perf_counter
+from typing import List
+from flask import (
+    request as flask_request,
+    Response as FlaskResponse,
+    render_template,
+    jsonify,
+    Flask)
+from nboost.plugins.models.rerank.base import RerankModelPlugin
+from nboost.delegates import RequestDelegate, ResponseDelegate
+from nboost.plugins.models.qa.base import QAModelPlugin
+from nboost.compat import BackwardsCompatibility
+from nboost.plugins.models import resolve_model
+from nboost.plugins.debug import DebugPlugin
+from nboost import defaults, PKG_PATH
+from nboost.database import Database
+from nboost.logger import set_logger
+from nboost.plugins import Plugin
+from nboost.translators import *
 
-from typing import Tuple, Callable
-from numbers import Number
-from copy import deepcopy
-import socket
-from nboost.models.rerank.base import RerankModel
-from nboost.models.qa.base import QAModel
-from nboost.models import resolve_model
-from nboost.server import SocketServer
-from nboost.helpers import dump_json
-from nboost.session import Session
-from nboost import hooks, defaults
-from nboost.exceptions import *
 
-
-class Proxy(SocketServer):
-    """The proxy object is the core of NBoost."""
-    def __init__(self, search_path: type(defaults.search_path) = defaults.search_path,
-                 rerank: type(defaults.rerank) = defaults.rerank,
+class Proxy:
+    def __init__(self, host: type(defaults.host) = defaults.host,
+                 port: type(defaults.port) = defaults.port,
+                 verbose: type(defaults.verbose) = defaults.verbose,
+                 data_dir: type(defaults.data_dir) = defaults.data_dir,
+                 no_rerank: type(defaults.no_rerank) = defaults.no_rerank,
                  model: type(defaults.model) = defaults.model,
                  model_dir: type(defaults.model_dir) = defaults.model_dir,
                  qa: type(defaults.qa) = defaults.qa,
                  qa_model: type(defaults.qa_model) = defaults.qa_model,
                  qa_model_dir: type(defaults.qa_model_dir) = defaults.qa_model_dir,
-                 data_dir: type(defaults.data_dir) = defaults.data_dir, **kwargs):
-        super().__init__(**kwargs)
-        self.kwargs = kwargs
-        self.averages = {}
-        self.search_path = search_path
-        self.rerank = rerank
-        self.qa = qa
+                 search_route: type(defaults.search_route) = defaults.search_route,
+                 frontend_route: type(defaults.frontend_route) = defaults.frontend_route,
+                 status_route: type(defaults.status_route) = defaults.status_route,
+                 debug: type(defaults.debug) = defaults.debug,
+                 **cli_args):
+        self.logger = set_logger(self.__class__.__name__, verbose=verbose)
+        BackwardsCompatibility().set()
+        db = Database()
+        plugins = []  # type: List[Plugin]
 
-        self.status = deepcopy(self.get_session().cli_configs)
-        self.status.pop('delim', '')
-        self.status.pop('qa_cids', '')
-        self.status.pop('rerank_cids', '')
-        self.status['search_path'] = search_path
-
-        if self.rerank:
-            self.model = resolve_model(
+        if not no_rerank:
+            rerank_model_plugin = resolve_model(
                 data_dir=data_dir,
                 model_dir=model_dir,
-                model_cls=model, **kwargs)  # type: RerankModel
-            self.status['model_class'] = type(self.model).__name__
-            self.status['model_dir'] = model_dir
+                model_cls=model,
+                **cli_args)  # type: RerankModelPlugin
 
-        if self.qa:
-            self.qa_model = resolve_model(
+            plugins.append(rerank_model_plugin)
+
+        if qa:
+            qa_model_plugin = resolve_model(
                 data_dir=data_dir,
                 model_dir=qa_model_dir,
                 model_cls=qa_model,
-                **kwargs)  # type: QAModel
-            self.status['qa_model_class'] = type(self.qa_model).__name__
-            self.status['qa_model_dir'] = qa_model_dir
+                **cli_args)  # type: QAModelPlugin
 
-    def update_averages(self, **stats: Number):
-        for key, value in stats.items():
-            self.averages.setdefault(key, {'count': 0, 'sum': 0})
-            item = self.averages[key]
-            item['count'] += 1
-            item['sum'] += value
-            self.status['average_' + key] = item['sum'] / item['count']
+            plugins.append(qa_model_plugin)
 
-    def get_session(self):
-        return Session(**self.kwargs)
+        if debug:
+            debug_plugin = DebugPlugin(**cli_args)
+            plugins.append(debug_plugin)
 
-    def loop(self, client_socket: socket.socket, address: Tuple[str, str]):
-        """Main ioloop for reranking server results to the client"""
-        server_socket = self.set_socket()
-        session = self.get_session()
-        prefix = 'Request (%s:%s): ' % address
+        flask_app = Flask(
+            import_name=__name__,
+            static_folder=str(PKG_PATH.joinpath('resources/frontend')),
+            template_folder=str(PKG_PATH.joinpath('resources/frontend'))
+        )
 
-        try:
-            hooks.on_client_request(session, client_socket, self.search_path)
-            self.logger.debug(prefix + 'search request.')
+        @flask_app.route(search_route)
+        def search(**_) -> FlaskResponse:
+            """Search request."""
+            db_row = db.new_row()
 
-            if self.rerank:
-                hooks.on_rerank_request(session)
+            # parse the client request
+            dict_request = flask_request_to_dict_request(flask_request)
 
-            hooks.on_server_request(session)
+            # combine command line args and runtime args sent by request
+            query_args = {}
+            for key in list(dict_request['url']['query']):
+                if key in defaults.__dict__:
+                    query_args[key] = dict_request['url']['query'].pop(key)
+            json_args = dict_request['body'].pop('nboost', {})
+            args = {**cli_args, **json_args, **query_args}
 
-            if self.rerank:
-                hooks.on_rerank_response(session, self.model)
+            request = RequestDelegate(dict_request, **args)
+            request.set_path('url.netloc', '%s:%s' % (request.uhost, request.uport))
 
-            if self.qa:
-                hooks.on_qa(session, self.qa_model)
+            for plugin in plugins:  # type: Plugin
+                plugin.on_request(request, db_row)
 
-            if session.debug:
-                hooks.on_debug(session)
+            # get response from upstream server
+            start_time = perf_counter()
+            requests_response = dict_request_to_requests_response(dict_request)
+            db_row.response_time = perf_counter() - start_time
+            dict_response = requests_response_to_dict_response(requests_response)
+            response = ResponseDelegate(dict_response, request)
+            response.set_path('body.nboost', {})
+            db_row.choices = len(response.choices)
 
-            hooks.on_client_response(session, client_socket)
+            for plugin in plugins:  # type: Plugin
+                plugin.on_response(response, db_row)
 
-        except FrontendRequest:
-            self.logger.info(prefix + 'frontend request')
-            hooks.on_frontend_request(client_socket, session)
+            # save stats to sql lite
+            db.insert(db_row)
 
-        except StatusRequest:
-            self.logger.info(prefix + 'status request')
-            hooks.on_status_request(client_socket, session, self.status)
+            return dict_response_to_flask_response(dict_response)
 
-        except UnknownRequest:
-            path = session.get_request_path('url.path')
-            self.logger.info(prefix + 'unknown path %s', path)
-            hooks.on_unhandled_request(client_socket, server_socket, session)
+        @flask_app.route(frontend_route)
+        def frontend(**_):
+            return render_template('index.html')
 
-        except MissingQuery:
-            self.logger.warning(prefix + 'missing query')
-            hooks.on_unhandled_request(client_socket, server_socket, session)
+        @flask_app.route(status_route)
+        def status(**_):
+            configs = {}
 
-        except UpstreamServerError as exc:
-            self.logger.error(prefix + 'server status %s' % exc)
-            hooks.on_client_response(session, client_socket)
+            for plugin in plugins:
+                configs.update(plugin.configs)
 
-        except InvalidChoices as exc:
-            self.logger.warning(prefix + '%s', exc.args)
-            hooks.on_unhandled_request(client_socket, server_socket, session)
+            stats = db.get_stats()
 
-        except Exception as exc:
-            # for misc errors, send back json error msg
-            self.logger.error(prefix + str(exc), exc_info=True)
-            hooks.on_proxy_error(client_socket, exc)
+            return jsonify({**configs, **stats})
 
-        finally:
-            self.update_averages(**session.stats)
-            client_socket.close()
-            server_socket.close()
+        @flask_app.route('/', defaults={'path': ''})
+        @flask_app.route('/<path:path>')
+        def proxy_through(path):
+            dict_request = flask_request_to_dict_request(flask_request)
+            request = RequestDelegate(dict_request)
+            request.set_path('url.netloc', '%s:%s' % (request.uhost, request.uport))
+            requests_response = dict_request_to_requests_response(dict_request)
+            return requests_response_to_flask_response(requests_response)
 
-    def run(self):
-        """Same as socket server run() but logs"""
-        self.logger.info(dump_json(self.status, indent=4).decode())
-        super().run()
+        @flask_app.errorhandler(Exception)
+        def handle_json_response(error):
+            return jsonify({
+                'type': error.__class__.__name__,
+                'spec': error.__class__.__doc__,
+                'msg': str(error)
+            }), 500
 
-    def close(self):
-        """Close the proxy server and model"""
-        self.logger.info('Closing model...')
-        self.model.close()
-        super().close()
+        self.run = lambda: (
+            self.logger.critical('LISTENING %s:%s' % (host, port)) or
+            flask_app.run(host=host, port=port)
+        )

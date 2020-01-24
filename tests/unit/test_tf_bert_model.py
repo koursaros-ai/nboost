@@ -1,19 +1,24 @@
-from nboost.proxy import Proxy
+from nboost.plugins.models import resolve_model
+from nboost import defaults
 import unittest
 
 
-class TestPtTinyBertModel(unittest.TestCase):
+class TestTfBertModel(unittest.TestCase):
+
     def setUp(self):
-        self.proxy = Proxy(model_dir='pt-bert-base-uncased-msmarco')
+        self.model = resolve_model(
+            model_dir='tf-bert-base-uncased-msmarco',
+            data_dir=defaults.data_dir,
+            model_cls=''
+        )
 
     def test_rank(self):
-        ranks = self.proxy.model.rank('O wherefore art thou', CHOICES)
-        self.assertEqual(self.proxy.model.__class__.__name__, 'PtBertModel')
+        ranks = self.model.rank('O wherefore art thou', CHOICES)
         self.assertIsInstance(ranks, list)
         self.assertEqual(6, len(ranks))
 
     def tearDown(self) -> None:
-        self.proxy.model.close()
+        self.model.close()
 
 
 CHOICES = [

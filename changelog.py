@@ -18,12 +18,12 @@ EMOJIS = {
     'proxy': '📡',
     'maps': '📖',
     'helpers': '🧰',
-    'protocol': '🌐',
-    'server': '🖥️',
+    'translators': '💬',
+    'delegates': '📞️',
+    'plugins': '🔌',
     'cli': '⌨️',
     'models': '🧠',
-    'session': '📞',
-    'hooks': '🎣',
+    'defaults': '🏠',
 }
 
 

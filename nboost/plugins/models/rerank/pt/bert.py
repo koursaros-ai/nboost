@@ -3,11 +3,11 @@ from typing import List
 import numpy as np
 import torch.nn
 import torch
-from nboost.models.rerank.base import RerankModel
+from nboost.plugins.models.rerank.base import RerankModelPlugin
 from nboost import defaults
 
 
-class PtBertModel(RerankModel):
+class PtBertRerankModelPlugin(RerankModelPlugin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

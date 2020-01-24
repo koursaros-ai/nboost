@@ -1,5 +1,7 @@
+
 """Default command line arguments."""
 
+from nboost.helpers import ListOrCommaDelimitedString
 from nboost import PKG_PATH
 
 host = '0.0.0.0'
@@ -9,7 +11,7 @@ uport = 9200
 ussl = False
 backlog = 100
 verbose = False
-delim = '. '
+query_delim = '. '
 lr = 10e-3
 max_seq_len = 64
 bufsize = 2048
@@ -17,7 +19,7 @@ batch_size = 4
 topn = 50
 workers = 10
 data_dir = PKG_PATH.joinpath('.cache')
-rerank = True
+no_rerank = False
 model = ''
 model_dir = 'pt-tinybert-msmarco'
 qa = False
@@ -28,9 +30,13 @@ max_query_length = 64
 filter_results = False
 query_prep = 'lambda query: query'
 debug = False
+db_file = data_dir.joinpath('nboost.db')
+rerank_cids = ListOrCommaDelimitedString()
 
 # by default, nboost is configured for elasticsearch
-search_path = '/.*/_search'
+search_route = '/<index>/_search'
+frontend_route = '/nboost'
+status_route = '/nboost/status'
 query_path = '(body.query.match) | (body.query.term.*) | (url.query.q)'
 topk_path = '(body.size) | (url.query.size)'
 default_topk = 10

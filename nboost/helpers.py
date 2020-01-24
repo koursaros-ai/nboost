@@ -1,7 +1,7 @@
 """Utility functions for NBoost classes"""
 from urllib.parse import urlparse, parse_qsl, urlunparse, urlencode
 from json.decoder import JSONDecodeError
-from typing import Any, Union, List
+from typing import Any, Union, List, Optional
 from http.client import responses
 from contextlib import suppress
 from functools import reduce
@@ -16,6 +16,21 @@ from tqdm import tqdm
 import requests
 
 JSONTYPES = Union[dict, list, str, int, float]
+
+
+class ListOrCommaDelimitedString:
+
+    def __init__(self, value: Optional[Union[str, list]] = None):
+
+        if isinstance(value, list):
+            self.string = ','.join(value)
+            self.list = value
+        elif isinstance(value, str):
+            self.string = value
+            self.list = value.split(',')
+        else:
+            self.string = None
+            self.list = []
 
 
 def update_union(self, data, val):
@@ -41,48 +56,8 @@ jsonpath.Union.update = update_union
 jsonpath.Fields.update = update_field
 
 
-def parse_url(url: bytes) -> dict:
-    """Parses a url bytes string in the form of:
-        scheme://netloc/path;params?query#fragment
-
-    Returns a dictionary with the respective keys value pairs."""
-    url = urlparse(url.decode())
-    qsl = parse_qsl(url.query, keep_blank_values=True)
-    return {
-        'scheme': url.scheme,
-        'netloc': url.netloc,
-        'path': url.path,
-        'params': url.params,
-        'fragment': url.fragment,
-        'query': dict(qsl) if url.query else {}
-    }
 
 
-def unparse_url(url: dict) -> str:
-    """Reformats a url produced in parse_url()"""
-    return urlunparse((
-        url['scheme'],
-        url['netloc'],
-        url['path'],
-        url['params'],
-        urlencode(url['query'], quote_via=lambda x, *a: x),
-        url['fragment']
-    ))
-
-
-def prepare_response(response: dict) -> bytes:
-    """Prepares a response with the following keys:
-        version: str
-        status: int
-        headers: dict
-        body: bytes"""
-    response['reason'] = responses[response['status']]
-    response['headers'].pop('content-encoding', '')
-    response['headers'].pop('transfer-encoding', '')
-    response['headers']['content-length'] = str(len(response['body']))
-    response['headers'] = ''.join('\r\n%s: %s' % (k, v) for k, v in response['headers'].items())
-
-    return '{version} {status} {reason}{headers}\r\n\r\n'.format(**response).encode() + response['body']
 
 
 def get_jsonpath(obj: JSONTYPES, path: str) -> List[JSONTYPES]:
@@ -122,16 +97,6 @@ def extract_tar_gz(path: Path, to_dir: Path = None):
     tar.extractall(path=str(to_dir))
     tar.close()
     fileobj.close()
-
-
-def get_by_path(root: dict, items: list) -> Any:
-    """Access a nested object in root by item sequence."""
-    return reduce(operator.getitem, items, root)
-
-
-def set_by_path(root: dict, items: list, value: Any):
-    """Set a value in a nested object in root by item sequence."""
-    get_by_path(root, items[:-1])[items[-1]] = value
 
 
 def load_json(json_string: bytes) -> dict:
@@ -179,3 +144,5 @@ def import_class(module: str, cls: str):
     """import an nboost class from a module."""
     file = 'nboost.%s' % module
     return getattr(importlib.import_module(file), cls)
+
+

@@ -19,7 +19,7 @@ CHOICES_PATH = 'the jsonpath to find the array of choices to reorder'
 TOPK_PATH = 'the jsonpath to find the number of requested results'
 DEFAULT_TOPK = 'the default number of results that the api returns'
 TRUE_CIDS_PATH = 'the path of the true choice ids in the request'
-SEARCH_PATH = 'the url path to tag for reranking via nboost'
+SEARCH_ROUTE = 'the url path to tag for reranking via nboost'
 QUERY_PATH = 'the jsonpath in the request to find the query'
 QA_MODEL_DIR = 'name or directory of the finetuned qa model'
 CONFIG = 'which search api nboost should be configured for'
@@ -39,7 +39,7 @@ PROTOCOL = 'protocol class'
 HOST = 'host of the proxy'
 PORT = 'port of the proxy'
 MODEL = 'model class'
-RERANK = 'whether to rerank the query results using the model'
+NO_RERANK = 'do not rerank the query results using the model'
 USSL = 'use ssl for the upstream connection'
 DEBUG = 'return the session parameters and parsed objects for that session'
 
@@ -49,8 +49,8 @@ def set_parser() -> ArgumentParser:
     parser = ArgumentParser(prog='nboost', description=DESCRIPTION,
                             formatter_class=lambda prog: AdHf(prog, max_help_position=100, width=100))
     parser.add_argument('--debug', type=type(defaults.debug), default=defaults.debug, help=DEBUG)
-    parser.add_argument('--rerank', type=type(defaults.rerank), default=defaults.rerank, help=RERANK)
-    parser.add_argument('--search_path', type=type(defaults.search_path), default=defaults.search_path, help=SEARCH_PATH)
+    parser.add_argument('--no_rerank', type=type(defaults.no_rerank), default=defaults.no_rerank, help=NO_RERANK)
+    parser.add_argument('--search_path', type=type(defaults.search_route), default=defaults.search_route, help=SEARCH_ROUTE)
     parser.add_argument('--query_path', type=type(defaults.query_path), default=defaults.query_path, help=QUERY_PATH)
     parser.add_argument('--topk_path', type=type(defaults.topk_path), default=defaults.topk_path, help=TOPK_PATH)
     parser.add_argument('--default_topk', type=type(defaults.default_topk), default=defaults.default_topk, help=DEFAULT_TOPK)
@@ -64,7 +64,7 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--uhost', type=type(defaults.uhost), default=defaults.uhost, help=UHOST)
     parser.add_argument('--uport', type=type(defaults.uport), default=defaults.uport, help=UPORT)
     parser.add_argument('--ussl', type=type(defaults.ussl), default=defaults.ussl, help=USSL)
-    parser.add_argument('--delim', type=type(defaults.delim), default=defaults.delim, help=DELIM)
+    parser.add_argument('--delim', type=type(defaults.query_delim), default=defaults.query_delim, help=DELIM)
     parser.add_argument('--lr', type=type(defaults.lr), default=defaults.lr, help=LR)
     parser.add_argument('--max_seq_len', type=type(defaults.max_seq_len), default=defaults.max_seq_len, help=MAX_SEQ_LEN)
     parser.add_argument('--bufsize', type=type(defaults.bufsize), default=defaults.bufsize, help=BUFSIZE)

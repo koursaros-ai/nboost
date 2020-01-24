@@ -1,10 +1,11 @@
 """Base Class for ranking models"""
 
 from nboost.logger import set_logger
+from nboost.plugins import Plugin
 from nboost import defaults
 
 
-class BaseModel:
+class ModelPlugin(Plugin):
     """Base Class for Transformer Models"""
     def __init__(self, model_dir: type(defaults.model_dir) = defaults.model_dir,
                  batch_size: type(defaults.batch_size) = defaults.batch_size,
