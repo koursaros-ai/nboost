@@ -34,15 +34,15 @@ Now we're ready to deploy our Neural Proxy! There are three ways to configure NB
     
     On the command line, we can run:
     ```bash
-    nboost                              \
-        --uhost localhost               \
-        --uport 9200                    \
-        --search_route /.*/_search       \
-        --query_path url.query.q        \
-        --topk_path url.query.size      \
-        --default_topk 10               \
-        --topn 50                       \
-        --choices_path body.hits.hits   \
+    nboost                                  \
+        --uhost localhost                   \
+        --uport 9200                        \
+        --search_route "/<index>/_search"   \
+        --query_path url.query.q            \
+        --topk_path url.query.size          \
+        --default_topk 10                   \
+        --topn 50                           \
+        --choices_path body.hits.hits       \
         --cvalues_path _source.passage
     ```
     > 📢 The `--uhost` and `--uport` should be the same as the Elasticsearch server above! Uhost and uport are short for upstream-host and upstream-port (referring to the upstream server).
@@ -56,7 +56,7 @@ Now we're ready to deploy our Neural Proxy! There are three ways to configure NB
 
     On the command line, let's run:
     ```bash
-   nboost --search_route /.*/_search
+   nboost --search_route "/<index>/_search"
    ```
    
    In a python script, we can run:
@@ -90,7 +90,7 @@ Now we're ready to deploy our Neural Proxy! There are three ways to configure NB
 
     On the command line, let's run:
     ```bash
-   nboost --search_route /.*/_search
+   nboost --search_route "/<index>/_search"
    ```
    
       In a python script, we can run:

@@ -17,14 +17,14 @@ Just like the Elasticsearch tutorial, we will go through the three ways to confi
         --uport 443                         \
         --ussl True                         \
         --topn 20                           \
-        --search_path /bing/v7.0/search     \
+        --search_route /bing/v7.0/search    \
         --query_path url.query.q            \
         --topk_path url.query.count         \
         --default_topk 10                   \
         --choices_path body.webPages.value  \
         --cvalues_path snippet              \
         --qa True                           \
-        --qa_model PtDistilBertQAModel      
+        --qa_model PtDistilBertQAModelPlugin      
     ```
     Then we can query NBoost.
     
@@ -36,7 +36,7 @@ Just like the Elasticsearch tutorial, we will go through the three ways to confi
 
     On the command line, let's run:
     ```bash
-   nboost --search_path /bing/v7.0/search --qa True --qa_model PtDistilBertQAModel
+   nboost --search_route /bing/v7.0/search --qa True --qa_model PtDistilBertQAModelPlugin
    ```
    
    In a python script, we can run:
@@ -52,7 +52,6 @@ Just like the Elasticsearch tutorial, we will go through the three ways to confi
             'nboost': {
                 'uhost': 'api.cognitive.microsoft.com',
                 'uport': 443,
-                'ussl': True,
                 'topn': 20,
                 'query_path': 'url.query.q',
                 'topk_path': 'url.query.count',
@@ -70,7 +69,7 @@ Just like the Elasticsearch tutorial, we will go through the three ways to confi
 
     On the command line, let's run:
     ```bash
-   nboost --search_path /bing/v7.0/search --qa True --qa_model PtDistilBertQAModel
+   nboost --search_route /bing/v7.0/search --qa True --qa_model PtDistilBertQAModelPlugin
    ```
 
    In a python script, we can run:
@@ -86,7 +85,6 @@ Just like the Elasticsearch tutorial, we will go through the three ways to confi
            'responseFilter': 'Webpages',
            'uhost': 'api.cognitive.microsoft.com',
            'uport': 443,
-           'ussl': True,
            'topn': 20,
            'query_path': 'url.query.q',
            'topk_path': 'url.query.count',
