@@ -1,3 +1,11 @@
+# Release `0.3.0`
+> Jan 24th, 2020
+
+### 📡 Proxy
+
+ - [[```9c13d0e```](https://github.com/koursaros-ai/nboost/commit/9c13d0e720e9e203198d73888c816e2ccd745539)] refactor to use flask and requests (*colethienes*) <span style="color:blue">△2169</span>
+
+
 # Release `0.2.2`
 > Jan 22nd, 2020
 
