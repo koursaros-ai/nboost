@@ -50,7 +50,7 @@ def set_parser() -> ArgumentParser:
                             formatter_class=lambda prog: AdHf(prog, max_help_position=100, width=100))
     parser.add_argument('--debug', type=type(defaults.debug), default=defaults.debug, help=DEBUG)
     parser.add_argument('--no_rerank', type=type(defaults.no_rerank), default=defaults.no_rerank, help=NO_RERANK)
-    parser.add_argument('--search_path', type=type(defaults.search_route), default=defaults.search_route, help=SEARCH_ROUTE)
+    parser.add_argument('--search_route', type=type(defaults.search_route), default=defaults.search_route, help=SEARCH_ROUTE)
     parser.add_argument('--query_path', type=type(defaults.query_path), default=defaults.query_path, help=QUERY_PATH)
     parser.add_argument('--topk_path', type=type(defaults.topk_path), default=defaults.topk_path, help=TOPK_PATH)
     parser.add_argument('--default_topk', type=type(defaults.default_topk), default=defaults.default_topk, help=DEFAULT_TOPK)

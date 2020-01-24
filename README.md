@@ -182,7 +182,7 @@ Now we're ready to deploy our Neural Proxy! It is very simple to do this, run:
 nboost                              \
     --uhost localhost               \
     --uport 9200                    \
-    --search_path /.*/_search       \
+    --search_route /.*/_search       \
     --query_path url.query.q        \
     --topk_path url.query.size      \
     --default_topk 10               \

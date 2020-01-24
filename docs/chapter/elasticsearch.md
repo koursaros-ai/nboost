@@ -37,7 +37,7 @@ Now we're ready to deploy our Neural Proxy! There are three ways to configure NB
     nboost                              \
         --uhost localhost               \
         --uport 9200                    \
-        --search_path /.*/_search       \
+        --search_route /.*/_search       \
         --query_path url.query.q        \
         --topk_path url.query.size      \
         --default_topk 10               \
@@ -56,7 +56,7 @@ Now we're ready to deploy our Neural Proxy! There are three ways to configure NB
 
     On the command line, let's run:
     ```bash
-   nboost --search_path /.*/_search
+   nboost --search_route /.*/_search
    ```
    
    In a python script, we can run:
@@ -90,7 +90,7 @@ Now we're ready to deploy our Neural Proxy! There are three ways to configure NB
 
     On the command line, let's run:
     ```bash
-   nboost --search_path /.*/_search
+   nboost --search_route /.*/_search
    ```
    
       In a python script, we can run:
