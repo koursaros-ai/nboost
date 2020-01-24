@@ -3,7 +3,7 @@ from typing import List
 from flask import (
     request as flask_request,
     Response as FlaskResponse,
-    render_template,
+    send_from_directory,
     jsonify,
     Flask)
 from nboost.plugins.models.rerank.base import RerankModelPlugin
@@ -62,11 +62,44 @@ class Proxy:
             debug_plugin = DebugPlugin(**cli_args)
             plugins.append(debug_plugin)
 
-        flask_app = Flask(
-            import_name=__name__,
-            static_folder=str(PKG_PATH.joinpath('resources/frontend')),
-            template_folder=str(PKG_PATH.joinpath('resources/frontend'))
-        )
+        static_dir = str(PKG_PATH.joinpath('resources/frontend'))
+        flask_app = Flask(__name__)
+
+        @flask_app.route(frontend_route, methods=['GET'])
+        def frontend_root():
+            return send_from_directory(static_dir, 'index.html')
+
+        @flask_app.route(frontend_route + '/<path:path>', methods=['GET'])
+        def frontend_path(path):
+            return send_from_directory(static_dir, path)
+
+        @flask_app.route(frontend_route + status_route)
+        def status_path():
+            configs = {}
+
+            for plugin in plugins:
+                configs.update(plugin.configs)
+
+            stats = db.get_stats()
+            return jsonify({**configs, **stats})
+
+        @flask_app.route('/', defaults={'path': ''})
+        @flask_app.route('/<path:path>')
+        def proxy_through(path):
+            dict_request = flask_request_to_dict_request(flask_request)
+            request = RequestDelegate(dict_request)
+            request.set_path('url.netloc', '%s:%s' % (request.uhost, request.uport))
+            requests_response = dict_request_to_requests_response(dict_request)
+            return requests_response_to_flask_response(requests_response)
+
+        @flask_app.errorhandler(Exception)
+        def handle_json_response(error):
+            self.logger.error('', exc_info=True)
+            return jsonify({
+                'type': error.__class__.__name__,
+                'doc': error.__class__.__doc__,
+                'msg': error.args
+            }), 500
 
         @flask_app.route(search_route)
         def search(**_) -> FlaskResponse:
@@ -106,38 +139,6 @@ class Proxy:
             db.insert(db_row)
 
             return dict_response_to_flask_response(dict_response)
-
-        @flask_app.route(frontend_route)
-        def frontend(**_):
-            return render_template('index.html')
-
-        @flask_app.route(status_route)
-        def status(**_):
-            configs = {}
-
-            for plugin in plugins:
-                configs.update(plugin.configs)
-
-            stats = db.get_stats()
-
-            return jsonify({**configs, **stats})
-
-        @flask_app.route('/', defaults={'path': ''})
-        @flask_app.route('/<path:path>')
-        def proxy_through(path):
-            dict_request = flask_request_to_dict_request(flask_request)
-            request = RequestDelegate(dict_request)
-            request.set_path('url.netloc', '%s:%s' % (request.uhost, request.uport))
-            requests_response = dict_request_to_requests_response(dict_request)
-            return requests_response_to_flask_response(requests_response)
-
-        @flask_app.errorhandler(Exception)
-        def handle_json_response(error):
-            return jsonify({
-                'type': error.__class__.__name__,
-                'spec': error.__class__.__doc__,
-                'msg': str(error)
-            }), 500
 
         self.run = lambda: (
             self.logger.critical('LISTENING %s:%s' % (host, port)) or

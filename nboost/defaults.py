@@ -36,7 +36,7 @@ rerank_cids = ListOrCommaDelimitedString()
 # by default, nboost is configured for elasticsearch
 search_route = '/<index>/_search'
 frontend_route = '/nboost'
-status_route = '/nboost/status'
+status_route = '/status'
 query_path = '(body.query.match) | (body.query.term.*) | (url.query.q)'
 topk_path = '(body.size) | (url.query.size)'
 default_topk = 10
