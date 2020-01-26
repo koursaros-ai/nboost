@@ -118,6 +118,8 @@ class Proxy:
             args = {**cli_args, **json_args, **query_args}
 
             request = RequestDelegate(dict_request, **args)
+            request.dict['headers'].pop('Host', '')
+            request.set_path('url.headers.host', '%s:%s' % (request.uhost, request.uport))
             request.set_path('url.netloc', '%s:%s' % (request.uhost, request.uport))
 
             for plugin in plugins:  # type: Plugin
