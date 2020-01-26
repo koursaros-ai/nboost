@@ -62,6 +62,8 @@ def dict_request_to_requests_response(dict_request: dict) -> RequestsResponse:
 
 def requests_response_to_dict_response(requests_response: RequestsResponse) -> dict:
     requests_response.headers.pop('content-encoding', '')
+    requests_response.headers.pop('content-length', '')
+    requests_response.headers.pop('transfer-encoding', '')
     return {
         'status': requests_response.status_code,
         'headers': dict(requests_response.headers),
@@ -71,6 +73,8 @@ def requests_response_to_dict_response(requests_response: RequestsResponse) -> d
 
 def requests_response_to_flask_response(requests_response: RequestsResponse) -> FlaskResponse:
     requests_response.headers.pop('content-encoding', '')
+    requests_response.headers.pop('transfer-encoding', '')
+    requests_response.headers.pop('content-length', '')
     return FlaskResponse(
         response=requests_response.content,
         status=requests_response.status_code,

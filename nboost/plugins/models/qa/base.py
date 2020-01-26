@@ -17,8 +17,8 @@ class QAModelPlugin(ModelPlugin):
             start_time = time.perf_counter()
 
             answer, start_pos, stop_pos, score = self.get_answer(
-                query=response.request.query,
-                cvalue=response.cvalues[0])
+                response.request.query,
+                response.cvalues[0])
 
             db_row.qa_time = time.perf_counter() - start_time
 

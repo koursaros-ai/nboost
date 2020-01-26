@@ -49,11 +49,11 @@ class RequestDelegate(Delegate):
         self.topk_path = type(defaults.topk_path)(topk_path)
         self.default_topk = type(defaults.default_topk)(default_topk)
         self.rerank_cids = type(defaults.rerank_cids)(rerank_cids)
-        self.choices_path = type(defaults.uhost)(choices_path)
-        self.cvalues_path = type(defaults.uhost)(cvalues_path)
-        self.cids_path = type(defaults.uhost)(cids_path)
-        self.filter_results = type(defaults.uhost)(filter_results)
-        self.qa_threshold = type(defaults.uhost)(qa_threshold)
+        self.choices_path = type(defaults.choices_path)(choices_path)
+        self.cvalues_path = type(defaults.cvalues_path)(cvalues_path)
+        self.cids_path = type(defaults.cids_path)(cids_path)
+        self.filter_results = type(defaults.filter_results)(filter_results)
+        self.qa_threshold = type(defaults.qa_threshold)(qa_threshold)
 
     @property
     def topk(self) -> int:
