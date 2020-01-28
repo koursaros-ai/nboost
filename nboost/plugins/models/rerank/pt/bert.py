@@ -26,7 +26,13 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
 
     def rank(self, query: str, choices: List[str],
              filter_results=defaults.filter_results):
+        """
 
+        :param query:
+        :param choices:
+        :param filter_results:
+        :return:
+        """
         if len(choices) == 0:
             return [], []
         input_ids, attention_mask, token_type_ids = self.encode(query, choices)
@@ -44,6 +50,12 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
             return sorted_indices, scores[sorted_indices]
 
     def encode(self, query: str, choices: List[str]):
+        """
+
+        :param query:
+        :param choices:
+        :return:
+        """
         inputs = [self.tokenizer.encode_plus(query, choice, add_special_tokens=True)
                   for choice in choices]
 
