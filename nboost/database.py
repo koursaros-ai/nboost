@@ -13,7 +13,7 @@ class Database:
         return DatabaseRow()
 
     def get_cursor(self) -> Cursor:
-        conn = sqlite3.connect(self.db_file, isolation_level=None)
+        conn = sqlite3.connect(str(self.db_file), isolation_level=None)
         return conn.cursor()
 
     def insert(self, db_row: 'DatabaseRow'):
