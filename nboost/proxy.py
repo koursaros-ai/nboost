@@ -19,6 +19,7 @@ from nboost.database import Database
 from nboost.logger import set_logger
 from nboost.plugins import Plugin
 from nboost.translators import *
+from json.decoder import JSONDecodeError
 
 
 class Proxy:
@@ -120,7 +121,11 @@ class Proxy:
             start_time = perf_counter()
             requests_response = dict_request_to_requests_response(dict_request)
             db_row.response_time = perf_counter() - start_time
-            dict_response = requests_response_to_dict_response(requests_response)
+            try:
+                dict_response = requests_response_to_dict_response(requests_response)
+            except JSONDecodeError:
+                print(requests_response.content)
+                return requests_response.content
             response = ResponseDelegate(dict_response, request)
             response.set_path('body.nboost', {})
             db_row.choices = len(response.choices)
