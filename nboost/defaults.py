@@ -32,6 +32,7 @@ query_prep = 'lambda query: query'
 debug = False
 db_file = data_dir.joinpath('nboost.db')
 rerank_cids = ListOrCommaDelimitedString()
+prerank = True
 
 # by default, nboost is configured for elasticsearch
 search_route = '/<index>/_search'

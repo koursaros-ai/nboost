@@ -75,6 +75,7 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--model', type=type(defaults.model), default=defaults.model, help=MODEL)
     parser.add_argument('--model_dir', type=type(defaults.model_dir), default=defaults.model_dir, help=MODEL_DIR)
     parser.add_argument('--qa', type=type(defaults.qa), default=defaults.qa, help=QA)
+    parser.add_argument('--prerank', type=type(defaults.prerank), default=defaults.prerank, help="Prerank results w/BM25")
     parser.add_argument('--qa_model', type=type(defaults.qa_model), default=defaults.qa_model, help=QA_MODEL)
     parser.add_argument('--qa_model_dir', type=type(defaults.qa_model_dir), default=defaults.qa_model_dir, help=QA_MODEL_DIR)
     parser.add_argument('--filter_results', type=type(defaults.filter_results), default=defaults.filter_results, help=FILTER_RESULTS)

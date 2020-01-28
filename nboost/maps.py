@@ -8,6 +8,7 @@ MODULE_MAP = {
     'TfBertRerankModelPlugin': 'plugins.models.rerank.tf.bert',
     'TfAlbertRerankModelPlugin': 'plugins.models.rerank.tf.albert',
     'PtDistilBertQAModelPlugin': 'plugins.models.qa.pt.distilbert',
+    'USERerankModelPlugin': 'plugins.models.rerank.tf.use'
 }
 
 CLASS_MAP = {
@@ -17,11 +18,13 @@ CLASS_MAP = {
     "pt-bert-base-uncased-msmarco": "PtBertRerankModelPlugin",
     "tf-bert-base-uncased-msmarco": "TfBertRerankModelPlugin",
     "tf-albert-tiny-uncased-msmarco": "TfAlbertRerankModelPlugin",
-    "tf-biobert-base-uncased-msmarco": "TfBertRerankModelPlugin"
+    "tf-biobert-base-uncased-msmarco": "TfBertRerankModelPlugin",
+    "use-model": 'USERerankModelPlugin'
 }
 
 URL_MAP = {
     "shuffle-model": "https://example.org",
+    "use-model": "https://example.org",
     "tf-bert-base-uncased-msmarco": "https://storage.googleapis.com/koursaros/tf-bert-base-uncased-msmarco.tar.gz",
     "tf-albert-tiny-uncased-msmarco": "https://storage.googleapis.com/koursaros/albert-tiny-uncased-msmarco.tar.gz",
     "tf-biobert-base-uncased-msmarco": "https://storage.googleapis.com/koursaros/biobert-base-uncased-msmarco.tar.gz",

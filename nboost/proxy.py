@@ -6,9 +6,11 @@ from flask import (
     send_from_directory,
     jsonify,
     Flask)
+import traceback
 from nboost.plugins.models.rerank.base import RerankModelPlugin
 from nboost.delegates import RequestDelegate, ResponseDelegate
 from nboost.plugins.models.qa.base import QAModelPlugin
+from nboost.plugins.prerank import PrerankPlugin
 from nboost.compat import BackwardsCompatibility
 from nboost.plugins.models import resolve_model
 from nboost.plugins.debug import DebugPlugin
@@ -34,11 +36,16 @@ class Proxy:
                  frontend_route: type(defaults.frontend_route) = defaults.frontend_route,
                  status_route: type(defaults.status_route) = defaults.status_route,
                  debug: type(defaults.debug) = defaults.debug,
+                 prerank: type(defaults.prerank) = defaults.prerank,
                  **cli_args):
         self.logger = set_logger(self.__class__.__name__, verbose=verbose)
         BackwardsCompatibility().set()
         db = Database()
         plugins = []  # type: List[Plugin]
+
+        if prerank:
+            preRankPlugin = PrerankPlugin()
+            plugins.append(preRankPlugin)
 
         if not no_rerank:
             rerank_model_plugin = resolve_model(
@@ -86,28 +93,11 @@ class Proxy:
         @flask_app.route('/', defaults={'path': ''})
         @flask_app.route('/<path:path>')
         def proxy_through(path):
-            dict_request = flask_request_to_dict_request(flask_request)
-            request = RequestDelegate(dict_request)
-            request.set_path('url.netloc', '%s:%s' % (request.uhost, request.uport))
-            requests_response = dict_request_to_requests_response(dict_request)
-            return requests_response_to_flask_response(requests_response)
+            # parse the client request
+            dict_request = flask_request_to_dict_request(flask_request) # takes the json
 
-        @flask_app.errorhandler(Exception)
-        def handle_json_response(error):
-            self.logger.error('', exc_info=True)
-            return jsonify({
-                'type': error.__class__.__name__,
-                'doc': error.__class__.__doc__,
-                'msg': error.args
-            }), 500
-
-        @flask_app.route(search_route)
-        def search(**_) -> FlaskResponse:
             """Search request."""
             db_row = db.new_row()
-
-            # parse the client request
-            dict_request = flask_request_to_dict_request(flask_request)
 
             # combine command line args and runtime args sent by request
             query_args = {}
@@ -121,6 +111,7 @@ class Proxy:
             request.dict['headers'].pop('Host', '')
             request.set_path('url.headers.host', '%s:%s' % (request.uhost, request.uport))
             request.set_path('url.netloc', '%s:%s' % (request.uhost, request.uport))
+            request.set_path('url.scheme', 'https' if request.ussl else 'http')
 
             for plugin in plugins:  # type: Plugin
                 plugin.on_request(request, db_row)
@@ -141,6 +132,25 @@ class Proxy:
             db.insert(db_row)
 
             return dict_response_to_flask_response(dict_response)
+
+            # except Exception as e:
+            #     self.logger.warning("Failed to rerank due to %s, proxying result" % e)
+            #     traceback.print_exc()
+            #     request = RequestDelegate(_dict_request)
+            #     request.set_path('url.netloc', '%s:%s' % (request.uhost, request.uport))
+            #     request.dict['headers'].pop('Host', '')
+            #     request.set_path('url.headers.host', '%s:%s' % (request.uhost, request.uport))
+            #     requests_response = dict_request_to_requests_response(_dict_request)
+            #     return requests_response_to_flask_response(requests_response)
+
+        @flask_app.errorhandler(Exception)
+        def handle_json_response(error):
+            self.logger.error('', exc_info=True)
+            return jsonify({
+                'type': error.__class__.__name__,
+                'doc': error.__class__.__doc__,
+                'msg': error.args
+            }), 500
 
         self.run = lambda: (
             self.logger.critical('LISTENING %s:%s' % (host, port)) or

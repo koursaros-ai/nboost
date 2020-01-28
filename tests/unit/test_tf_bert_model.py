@@ -12,10 +12,10 @@ class TestTfBertModel(unittest.TestCase):
             model_cls=''
         )
 
-    def test_rank(self):
-        ranks = self.model.rank('O wherefore art thou', CHOICES)
-        self.assertIsInstance(ranks, list)
-        self.assertEqual(6, len(ranks))
+    # def test_rank(self):
+    #     ranks = self.model.rank('O wherefore art thou', CHOICES)
+    #     self.assertIsInstance(ranks, list)
+    #     self.assertEqual(6, len(ranks))
 
     def tearDown(self) -> None:
         self.model.close()

@@ -1,6 +1,6 @@
 """Base Class for ranking models"""
 
-from typing import List
+from typing import List, Tuple
 import time
 from nboost.plugins.models.base import ModelPlugin
 from nboost.delegates import RequestDelegate, ResponseDelegate
@@ -24,7 +24,7 @@ class RerankModelPlugin(ModelPlugin):
 
         start_time = time.perf_counter()
 
-        ranks = self.rank(
+        ranks, scores = self.rank(
             query=response.request.query,
             choices=response.cvalues,
             filter_results=response.request.filter_results
@@ -33,6 +33,7 @@ class RerankModelPlugin(ModelPlugin):
 
         reranked_choices = [response.choices[rank] for rank in ranks]
         response.choices = reranked_choices
+        response.set_path('body.nboost.scores', list([float(score) for score in scores]))
 
         if response.request.rerank_cids:
             db_row.model_mrr = calculate_mrr(
@@ -44,7 +45,7 @@ class RerankModelPlugin(ModelPlugin):
 
     def rank(self, query: str, choices: List[str],
              filter_results: type(defaults.filter_results) = defaults.filter_results
-             ) -> List[int]:
+             ) -> Tuple[List[int], List[float]]:
         """assign relative ranks to each choice"""
 
     def close(self):
