@@ -7,7 +7,9 @@ import math
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+import nltk
 
+nltk.download('stopwords')
 
 class BM25:
     def __init__(self, corpus, tokenizer=None):
