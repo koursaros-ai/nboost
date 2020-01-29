@@ -10,6 +10,7 @@ from nltk.corpus import stopwords
 import nltk
 
 nltk.download('stopwords')
+nltk.download('punkt')
 
 class BM25:
     def __init__(self, corpus, tokenizer=None):
