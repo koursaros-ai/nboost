@@ -1,8 +1,6 @@
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from transformers import AutoTokenizer
 from typing import List
 import numpy as np
-import torch.nn
-import torch
 from nboost.plugins.models.rerank.base import RerankModelPlugin
 from nboost import defaults
 import onnxruntime as rt
@@ -29,7 +27,6 @@ class ONNXBertRerankModelPlugin(RerankModelPlugin):
     def rank(self, query: str, choices: List[str],
              filter_results=defaults.filter_results):
         """
-
         :param query:
         :param choices:
         :param filter_results:
@@ -54,7 +51,6 @@ class ONNXBertRerankModelPlugin(RerankModelPlugin):
 
     def encode(self, query: str, choices: List[str]):
         """
-
         :param query:
         :param choices:
         :return:
