@@ -30,7 +30,8 @@ setup(
         'elasticsearch',
         'tqdm',
         'httptools',
-        'jsonpath-ng'
+        'jsonpath-ng',
+        'flask'
     ],
     extras_require={
         'pt': ['torch', 'transformers==2.2.1'],
