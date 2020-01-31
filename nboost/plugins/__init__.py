@@ -16,7 +16,7 @@ class Plugin:
         """Returns configs to be displayed on /nboost/status"""
         return {}
 
-    def on_request(self, request: RequestDelegate , db_row: DatabaseRow):
+    def on_request(self, request: RequestDelegate, db_row: DatabaseRow):
         """Access request."""
 
     def on_response(self, response: ResponseDelegate, db_row: DatabaseRow):

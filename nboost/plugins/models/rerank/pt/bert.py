@@ -26,9 +26,15 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
 
     def rank(self, query: str, choices: List[str],
              filter_results=defaults.filter_results):
+        """
 
+        :param query:
+        :param choices:
+        :param filter_results:
+        :return:
+        """
         if len(choices) == 0:
-            return []
+            return [], []
         input_ids, attention_mask, token_type_ids = self.encode(query, choices)
 
         with torch.no_grad():
@@ -39,10 +45,17 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
             if filter_results:
                 scores = np.extract(scores[:, 0] < scores[:, 1], scores)
             if len(scores.shape) > 1 and scores.shape[1] == 2:
-                scores = np.squeeze(scores[:, 1])
-            return list(np.argsort(scores)[::-1])
+                scores = np.reshape(scores[:, 1], (-1,))
+            sorted_indices = list(np.argsort(scores)[::-1])
+            return sorted_indices, scores[sorted_indices]
 
     def encode(self, query: str, choices: List[str]):
+        """
+
+        :param query:
+        :param choices:
+        :return:
+        """
         inputs = [self.tokenizer.encode_plus(query, choice, add_special_tokens=True)
                   for choice in choices]
 

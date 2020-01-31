@@ -12,17 +12,17 @@ class TestPtBertRerankModelPlugin(unittest.TestCase):
         )
 
     def test_rank(self):
-        ranks = self.model.rank('O wherefore art thou', CHOICES)
+        ranks, scores = self.model.rank('O wherefore art thou', CHOICES)
         self.assertEqual(self.model.__class__.__name__, 'PtBertRerankModelPlugin')
         self.assertIsInstance(ranks, list)
         self.assertEqual(6, len(ranks))
 
     def test_filter(self):
-        ranks = self.model.rank('His tender heir', CHOICES, filter_results=True)
+        ranks, scores = self.model.rank('His tender heir', CHOICES, filter_results=True)
         self.assertIsInstance(ranks, list)
         self.assertEqual(1, len(ranks))
 
-        ranks = self.model.rank('His tender heir', CHOICES[:1], filter_results=True)
+        ranks, scores = self.model.rank('His tender heir', CHOICES[:1], filter_results=True)
         self.assertIsInstance(ranks, list)
         self.assertEqual(0, len(ranks))
 
