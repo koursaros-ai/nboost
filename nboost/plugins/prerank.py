@@ -12,6 +12,7 @@ import nltk
 nltk.download('stopwords')
 nltk.download('punkt')
 
+
 class BM25:
     def __init__(self, corpus, tokenizer=None):
         self.corpus_size = len(corpus)
@@ -113,7 +114,6 @@ class BM25Okapi(BM25):
             score += (self.idf.get(q) or 0) * (q_freq * (self.k1 + 1) /
                                                (q_freq + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)))
         return score
-
 
 
 class PrerankPlugin(Plugin):
