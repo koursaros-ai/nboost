@@ -10,4 +10,5 @@ class ShuffleRerankModelPlugin(RerankModelPlugin):
         """random shuffle with no regard for query"""
         ranks = list(range(len(choices)))
         random.shuffle(ranks)
-        return ranks, [0] * len(ranks)
+        scores = [0] * len(ranks)
+        return ranks, scores
