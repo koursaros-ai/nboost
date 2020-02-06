@@ -21,7 +21,8 @@ CLASS_MAP = {
     "tf-albert-tiny-uncased-msmarco": "TfAlbertRerankModelPlugin",
     "tf-biobert-base-uncased-msmarco": "TfBertRerankModelPlugin",
     "use-model": 'USERerankModelPlugin',
-    "onnx-bert-base-msmarco": 'ONNXBertRerankModelPlugin'
+    "onnx-bert-base-msmarco": 'ONNXBertRerankModelPlugin',
+    "onnx-tinybert-mrpc" : 'ONNXBertRerankModelPlugin'
 }
 
 URL_MAP = {
@@ -31,9 +32,10 @@ URL_MAP = {
     "tf-albert-tiny-uncased-msmarco": "https://storage.googleapis.com/koursaros/albert-tiny-uncased-msmarco.tar.gz",
     "tf-biobert-base-uncased-msmarco": "https://storage.googleapis.com/koursaros/biobert-base-uncased-msmarco.tar.gz",
     "pt-tinybert-msmarco": "https://storage.googleapis.com/koursaros/pt-tinybert-msmarco.tar.gz",
-    "pt-bert-base-uncased-msmarco":  "https://storage.googleapis.com/koursaros/pt-bert-base-uncased-msmarco.tar.gz",
+    "pt-bert-base-uncased-msmarco": "https://storage.googleapis.com/koursaros/pt-bert-base-uncased-msmarco.tar.gz",
     "pt-tinybert-mrpc": "https://storage.googleapis.com/koursaros/pt-tinybert-mrpc.tar.gz",
-    "onnx-bert-base-msmarco": "https://storage.googleapis.com/koursaros/onnx-bert-base-msmarco.tar.gz"
+    "onnx-bert-base-msmarco": "https://storage.googleapis.com/koursaros/onnx-bert-base-msmarco.tar.gz",
+    "onnx-tinybert-mrpc": "https://storage.googleapis.com/koursaros/onnx-tinybert-mrpc.tar.gz"
 }
 
 # image => directory
