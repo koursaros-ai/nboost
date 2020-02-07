@@ -29,7 +29,6 @@ setup(
         'requests',
         'elasticsearch',
         'tqdm',
-        'httptools',
         'jsonpath-ng',
         'flask'
     ],
