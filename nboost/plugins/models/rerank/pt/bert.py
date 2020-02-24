@@ -47,7 +47,7 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
             if len(scores.shape) > 1 and scores.shape[1] == 2:
                 scores = np.reshape(scores[:, 1], (-1,))
             sorted_indices = list(np.argsort(scores)[::-1])
-            return sorted_indices, scores[sorted_indices]
+            return sorted_indices, scores
 
     def encode(self, query: str, choices: List[str]):
         """
