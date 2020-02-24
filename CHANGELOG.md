@@ -1,3 +1,18 @@
+# Release `0.3.1`
+> Feb 20th, 2020
+
+### 🔌 Plugins
+
+ - [[```8427d37```](https://github.com/koursaros-ai/nboost/commit/8427d37de8241c503e893cbe5fb20108728298b5)] Add / Flask DEP (*Jack Pertschuk*) <span style="color:blue">△6</span>
+ - [[```25a44bb```](https://github.com/koursaros-ai/nboost/commit/25a44bb59e6b794d26ee668abc6d42455d038d2c)] Add / ONNX Runtime Optimization for BERT (*Jack Pertschuk*) <span style="color:blue">△138</span>
+ - [[```f0da54f```](https://github.com/koursaros-ai/nboost/commit/f0da54f73b39796c392718a83b25fbf0db357c11)] Added Prerank BM25 (*Jack Pertschuk*) <span style="color:blue">△261</span>
+ - [[```9f09cd7```](https://github.com/koursaros-ai/nboost/commit/9f09cd7fa86be97e2db1543ba28fb5b58ea60ecb)] Fix/ Transfer Encoding Chunked Header (*Jack Pertschuk*) <span style="color:blue">△18</span>
+
+
+### 📡 Proxy
+
+ - [[```9ef1e48```](https://github.com/koursaros-ai/nboost/commit/9ef1e48b7b02aaa32cc53b6f3f987e16403ff5ae)] Fix/ Header Routing (*Jack Pertschuk*) <span style="color:blue">△2</span>
+
 # Release `0.3.0`
 > Jan 24th, 2020
 
