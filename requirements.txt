@@ -7,3 +7,4 @@ transformers==2.2.1
 tqdm
 jsonpath-ng
 flask
+nltk
