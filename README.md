@@ -167,7 +167,7 @@ pip install nboost[pt]
 #### Setting up an Elasticsearch Server
 > 🔔 If you already have an Elasticsearch server, you can skip this step!
 
-If you don't have Elasticsearch, not to worry! You can set up a local Elasticsearch cluster by using docker. First, get the ES image by running:
+If you don't have Elasticsearch, not to worry! We recommend setting up a local Elasticsearch cluster using docker (providing you have Docker installed). First, get the ES image by running:
 ```bash
 docker pull elasticsearch:7.4.2
 ```
