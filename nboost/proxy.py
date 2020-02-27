@@ -154,7 +154,7 @@ class Proxy:
             return jsonify({
                 'type': error.__class__.__name__,
                 'doc': error.__class__.__doc__,
-                'msg': error.args
+                'msg': str(error.args)
             }), 500
 
         self.run = lambda: (
