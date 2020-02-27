@@ -157,7 +157,7 @@ In this example we will set up a proxy to sit in between the client and Elastics
 
 #### Installing NBoost with tensorflow
 
-If you want to run the example on a GPU, make sure you have Tensorflow 1.14-1.15 (with CUDA) to support the modeling functionality. However, if you want to just run it on a CPU, don't worry about it. For both cases, just run:
+If you want to run the example on a GPU, make sure you have Tensorflow 1.14-1.15, Pytorch or ONNX Runtime with CUDA to to support the modeling functionality. However, if you want to just run it on a CPU, don't worry about it. For both cases, just run:
 
 ```bash
 pip install nboost[pt]
