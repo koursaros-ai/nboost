@@ -64,9 +64,8 @@ class BaseIndexer:
                     cid = None
 
                     if self.id_col:
-                        import pdb
-                        pdb.set_trace()
-                        cid = line.popitem(last=False)[1]
+                        try: cid = line.popitem(last=False)[1]
+                        except: cid = line.popitem()[1]
 
                     yield cid, dict(line)
 
