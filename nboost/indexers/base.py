@@ -64,7 +64,7 @@ class BaseIndexer:
                     cid = None
 
                     if self.id_col:
-                        try: cid = line.popitem(last=False)[1]
+                        try: cid = line.popitem(last=False)[1] # Python 3.5 bug in some versions
                         except: cid = line.popitem()[1]
 
                     yield cid, dict(line)
