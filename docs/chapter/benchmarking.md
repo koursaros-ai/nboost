@@ -29,7 +29,7 @@ Start the NBoost proxy using one of the main methods:
 ```python
 import requests, csv
 
-with open('queries.dev.small.tsv') as file:
+with open('queries.dev.tsv') as file:
     for query, cids in csv.reader(file, delimiter='\t'):
         requests.post(
             url='http://localhost:8000/ms_marco/_search',

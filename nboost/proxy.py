@@ -20,6 +20,7 @@ from nboost.logger import set_logger
 from nboost.plugins import Plugin
 from nboost.translators import *
 from json.decoder import JSONDecodeError
+from werkzeug.routing import Rule
 
 
 class Proxy:
@@ -91,11 +92,13 @@ class Proxy:
             stats = db.get_stats()
             return jsonify({**configs, **stats})
 
+        flask_app.url_map.add(Rule('/<path:path>', endpoint='proxy'))
+
         @flask_app.route('/', defaults={'path': ''})
-        @flask_app.route('/<path:path>')
+        @flask_app.endpoint('proxy')
         def proxy_through(path):
             # parse the client request
-            dict_request = flask_request_to_dict_request(flask_request) # takes the json
+            dict_request = flask_request_to_dict_request(flask_request)  # takes the json
 
             """Search request."""
             db_row = db.new_row()
@@ -137,16 +140,6 @@ class Proxy:
             db.insert(db_row)
 
             return dict_response_to_flask_response(dict_response)
-
-            # except Exception as e:
-            #     self.logger.warning("Failed to rerank due to %s, proxying result" % e)
-            #     traceback.print_exc()
-            #     request = RequestDelegate(_dict_request)
-            #     request.set_path('url.netloc', '%s:%s' % (request.uhost, request.uport))
-            #     request.dict['headers'].pop('Host', '')
-            #     request.set_path('url.headers.host', '%s:%s' % (request.uhost, request.uport))
-            #     requests_response = dict_request_to_requests_response(_dict_request)
-            #     return requests_response_to_flask_response(requests_response)
 
         @flask_app.errorhandler(Exception)
         def handle_json_response(error):
