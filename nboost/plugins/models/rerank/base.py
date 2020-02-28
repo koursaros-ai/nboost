@@ -34,8 +34,8 @@ class RerankModelPlugin(ModelPlugin):
         try:
             reranked_choices = [response.choices[rank] for rank in ranks]
         except:
-            print(response.choices)
-            print(ranks)
+            import pdb
+            pdb.set_trace()
             return
         response.choices = reranked_choices
         response.set_path('body.nboost.scores', list([float(score) for score in scores]))
