@@ -22,10 +22,9 @@ class QAModelPlugin(ModelPlugin):
 
             print(answer, start_pos, stop_pos, score)
             if score > response.request.qa_threshold:
-                response.set_path('json.nboost.answer_text', answer)
-                response.set_path('json.nboost.answer_start_pos', start_pos)
-                response.set_path('json.nboost.answer_stop_pos', stop_pos)
-                print(response)
+                response.set_path('body.nboost.answer_text', answer)
+                response.set_path('body.nboost.answer_start_pos', start_pos)
+                response.set_path('body.nboost.answer_stop_pos', stop_pos)
 
     def get_answer(self, query: str, cvalue: str) -> Tuple[str, int, int, float]:
         """Return answer, start_pos, end_pos, score"""
