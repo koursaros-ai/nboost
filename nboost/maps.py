@@ -22,7 +22,8 @@ CLASS_MAP = {
     "tf-biobert-base-uncased-msmarco": "TfBertRerankModelPlugin",
     "use-model": 'USERerankModelPlugin',
     "onnx-bert-base-msmarco": 'ONNXBertRerankModelPlugin',
-    "onnx-tinybert-mrpc" : 'ONNXBertRerankModelPlugin'
+    "onnx-tinybert-mrpc" : 'ONNXBertRerankModelPlugin',
+    "distilbert-base-uncased-distilled-squad": "QAModelPlugin"
 }
 
 URL_MAP = {
