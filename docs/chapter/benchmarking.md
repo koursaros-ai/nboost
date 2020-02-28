@@ -6,14 +6,15 @@ This is made possible by sending the correct document ids with either the `?nboo
 
 #### Index the background corpus
 
-For demonstration, we will be indexing the [TREC CAR dataset](http://trec-car.cs.unh.edu/). Download the necessary `paragraphs.tsv` from [this link](https://storage.googleapis.com/koursaros/trec-car/paragraphs.tsv) and extract it. 
+For demonstration, we will be indexing the [MS MARCO dataset](https://microsoft.github.io/msmarco/). Download the necessary collection and queries tsv files from [this link](https://msmarco.blob.core.windows.net/msmarcoranking/collectionandqueries.tar.gz) and extract them. 
 
 Use the `nboost-index` utility to send the data to your Elasticsearch:
 
 ```shell script
-nboost-index --file paragraphs.tsv --name trec_car --host <Elasticsearch host>
+tar -xvzf collectionandqueries.tar.gz
+nboost-index --file collection.tsv --index_name ms_marco --host <Elasticsearch host>
 ```
-> ☕ The corpus is composed of 30 million paragraphs, so go grab a coffee while it finishes indexing...
+> ☕ The corpus is composed of 8.8 million paragraphs, so go grab a coffee while it finishes indexing...
 
 #### Start the Proxy
 
@@ -25,15 +26,13 @@ Start the NBoost proxy using one of the main methods:
 
 #### Benchmark on the test set
 
-Download the `queries.tsv` from [this link](https://storage.googleapis.com/koursaros/trec-car/queries.tsv). This tsv has queries matched with relevant paragraph ids (comma delimited). Let's send the queries with the matched paragraph ids to Elasticsearch with the `?nboost=` parameter:
-
 ```python
 import requests, csv
 
-with open('queries.tsv') as file:
+with open('queries.dev.small.tsv') as file:
     for query, cids in csv.reader(file, delimiter='\t'):
         requests.post(
-            url='http://localhost:8000/trec_car/_search',
+            url='http://localhost:8000/ms_marco/_search',
             json={
                 'nboost': {
                     'rerank_cids': cids.split(','),

@@ -1,6 +1,6 @@
 from typing import Dict
 from elasticsearch.exceptions import RequestError
-from elasticsearch.helpers import streaming_bulk
+from elasticsearch.helpers import bulk
 from elasticsearch import Elasticsearch
 from nboost.indexers.base import BaseIndexer
 
@@ -36,4 +36,4 @@ class ESIndexer(BaseIndexer):
 
         self.logger.info('Indexing %s...' % self.file)
         act = (self.format(choices, cid=cid) for cid, choices in self.csv_generator())
-        list(streaming_bulk(elastic, actions=act))
+        bulk(elastic, actions=act)
