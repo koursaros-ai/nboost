@@ -61,7 +61,9 @@ class Database:
                 AVG(topk) AS avg_topk,
                 AVG(choices) AS avg_num_choices,
                 AVG(rerank_time) AS avg_rerank_time,
-                AVG(response_time) AS avg_response_time
+                AVG(response_time) AS avg_response_time,
+                AVG(model_mrr) AS avg_model_mrr,
+                
             FROM searches
         ''').fetchone()
         columns = [column[0] for column in cursor.description]

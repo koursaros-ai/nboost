@@ -16,7 +16,7 @@ class ESIndexer(BaseIndexer):
         body = {
             '_index': self.index_name,
             '_type': '_doc',
-            '_source': {"passage": passage }
+            '_source': {"passage": passage}
         }
 
         if cid is not None:
