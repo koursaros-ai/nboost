@@ -16,9 +16,13 @@ class QAModelPlugin(ModelPlugin):
         if response.cvalues:
             start_time = time.perf_counter()
 
-            answer, start_pos, stop_pos, score = self.get_answer(
-                response.request.query,
-                response.cvalues[0])
+            try:
+                answer, start_pos, stop_pos, score = self.get_answer(
+                    response.request.query,
+                    response.cvalues[0])
+            except:
+                import pdb
+                pdb.set_trace()
 
             db_row.qa_time = time.perf_counter() - start_time
 
