@@ -16,13 +16,7 @@ class QAModelPlugin(ModelPlugin):
         if response.cvalues:
             start_time = time.perf_counter()
 
-            try:
-                answer, start_pos, stop_pos, score = self.get_answer(
-                    response.request.query,
-                    response.cvalues[0])
-            except:
-                import pdb
-                pdb.set_trace()
+            answer, start_pos, stop_pos, score = self.get_answer(response.request.query, response.cvalues[0])
 
             db_row.qa_time = time.perf_counter() - start_time
 
@@ -33,3 +27,4 @@ class QAModelPlugin(ModelPlugin):
 
     def get_answer(self, query: str, cvalue: str) -> Tuple[str, int, int, float]:
         """Return answer, start_pos, end_pos, score"""
+        raise NotImplementedError()
