@@ -30,22 +30,22 @@ def resolve_model(data_dir: Path, model_dir: str, model_cls: str, **kwargs):
         if model_dir.name in CLASS_MAP:
             model_cls = CLASS_MAP[model_dir.name]
             module = MODULE_MAP[model_cls]
-            url = URL_MAP[model_dir.name]
-            binary_path = data_dir.joinpath(Path(url).name)
+            if model_dir.name in URL_MAP: # DOWNLOAD AND CACHE
+                url = URL_MAP[model_dir.name]
+                binary_path = data_dir.joinpath(Path(url).name)
 
-            if binary_path.exists():
-                logger.info('Found model cache in %s', binary_path)
-            else:
-                logger.info('Downloading "%s" model.', model_dir)
-                download_file(url, binary_path)
+                if binary_path.exists():
+                    logger.info('Found model cache in %s', binary_path)
+                else:
+                    logger.info('Downloading "%s" model.', model_dir)
+                    download_file(url, binary_path)
 
-            if binary_path.suffixes == ['.tar', '.gz']:
-                logger.info('Extracting "%s" from %s', model_dir, binary_path)
-                extract_tar_gz(binary_path, data_dir)
+                if binary_path.suffixes == ['.tar', '.gz']:
+                    logger.info('Extracting "%s" from %s', model_dir, binary_path)
+                    extract_tar_gz(binary_path, data_dir)
 
             model = import_class(module, model_cls)  # type: Type[ModelPlugin]
             return model(model_dir=str(model_dir), **kwargs)
-
         else:
             if model_cls in MODULE_MAP:
                 module = MODULE_MAP[model_cls]
