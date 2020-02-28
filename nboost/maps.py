@@ -23,7 +23,7 @@ CLASS_MAP = {
     "use-model": 'USERerankModelPlugin',
     "onnx-bert-base-msmarco": 'ONNXBertRerankModelPlugin',
     "onnx-tinybert-mrpc" : 'ONNXBertRerankModelPlugin',
-    "distilbert-base-uncased-distilled-squad": "QAModelPlugin"
+    "distilbert-base-uncased-distilled-squad": "PtDistilBertQAModelPlugin"
 }
 
 URL_MAP = {
