@@ -11,12 +11,12 @@ class ESIndexer(BaseIndexer):
         super().__init__(**kwargs)
         self.mapping = {'settings': {'index': {'number_of_shards': shards}}}
 
-    def format(self, passage: Dict[str, str], cid: str = None):
+    def format(self, passage: str, cid: str):
         """Format a passage for indexing"""
         body = {
             '_index': self.index_name,
             '_type': '_doc',
-            '_source': passage
+            '_source': {"passage": passage }
         }
 
         if cid is not None:
