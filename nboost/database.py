@@ -63,7 +63,7 @@ class Database:
                 AVG(rerank_time) AS avg_rerank_time,
                 AVG(response_time) AS avg_response_time,
                 AVG(model_mrr) AS avg_model_mrr,
-                
+                AVG(server_mrr) AS avg_server_mrr
             FROM searches
         ''').fetchone()
         columns = [column[0] for column in cursor.description]
