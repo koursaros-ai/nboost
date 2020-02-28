@@ -43,6 +43,8 @@ def resolve_model(data_dir: Path, model_dir: str, model_cls: str, **kwargs):
                 if binary_path.suffixes == ['.tar', '.gz']:
                     logger.info('Extracting "%s" from %s', model_dir, binary_path)
                     extract_tar_gz(binary_path, data_dir)
+            else: # pass along to plugin maybe it can resolve it
+                model_dir = model_dir.name
 
             model = import_class(module, model_cls)  # type: Type[ModelPlugin]
             return model(model_dir=str(model_dir), **kwargs)
