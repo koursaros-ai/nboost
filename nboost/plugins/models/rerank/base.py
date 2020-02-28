@@ -31,7 +31,12 @@ class RerankModelPlugin(ModelPlugin):
         )
         db_row.rerank_time = time.perf_counter() - start_time
 
-        reranked_choices = [response.choices[rank] for rank in ranks]
+        try:
+            reranked_choices = [response.choices[rank] for rank in ranks]
+        except:
+            print(response.choices)
+            print(ranks)
+            return
         response.choices = reranked_choices
         response.set_path('body.nboost.scores', list([float(score) for score in scores]))
 
