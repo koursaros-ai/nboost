@@ -7,16 +7,16 @@ from nboost.indexers.base import BaseIndexer
 
 class ESIndexer(BaseIndexer):
     """Index csvs in Elasticsearch"""
-    def __init__(self, shards: int = 5, **kwargs):
+    def __init__(self, shards: int = 1, **kwargs):
         super().__init__(**kwargs)
         self.mapping = {'settings': {'index': {'number_of_shards': shards}}}
 
-    def format(self, choices: Dict[str, str], cid: str = None):
-        """Format a choice for indexing"""
+    def format(self, passage: Dict[str, str], cid: str = None):
+        """Format a passage for indexing"""
         body = {
             '_index': self.index_name,
             '_type': '_doc',
-            '_source': choices
+            '_source': passage
         }
 
         if cid is not None:
@@ -35,5 +35,5 @@ class ESIndexer(BaseIndexer):
             self.logger.info('Index already exists, skipping...')
 
         self.logger.info('Indexing %s...' % self.file)
-        act = (self.format(choices, cid=cid) for cid, choices in self.csv_generator())
+        act = (self.format(passage, cid=cid) for cid, passage in self.csv_generator())
         bulk(elastic, actions=act)

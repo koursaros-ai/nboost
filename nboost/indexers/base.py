@@ -42,7 +42,7 @@ class BaseIndexer:
         """Check for the csv in the current working directory first, then
         search for it in the package.
 
-        Generates id_col and dict of {<column name>: <column value>}
+        Generates id_col, passage
         """
 
         cwd_path = Path().joinpath(self.file).absolute()
@@ -60,15 +60,8 @@ class BaseIndexer:
         num_lines = count_lines(path)
         with path.open() as file:
             with tqdm(total=num_lines, desc=path.name) as pbar:
-                for line in csv.DictReader(file, delimiter=self.delim):
-                    cid = None
-
-                    if self.id_col:
-                        try: cid = line.popitem(last=False)[1] # Python 3.5 bug in some versions
-                        except: cid = line.popitem()[1]
-
-                    yield cid, dict(line)
-
+                for cid, passage in csv.reader(file, delimiter=self.delim):
+                    yield cid, passage
                     pbar.update()
 
     @abstractmethod
