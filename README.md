@@ -206,7 +206,7 @@ Now let's test it out! Hit the Elasticsearch with:
 curl "http://localhost:8000/travel/_search?pretty&q=passage:vegas&size=2"
 ```
 
-If the Elasticsearch result has the `_nboost` tag in it, congratulations it's working!
+If the Elasticsearch result has the `nboost` tag in it, congratulations it's working!
 
 <p align="center">
 <img src="https://github.com/koursaros-ai/nboost/raw/master/.github/travel-tutorial.svg?sanitize=true" alt="success installation of NBoost">
