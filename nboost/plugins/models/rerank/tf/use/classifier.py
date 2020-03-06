@@ -15,8 +15,14 @@ class USEClassifierRerankModelPlugin(RerankModelPlugin):
     def rank(self, query: str, choices: List[str],
              filter_results: type(defaults.filter_results) = defaults.filter_results
              ) -> Tuple[List[int], List[float]]:
-        logits = self.model.predict([np.array([query]*len(choices)), np.array(choices)])
-        scores = np.reshape(logits[:, 1], (-1,))
+        try:
+            logits = self.model.predict([np.array([query]*len(choices)), np.array(choices)])
+            scores = np.reshape(logits[:, 1], (-1,))
 
-        sorted_indices = list(np.argsort(scores)[::-1])
-        return sorted_indices, scores[sorted_indices]
+            sorted_indices = list(np.argsort(scores)[::-1])
+            return sorted_indices, scores[sorted_indices]
+        except:
+            print(query)
+            print(choices)
+            print("FAILED TO RANK")
+            return list(range(0, len(choices))), [0]*len(choices)
