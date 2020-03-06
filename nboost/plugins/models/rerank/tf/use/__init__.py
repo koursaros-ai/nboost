@@ -1,7 +1,6 @@
 import tensorflow as tf
 import tensorflow_hub as hub
 import numpy as np
-import tensorflow_text
 from nboost.plugins.models.rerank.base import RerankModelPlugin
 from nboost import defaults
 
