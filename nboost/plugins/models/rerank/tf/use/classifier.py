@@ -16,8 +16,6 @@ class USEClassifierRerankModelPlugin(RerankModelPlugin):
              filter_results: type(defaults.filter_results) = defaults.filter_results
              ) -> Tuple[List[int], List[float]]:
         try:
-            print(choices)
-            print(len(choices))
             logits = self.model.predict([np.array([query]*len(choices)), np.array(choices)])
             scores = np.reshape(logits[:, 1], (-1,))
 
