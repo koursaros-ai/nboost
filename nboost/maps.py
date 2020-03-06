@@ -9,7 +9,8 @@ MODULE_MAP = {
     'TfAlbertRerankModelPlugin': 'plugins.models.rerank.tf.albert',
     'PtDistilBertQAModelPlugin': 'plugins.models.qa.pt.distilbert',
     'USERerankModelPlugin': 'plugins.models.rerank.tf.use',
-    'ONNXBertRerankModelPlugin': 'plugins.models.rerank.onnx.bert'
+    'ONNXBertRerankModelPlugin': 'plugins.models.rerank.onnx.bert',
+    'USEClassifierRerankModelPlugin' : 'plugins.models.rerank.tf.use.classifier'
 }
 
 CLASS_MAP = {
