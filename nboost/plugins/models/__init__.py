@@ -13,6 +13,11 @@ def resolve_model(data_dir: Path, model_dir: str, model_cls: str, **kwargs):
 
     logger = set_logger('resolve_model')
     data_dir.mkdir(parents=True, exist_ok=True)
+    if 'http' in model_dir:
+        module = MODULE_MAP[model_cls]
+        model = import_class(module, model_cls)
+        return model(model_dir=model_dir)
+
     model_dir = data_dir.joinpath(model_dir).absolute()
 
     if model_dir.exists():
