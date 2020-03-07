@@ -1,5 +1,5 @@
 from threading import Thread
-from typing import List
+from typing import List, Tuple
 import tensorflow as tf
 from queue import Queue
 import numpy as np
@@ -188,7 +188,7 @@ class TfBertRerankModelPlugin(RerankModelPlugin):
             return candidates
 
     def rank(self, query: bytes, choices: List[str],
-             filter_results=defaults.filter_results) -> List[int]:
+             filter_results=defaults.filter_results) -> Tuple[ List[int], List[float]]:
 
         actual_length = len(choices)
         candidates = self.pad(choices)
@@ -203,7 +203,7 @@ class TfBertRerankModelPlugin(RerankModelPlugin):
             scores = np.extract(scores[:, 0] < scores[:, 1], scores)
         if len(scores.shape) > 1 and scores.shape[1] == 2:
             scores = np.squeeze(scores[:, 1])
-        return list(scores.argsort()[::-1])
+        return list(scores.argsort()[::-1]), scores
 
     def close(self):
         self.input_q.put(None)
