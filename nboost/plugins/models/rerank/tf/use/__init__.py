@@ -10,7 +10,7 @@ class USERerankModelPlugin(RerankModelPlugin):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.module = hub.load('https://tfhub.dev/google/universal-sentence-encoder-qa/3')
+        self.module = hub.load(self.model_dir)
 
 
     def rank(self, query: str, choices: List[str],
