@@ -28,7 +28,7 @@ class USERerankModelPlugin(RerankModelPlugin):
 
         candidate_embeddings = self.module(choices)
 
-        scores = np.dot(question_embedding, candidate_embeddings)
+        scores = np.inner(question_embedding, candidate_embeddings)
         scores = np.reshape(scores, (-1,))
         sorted_indices = list(np.argsort(scores)[::-1])
         return sorted_indices, scores[sorted_indices]
