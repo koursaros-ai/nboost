@@ -203,7 +203,7 @@ class TfBertRerankModelPlugin(RerankModelPlugin):
             scores = np.extract(scores[:, 0] < scores[:, 1], scores)
         if len(scores.shape) > 1 and scores.shape[1] == 2:
             scores = np.squeeze(scores[:, 1])
-        return list(scores.argsort()[::-1]), scores
+        return list(scores.argsort()[::-1]), list(scores)
 
     def close(self):
         self.input_q.put(None)
