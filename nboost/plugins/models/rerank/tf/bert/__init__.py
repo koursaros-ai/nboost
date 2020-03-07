@@ -23,7 +23,7 @@ class TfBertRerankModelPlugin(RerankModelPlugin):
         self.vocab_file = str(self.model_dir.joinpath('vocab.txt'))
         self.bert_config_file = str(self.model_dir.joinpath('bert_config.json'))
         if not verbose:
-            tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+            tf.logging.set_verbosity(tf.logging.ERROR)
         self.model_thread = Thread(target=self.run_model)
         self.model_thread.start()
 
@@ -42,22 +42,22 @@ class TfBertRerankModelPlugin(RerankModelPlugin):
         output_layer = model.get_pooled_output()
         hidden_size = output_layer.shape[-1].value
 
-        output_weights = tf.compat.v1.get_variable(
+        output_weights = tf.get_variable(
             "output_weights", [num_labels, hidden_size],
-            initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.02))
+            initializer=tf.truncated_normal_initializer(stddev=0.02))
 
-        output_bias = tf.compat.v1.get_variable(
+        output_bias = tf.get_variable(
             "output_bias", [num_labels], initializer=tf.zeros_initializer())
 
-        with tf.compat.v1.variable_scope("loss"):
-            logits = tf.compat.v1.matmul(output_layer, output_weights, transpose_b=True)
+        with tf.variable_scope("loss"):
+            logits = tf.matmul(output_layer, output_weights, transpose_b=True)
             logits = tf.nn.bias_add(logits, output_bias)
             log_probs = tf.nn.log_softmax(logits, axis=-1)
 
-            one_hot_labels = tf.compat.v1.one_hot(labels, depth=num_labels, dtype=tf.float32)
+            one_hot_labels = tf.one_hot(labels, depth=num_labels, dtype=tf.float32)
 
-            per_example_loss = -tf.compat.v1.reduce_sum(one_hot_labels * log_probs, axis=-1)
-            loss = tf.compat.v1.reduce_mean(per_example_loss)
+            per_example_loss = -tf.reduce_sum(one_hot_labels * log_probs, axis=-1)
+            loss = tf.reduce_mean(per_example_loss)
 
             return (loss, per_example_loss, log_probs)
 
@@ -76,14 +76,14 @@ class TfBertRerankModelPlugin(RerankModelPlugin):
                 bert_config, input_ids, input_mask, segment_ids, label_ids,
                 num_labels)
 
-            tvars = tf.compat.v1.trainable_variables()
+            tvars = tf.trainable_variables()
 
             (assignment_map, initialized_variable_names
              ) = modeling.get_assignment_map_from_checkpoint(tvars, init_checkpoint)
 
             tf.train.init_from_checkpoint(init_checkpoint, assignment_map)
 
-            output_spec = tf.compat.v1.estimator.EstimatorSpec(
+            output_spec = tf.estimator.EstimatorSpec(
                 mode=mode,
                 predictions={
                     "log_probs": log_probs,
@@ -126,14 +126,14 @@ class TfBertRerankModelPlugin(RerankModelPlugin):
         bert_config = modeling.BertConfig.from_json_file(self.bert_config_file)
         assert self.max_seq_len <= bert_config.max_position_embeddings
 
-        run_config = tf.compat.v1.estimator.RunConfig(model_dir=str(self.model_dir))
+        run_config = tf.estimator.RunConfig(model_dir=str(self.model_dir))
 
         model_fn = self.model_fn_builder(
             bert_config=bert_config,
             num_labels=2,
             init_checkpoint=self.checkpoint)
 
-        estimator = tf.compat.v1.estimator.Estimator(
+        estimator = tf.estimator.Estimator(
             model_fn=model_fn,
             config=run_config)
 
