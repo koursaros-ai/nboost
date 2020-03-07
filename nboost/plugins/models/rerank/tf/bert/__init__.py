@@ -40,7 +40,7 @@ class TfBertRerankModelPlugin(RerankModelPlugin):
             use_one_hot_embeddings=False)
 
         output_layer = model.get_pooled_output()
-        hidden_size = output_layer.shape[-1].value
+        hidden_size = output_layer.shape[-1]
 
         output_weights = tf.compat.v1.get_variable(
             "output_weights", [num_labels, hidden_size],
