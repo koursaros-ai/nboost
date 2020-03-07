@@ -89,7 +89,7 @@ class BertConfig(object):
   @classmethod
   def from_json_file(cls, json_file):
     """Constructs a `BertConfig` from a json file of parameters."""
-    with tf.gfile.GFile(json_file, "r") as reader:
+    with tf.compat.v1.gfile.GFile(json_file, "r") as reader:
       text = reader.read()
     return cls.from_dict(json.loads(text))
 
@@ -110,9 +110,9 @@ class BertModel(object):
 
   ```python
   # Already been converted into WordPiece token ids
-  input_ids = tf.constant([[31, 51, 99], [15, 5, 0]])
-  input_mask = tf.constant([[1, 1, 1], [1, 1, 0]])
-  token_type_ids = tf.constant([[0, 0, 1], [0, 2, 0]])
+  input_ids = tf.compat.v1.constant([[31, 51, 99], [15, 5, 0]])
+  input_mask = tf.compat.v1.constant([[1, 1, 1], [1, 1, 0]])
+  token_type_ids = tf.compat.v1.constant([[0, 0, 1], [0, 2, 0]])
 
   config = modeling.BertConfig(vocab_size=32000, hidden_size=512,
     num_hidden_layers=8, num_attention_heads=6, intermediate_size=1024)
@@ -120,9 +120,9 @@ class BertModel(object):
   model = modeling.BertModel(config=config, is_training=True,
     input_ids=input_ids, input_mask=input_mask, token_type_ids=token_type_ids)
 
-  label_embeddings = tf.get_variable(...)
+  label_embeddings = tf.compat.v1.get_variable(...)
   pooled_output = model.get_pooled_output()
-  logits = tf.matmul(pooled_output, label_embeddings)
+  logits = tf.compat.v1.matmul(pooled_output, label_embeddings)
   ...
   ```
   """
@@ -145,7 +145,7 @@ class BertModel(object):
       input_mask: (optional) int32 Tensor of shape [batch_size, seq_length].
       token_type_ids: (optional) int32 Tensor of shape [batch_size, seq_length].
       use_one_hot_embeddings: (optional) bool. Whether to use one-hot word
-        embeddings or tf.embedding_lookup() for the word embeddings. On the TPU,
+        embeddings or tf.compat.v1.embedding_lookup() for the word embeddings. On the TPU,
         it is must faster if this is True, on the CPU or GPU, it is faster if
         this is False.
       scope: (optional) variable scope. Defaults to "bert".
@@ -164,13 +164,13 @@ class BertModel(object):
     seq_length = input_shape[1]
 
     if input_mask is None:
-      input_mask = tf.ones(shape=[batch_size, seq_length], dtype=tf.int32)
+      input_mask = tf.compat.v1.ones(shape=[batch_size, seq_length], dtype=tf.compat.v1.int32)
 
     if token_type_ids is None:
-      token_type_ids = tf.zeros(shape=[batch_size, seq_length], dtype=tf.int32)
+      token_type_ids = tf.compat.v1.zeros(shape=[batch_size, seq_length], dtype=tf.compat.v1.int32)
 
-    with tf.variable_scope("bert", scope):
-      with tf.variable_scope("embeddings"):
+    with tf.compat.v1.variable_scope("bert", scope):
+      with tf.compat.v1.variable_scope("embeddings"):
         # Perform embedding lookup on the word ids.
         (self.embedding_output, self.embedding_table) = embedding_lookup(
             input_ids=input_ids,
@@ -194,7 +194,7 @@ class BertModel(object):
             max_position_embeddings=config.max_position_embeddings,
             dropout_prob=config.hidden_dropout_prob)
 
-      with tf.variable_scope("encoder"):
+      with tf.compat.v1.variable_scope("encoder"):
         # This converts a 2D mask of shape [batch_size, seq_length] to a 3D
         # mask of shape [batch_size, seq_length, seq_length] which is used
         # for the attention scores.
@@ -222,14 +222,14 @@ class BertModel(object):
       # [batch_size, hidden_size]. This is necessary for segment-level
       # (or segment-pair-level) classification tasks where we need a fixed
       # dimensional representation of the segment.
-      with tf.variable_scope("pooler"):
+      with tf.compat.v1.variable_scope("pooler"):
         # We "pool" the model by simply taking the hidden state corresponding
         # to the first token. We assume that this has been pre-trained
-        first_token_tensor = tf.squeeze(self.sequence_output[:, 0:1, :], axis=1)
-        self.pooled_output = tf.layers.dense(
+        first_token_tensor = tf.compat.v1.squeeze(self.sequence_output[:, 0:1, :], axis=1)
+        self.pooled_output = tf.compat.v1.layers.dense(
             first_token_tensor,
             config.hidden_size,
-            activation=tf.tanh,
+            activation=tf.compat.v1.tanh,
             kernel_initializer=create_initializer(config.initializer_range))
 
   def get_pooled_output(self):
@@ -274,12 +274,12 @@ def gelu(input_tensor):
   Returns:
     `input_tensor` with the GELU activation applied.
   """
-  cdf = 0.5 * (1.0 + tf.erf(input_tensor / tf.sqrt(2.0)))
+  cdf = 0.5 * (1.0 + tf.compat.v1.erf(input_tensor / tf.compat.v1.sqrt(2.0)))
   return input_tensor * cdf
 
 
 def get_activation(activation_string):
-  """Maps a string to a Python function, e.g., "relu" => `tf.nn.relu`.
+  """Maps a string to a Python function, e.g., "relu" => `tf.compat.v1.nn.relu`.
 
   Args:
     activation_string: String name of the activation function.
@@ -306,11 +306,11 @@ def get_activation(activation_string):
   if act == "linear":
     return None
   elif act == "relu":
-    return tf.nn.relu
+    return tf.compat.v1.nn.relu
   elif act == "gelu":
     return gelu
   elif act == "tanh":
-    return tf.tanh
+    return tf.compat.v1.tanh
   else:
     raise ValueError("Unsupported activation: %s" % act)
 
@@ -328,7 +328,7 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint):
       name = m.group(1)
     name_to_variable[name] = var
 
-  init_vars = tf.train.list_variables(init_checkpoint)
+  init_vars = tf.compat.v1.train.list_variables(init_checkpoint)
 
   assignment_map = collections.OrderedDict()
   for x in init_vars:
@@ -348,7 +348,7 @@ def dropout(input_tensor, dropout_prob):
   Args:
     input_tensor: float Tensor.
     dropout_prob: Python float. The probability of dropping out a value (NOT of
-      *keeping* a dimension as in `tf.nn.dropout`).
+      *keeping* a dimension as in `tf.compat.v1.nn.dropout`).
 
   Returns:
     A version of `input_tensor` with dropout applied.
@@ -356,13 +356,13 @@ def dropout(input_tensor, dropout_prob):
   if dropout_prob is None or dropout_prob == 0.0:
     return input_tensor
 
-  output = tf.nn.dropout(input_tensor, 1.0 - dropout_prob)
+  output = tf.compat.v1.nn.dropout(input_tensor, 1.0 - dropout_prob)
   return output
 
 
 def layer_norm(input_tensor, name=None):
   """Run layer normalization on the last dimension of the tensor."""
-  return tf.contrib.layers.layer_norm(
+  return tf.compat.v1.contrib.layers.layer_norm(
       inputs=input_tensor, begin_norm_axis=-1, begin_params_axis=-1, scope=name)
 
 
@@ -375,7 +375,7 @@ def layer_norm_and_dropout(input_tensor, dropout_prob, name=None):
 
 def create_initializer(initializer_range=0.02):
   """Creates a `truncated_normal_initializer` with the given range."""
-  return tf.truncated_normal_initializer(stddev=initializer_range)
+  return tf.compat.v1.truncated_normal_initializer(stddev=initializer_range)
 
 
 def embedding_lookup(input_ids,
@@ -394,7 +394,7 @@ def embedding_lookup(input_ids,
     initializer_range: float. Embedding initialization range.
     word_embedding_name: string. Name of the embedding table.
     use_one_hot_embeddings: bool. If True, use one-hot method for word
-      embeddings. If False, use `tf.nn.embedding_lookup()`. One hot is better
+      embeddings. If False, use `tf.compat.v1.nn.embedding_lookup()`. One hot is better
       for TPUs.
 
   Returns:
@@ -406,23 +406,23 @@ def embedding_lookup(input_ids,
   # If the input is a 2D tensor of shape [batch_size, seq_length], we
   # reshape to [batch_size, seq_length, 1].
   if input_ids.shape.ndims == 2:
-    input_ids = tf.expand_dims(input_ids, axis=[-1])
+    input_ids = tf.compat.v1.expand_dims(input_ids, axis=[-1])
 
-  embedding_table = tf.get_variable(
+  embedding_table = tf.compat.v1.get_variable(
       name=word_embedding_name,
       shape=[vocab_size, embedding_size],
       initializer=create_initializer(initializer_range))
 
   if use_one_hot_embeddings:
-    flat_input_ids = tf.reshape(input_ids, [-1])
-    one_hot_input_ids = tf.one_hot(flat_input_ids, depth=vocab_size)
-    output = tf.matmul(one_hot_input_ids, embedding_table)
+    flat_input_ids = tf.compat.v1.reshape(input_ids, [-1])
+    one_hot_input_ids = tf.compat.v1.one_hot(flat_input_ids, depth=vocab_size)
+    output = tf.compat.v1.matmul(one_hot_input_ids, embedding_table)
   else:
-    output = tf.nn.embedding_lookup(embedding_table, input_ids)
+    output = tf.compat.v1.nn.embedding_lookup(embedding_table, input_ids)
 
   input_shape = get_shape_list(input_ids)
 
-  output = tf.reshape(output,
+  output = tf.compat.v1.reshape(output,
                       input_shape[0:-1] + [input_shape[-1] * embedding_size])
   return (output, embedding_table)
 
@@ -480,21 +480,21 @@ def embedding_postprocessor(input_tensor,
     if token_type_ids is None:
       raise ValueError("`token_type_ids` must be specified if"
                        "`use_token_type` is True.")
-    token_type_table = tf.get_variable(
+    token_type_table = tf.compat.v1.get_variable(
         name=token_type_embedding_name,
         shape=[token_type_vocab_size, width],
         initializer=create_initializer(initializer_range))
     # This vocab will be small so we always do one-hot here, since it is always
     # faster for a small vocabulary.
-    flat_token_type_ids = tf.reshape(token_type_ids, [-1])
-    one_hot_ids = tf.one_hot(flat_token_type_ids, depth=token_type_vocab_size)
-    token_type_embeddings = tf.matmul(one_hot_ids, token_type_table)
-    token_type_embeddings = tf.reshape(token_type_embeddings,
+    flat_token_type_ids = tf.compat.v1.reshape(token_type_ids, [-1])
+    one_hot_ids = tf.compat.v1.one_hot(flat_token_type_ids, depth=token_type_vocab_size)
+    token_type_embeddings = tf.compat.v1.matmul(one_hot_ids, token_type_table)
+    token_type_embeddings = tf.compat.v1.reshape(token_type_embeddings,
                                        [batch_size, seq_length, width])
     output += token_type_embeddings
 
   if use_position_embeddings:
-    full_position_embeddings = tf.get_variable(
+    full_position_embeddings = tf.compat.v1.get_variable(
         name=position_embedding_name,
         shape=[max_position_embeddings, width],
         initializer=create_initializer(initializer_range))
@@ -508,7 +508,7 @@ def embedding_postprocessor(input_tensor,
     # sequence has positions [0, 1, 2, ... seq_length-1], so we can just
     # perform a slice.
     if seq_length < max_position_embeddings:
-      position_embeddings = tf.slice(full_position_embeddings, [0, 0],
+      position_embeddings = tf.compat.v1.slice(full_position_embeddings, [0, 0],
                                      [seq_length, -1])
     else:
       position_embeddings = full_position_embeddings
@@ -522,7 +522,7 @@ def embedding_postprocessor(input_tensor,
     for _ in range(num_dims - 2):
       position_broadcast_shape.append(1)
     position_broadcast_shape.extend([seq_length, width])
-    position_embeddings = tf.reshape(position_embeddings,
+    position_embeddings = tf.compat.v1.reshape(position_embeddings,
                                      position_broadcast_shape)
     output += position_embeddings
 
@@ -547,16 +547,16 @@ def create_attention_mask_from_input_mask(from_tensor, to_mask):
   to_shape = get_shape_list(to_mask, expected_rank=2)
   to_seq_length = to_shape[1]
 
-  to_mask = tf.cast(
-      tf.reshape(to_mask, [batch_size, 1, to_seq_length]), tf.float32)
+  to_mask = tf.compat.v1.cast(
+      tf.compat.v1.reshape(to_mask, [batch_size, 1, to_seq_length]), tf.compat.v1.float32)
 
   # We don't assume that `from_tensor` is a mask (although it could be). We
   # don't actually care if we attend *from* padding tokens (only *to* padding)
   # tokens so we create a tensor of all ones.
   #
   # `broadcast_ones` = [batch_size, from_seq_length, 1]
-  broadcast_ones = tf.ones(
-      shape=[batch_size, from_seq_length, 1], dtype=tf.float32)
+  broadcast_ones = tf.compat.v1.ones(
+      shape=[batch_size, from_seq_length, 1], dtype=tf.compat.v1.float32)
 
   # Here we broadcast along two dimensions to create the mask.
   mask = broadcast_ones * to_mask
@@ -637,10 +637,10 @@ def attention_layer(from_tensor,
 
   def transpose_for_scores(input_tensor, batch_size, num_attention_heads,
                            seq_length, width):
-    output_tensor = tf.reshape(
+    output_tensor = tf.compat.v1.reshape(
         input_tensor, [batch_size, seq_length, num_attention_heads, width])
 
-    output_tensor = tf.transpose(output_tensor, [0, 2, 1, 3])
+    output_tensor = tf.compat.v1.transpose(output_tensor, [0, 2, 1, 3])
     return output_tensor
 
   from_shape = get_shape_list(from_tensor, expected_rank=[2, 3])
@@ -672,7 +672,7 @@ def attention_layer(from_tensor,
   to_tensor_2d = reshape_to_matrix(to_tensor)
 
   # `query_layer` = [B*F, N*H]
-  query_layer = tf.layers.dense(
+  query_layer = tf.compat.v1.layers.dense(
       from_tensor_2d,
       num_attention_heads * size_per_head,
       activation=query_act,
@@ -680,7 +680,7 @@ def attention_layer(from_tensor,
       kernel_initializer=create_initializer(initializer_range))
 
   # `key_layer` = [B*T, N*H]
-  key_layer = tf.layers.dense(
+  key_layer = tf.compat.v1.layers.dense(
       to_tensor_2d,
       num_attention_heads * size_per_head,
       activation=key_act,
@@ -688,7 +688,7 @@ def attention_layer(from_tensor,
       kernel_initializer=create_initializer(initializer_range))
 
   # `value_layer` = [B*T, N*H]
-  value_layer = tf.layers.dense(
+  value_layer = tf.compat.v1.layers.dense(
       to_tensor_2d,
       num_attention_heads * size_per_head,
       activation=value_act,
@@ -707,18 +707,18 @@ def attention_layer(from_tensor,
   # Take the dot product between "query" and "key" to get the raw
   # attention scores.
   # `attention_scores` = [B, N, F, T]
-  attention_scores = tf.matmul(query_layer, key_layer, transpose_b=True)
-  attention_scores = tf.multiply(attention_scores,
+  attention_scores = tf.compat.v1.matmul(query_layer, key_layer, transpose_b=True)
+  attention_scores = tf.compat.v1.multiply(attention_scores,
                                  1.0 / math.sqrt(float(size_per_head)))
 
   if attention_mask is not None:
     # `attention_mask` = [B, 1, F, T]
-    attention_mask = tf.expand_dims(attention_mask, axis=[1])
+    attention_mask = tf.compat.v1.expand_dims(attention_mask, axis=[1])
 
     # Since attention_mask is 1.0 for positions we want to attend and 0.0 for
     # masked positions, this operation will create a tensor which is 0.0 for
     # positions we want to attend and -10000.0 for masked positions.
-    adder = (1.0 - tf.cast(attention_mask, tf.float32)) * -10000.0
+    adder = (1.0 - tf.compat.v1.cast(attention_mask, tf.compat.v1.float32)) * -10000.0
 
     # Since we are adding it to the raw scores before the softmax, this is
     # effectively the same as removing these entirely.
@@ -726,34 +726,34 @@ def attention_layer(from_tensor,
 
   # Normalize the attention scores to probabilities.
   # `attention_probs` = [B, N, F, T]
-  attention_probs = tf.nn.softmax(attention_scores)
+  attention_probs = tf.compat.v1.nn.softmax(attention_scores)
 
   # This is actually dropping out entire tokens to attend to, which might
   # seem a bit unusual, but is taken from the original Transformer paper.
   attention_probs = dropout(attention_probs, attention_probs_dropout_prob)
 
   # `value_layer` = [B, T, N, H]
-  value_layer = tf.reshape(
+  value_layer = tf.compat.v1.reshape(
       value_layer,
       [batch_size, to_seq_length, num_attention_heads, size_per_head])
 
   # `value_layer` = [B, N, T, H]
-  value_layer = tf.transpose(value_layer, [0, 2, 1, 3])
+  value_layer = tf.compat.v1.transpose(value_layer, [0, 2, 1, 3])
 
   # `context_layer` = [B, N, F, H]
-  context_layer = tf.matmul(attention_probs, value_layer)
+  context_layer = tf.compat.v1.matmul(attention_probs, value_layer)
 
   # `context_layer` = [B, F, N, H]
-  context_layer = tf.transpose(context_layer, [0, 2, 1, 3])
+  context_layer = tf.compat.v1.transpose(context_layer, [0, 2, 1, 3])
 
   if do_return_2d_tensor:
     # `context_layer` = [B*F, N*V]
-    context_layer = tf.reshape(
+    context_layer = tf.compat.v1.reshape(
         context_layer,
         [batch_size * from_seq_length, num_attention_heads * size_per_head])
   else:
     # `context_layer` = [B, F, N*V]
-    context_layer = tf.reshape(
+    context_layer = tf.compat.v1.reshape(
         context_layer,
         [batch_size, from_seq_length, num_attention_heads * size_per_head])
 
@@ -833,12 +833,12 @@ def transformer_model(input_tensor,
 
   all_layer_outputs = []
   for layer_idx in range(num_hidden_layers):
-    with tf.variable_scope("layer_%d" % layer_idx):
+    with tf.compat.v1.variable_scope("layer_%d" % layer_idx):
       layer_input = prev_output
 
-      with tf.variable_scope("attention"):
+      with tf.compat.v1.variable_scope("attention"):
         attention_heads = []
-        with tf.variable_scope("self"):
+        with tf.compat.v1.variable_scope("self"):
           attention_head = attention_layer(
               from_tensor=layer_input,
               to_tensor=layer_input,
@@ -859,12 +859,12 @@ def transformer_model(input_tensor,
         else:
           # In the case where we have other sequences, we just concatenate
           # them to the self-attention head before the projection.
-          attention_output = tf.concat(attention_heads, axis=-1)
+          attention_output = tf.compat.v1.concat(attention_heads, axis=-1)
 
         # Run a linear projection of `hidden_size` then add a residual
         # with `layer_input`.
-        with tf.variable_scope("output"):
-          attention_output = tf.layers.dense(
+        with tf.compat.v1.variable_scope("output"):
+          attention_output = tf.compat.v1.layers.dense(
               attention_output,
               hidden_size,
               kernel_initializer=create_initializer(initializer_range))
@@ -872,16 +872,16 @@ def transformer_model(input_tensor,
           attention_output = layer_norm(attention_output + layer_input)
 
       # The activation is only applied to the "intermediate" hidden layer.
-      with tf.variable_scope("intermediate"):
-        intermediate_output = tf.layers.dense(
+      with tf.compat.v1.variable_scope("intermediate"):
+        intermediate_output = tf.compat.v1.layers.dense(
             attention_output,
             intermediate_size,
             activation=intermediate_act_fn,
             kernel_initializer=create_initializer(initializer_range))
 
       # Down-project back to `hidden_size` then add the residual.
-      with tf.variable_scope("output"):
-        layer_output = tf.layers.dense(
+      with tf.compat.v1.variable_scope("output"):
+        layer_output = tf.compat.v1.layers.dense(
             intermediate_output,
             hidden_size,
             kernel_initializer=create_initializer(initializer_range))
@@ -905,7 +905,7 @@ def get_shape_list(tensor, expected_rank=None, name=None):
   """Returns a list of the shape of tensor, preferring static dimensions.
 
   Args:
-    tensor: A tf.Tensor object to find the shape of.
+    tensor: A tf.compat.v1.Tensor object to find the shape of.
     expected_rank: (optional) int. The expected rank of `tensor`. If this is
       specified and the `tensor` has a different rank, and exception will be
       thrown.
@@ -914,7 +914,7 @@ def get_shape_list(tensor, expected_rank=None, name=None):
   Returns:
     A list of dimensions of the shape of tensor. All static dimensions will
     be returned as python integers, and dynamic dimensions will be returned
-    as tf.Tensor scalars.
+    as tf.compat.v1.Tensor scalars.
   """
   if name is None:
     name = tensor.name
@@ -932,7 +932,7 @@ def get_shape_list(tensor, expected_rank=None, name=None):
   if not non_static_indexes:
     return shape
 
-  dyn_shape = tf.shape(tensor)
+  dyn_shape = tf.compat.v1.shape(tensor)
   for index in non_static_indexes:
     shape[index] = dyn_shape[index]
   return shape
@@ -948,7 +948,7 @@ def reshape_to_matrix(input_tensor):
     return input_tensor
 
   width = input_tensor.shape[-1]
-  output_tensor = tf.reshape(input_tensor, [-1, width])
+  output_tensor = tf.compat.v1.reshape(input_tensor, [-1, width])
   return output_tensor
 
 
@@ -962,14 +962,14 @@ def reshape_from_matrix(output_tensor, orig_shape_list):
   orig_dims = orig_shape_list[0:-1]
   width = output_shape[-1]
 
-  return tf.reshape(output_tensor, orig_dims + [width])
+  return tf.compat.v1.reshape(output_tensor, orig_dims + [width])
 
 
 def assert_rank(tensor, expected_rank, name=None):
   """Raises an exception if the tensor rank is not of the expected rank.
 
   Args:
-    tensor: A tf.Tensor to check the rank of.
+    tensor: A tf.compat.v1.Tensor to check the rank of.
     expected_rank: Python integer or list of integers, expected rank.
     name: Optional name of the tensor for the error message.
 
@@ -988,7 +988,7 @@ def assert_rank(tensor, expected_rank, name=None):
 
   actual_rank = tensor.shape.ndims
   if actual_rank not in expected_rank_dict:
-    scope_name = tf.get_variable_scope().name
+    scope_name = tf.compat.v1.get_variable_scope().name
     raise ValueError(
         "For the tensor `%s` in scope `%s`, the actual rank "
         "`%d` (shape = %s) is not equal to the expected rank `%s`" %
