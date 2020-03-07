@@ -24,7 +24,7 @@ class USERerankModelPlugin(RerankModelPlugin):
         #     input=tf.constant(choices),
         #     context=tf.constant(choices))
 
-        question_embedding = self.module([query])[0]
+        question_embedding = self.module([query])
 
         candidate_embeddings = self.module(choices)
 
