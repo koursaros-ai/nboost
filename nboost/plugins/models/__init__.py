@@ -13,6 +13,7 @@ def resolve_model(data_dir: Path, model_dir: str, model_cls: str, **kwargs):
 
     logger = set_logger('resolve_model')
     data_dir.mkdir(parents=True, exist_ok=True)
+    og_model_dir = model_dir
     if 'http' in model_dir:
         module = MODULE_MAP[model_cls]
         model = import_class(module, model_cls)
@@ -57,7 +58,7 @@ def resolve_model(data_dir: Path, model_dir: str, model_cls: str, **kwargs):
             if model_cls in MODULE_MAP:
                 module = MODULE_MAP[model_cls]
                 model = import_class(module, model_cls)  # type: Type[ModelPlugin]
-                return model(model_dir=model_dir.name, **kwargs)
+                return model(model_dir=og_model_dir, **kwargs)
             else:
                 raise ImportError('model_dir %s not found in %s. You must '
                                   'set --model class to continue.'
