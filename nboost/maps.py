@@ -6,6 +6,7 @@ MODULE_MAP = {
     'ShuffleRerankModelPlugin': 'plugins.models.rerank.shuffle',
     'PtBertRerankModelPlugin': 'plugins.models.rerank.pt.bert',
     'TfBertRerankModelPlugin': 'plugins.models.rerank.tf.bert',
+    'Tfv1BertRerankModelPlugin' : 'plugins.modles.rerank.tf.bert_v1',
     'TfAlbertRerankModelPlugin': 'plugins.models.rerank.tf.albert',
     'PtDistilBertQAModelPlugin': 'plugins.models.qa.pt.distilbert',
     'USERerankModelPlugin': 'plugins.models.rerank.tf.use',
