@@ -21,7 +21,10 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
             torch.cuda.synchronize(self.device)
 
         self.rerank_model = AutoModelForSequenceClassification.from_pretrained(self.model_dir)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
+        try:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
+        except:
+            self.tokenizer = AutoTokenizer.from_pretrained('albert-base-v2')
         self.rerank_model.to(self.device, non_blocking=True)
 
     def rank(self, query: str, choices: List[str],
