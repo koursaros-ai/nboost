@@ -25,6 +25,7 @@ CLASS_MAP = {
     "use-model": 'USERerankModelPlugin',
     "onnx-bert-base-msmarco": 'ONNXBertRerankModelPlugin',
     "onnx-tinybert-mrpc" : 'ONNXBertRerankModelPlugin',
+    "bert-large-uncased-msmarco" : 'ONNXBertRerankModelPlugin',
     "distilbert-base-uncased-distilled-squad": "PtDistilBertQAModelPlugin"
 }
 
@@ -38,6 +39,7 @@ URL_MAP = {
     "pt-bert-base-uncased-msmarco": "https://storage.googleapis.com/koursaros/pt-bert-base-uncased-msmarco.tar.gz",
     "pt-tinybert-mrpc": "https://storage.googleapis.com/koursaros/pt-tinybert-mrpc.tar.gz",
     "onnx-bert-base-msmarco": "https://storage.googleapis.com/koursaros/onnx-bert-base-msmarco.tar.gz",
+    "bert-large-uncased-msmarco": "https://storage.googleapis.com/koursaros/bert-large-uncased-msmarco.tar.gz",
     "onnx-tinybert-mrpc": "https://storage.googleapis.com/koursaros/onnx-tinybert-mrpc.tar.gz"
 }
 
