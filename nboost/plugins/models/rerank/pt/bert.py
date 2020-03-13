@@ -24,8 +24,11 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
         try:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
         except:
-            self.logger.warn('Unable to find tokenizer, using albert tokenizer by default')
-            self.tokenizer = AutoTokenizer.from_pretrained('albert-base-v2')
+            self.logger.warn('Unable to find tokenizer, using bert or albert tokenizer by default')
+            if 'albert' in self.model_dir:
+                self.tokenizer = AutoTokenizer.from_pretrained('albert-base-uncased')
+            else:
+                self.tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
         self.rerank_model.to(self.device, non_blocking=True)
 
     def rank(self, query: str, choices: List[str],
