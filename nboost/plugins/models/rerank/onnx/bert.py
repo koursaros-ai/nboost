@@ -22,7 +22,10 @@ class ONNXBertRerankModelPlugin(RerankModelPlugin):
         # To enable model serialization and store the optimized graph to desired location.
         sess_options.optimized_model_filepath = self.model_dir
         self.session = rt.InferenceSession(self.model_dir, sess_options)
-        self.tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
+        if 'albert' in self.model_dir:
+            self.tokenizer = AutoTokenizer.from_pretrained('albert-base-uncased')
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 
     def rank(self, query: str, choices: List[str],
              filter_results=defaults.filter_results):
