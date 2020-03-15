@@ -56,7 +56,7 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
 
             sorted_indices = list(np.argsort(scores)[::-1])
             if filter_results:
-                sorted_indices = list(filter(lambda x, i: logits[i, 0] < logits[i, 1], enumerate(sorted_indices)))
+                sorted_indices = list(filter(lambda x: logits[x[0], 0] < logits[x[0], 1], enumerate(sorted_indices)))
             return sorted_indices, [scores[i] for i in sorted_indices]
 
     def encode(self, query: str, choices: List[str]):
