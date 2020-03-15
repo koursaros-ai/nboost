@@ -62,8 +62,9 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
                         lambda x: logits[x[0], 0] < logits[x[0], 1],
                         enumerate(sorted_indices)))
                 )
-                import pdb
-                pdb.set_trace()
+                if len(sorted_indices) > 0:
+                    import pdb
+                    pdb.set_trace()
             return sorted_indices, [scores[i] for i in sorted_indices]
 
     def encode(self, query: str, choices: List[str]):
