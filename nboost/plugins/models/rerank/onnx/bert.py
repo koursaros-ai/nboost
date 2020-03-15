@@ -50,7 +50,7 @@ class ONNXBertRerankModelPlugin(RerankModelPlugin):
         if len(scores.shape) > 1 and scores.shape[1] == 2:
             scores = np.reshape(scores[:, 1], (-1,))
         sorted_indices = list(np.argsort(scores)[::-1])
-        return sorted_indices, scores
+        return sorted_indices, [scores[i] for i in sorted_indices]
 
     def encode(self, query: str, choices: List[str]):
         """
