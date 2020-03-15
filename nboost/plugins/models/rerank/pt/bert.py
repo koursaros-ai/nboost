@@ -63,6 +63,7 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
                         enumerate(sorted_indices)))
                 )
                 if len(sorted_indices) > 0:
+                    print("SET TRACE")
                     import pdb
                     pdb.set_trace()
             return sorted_indices, [scores[i] for i in sorted_indices]
