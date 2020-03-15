@@ -50,12 +50,13 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
             logits = self.rerank_model(input_ids,
                                        attention_mask=attention_mask,
                                        token_type_ids=token_type_ids)[0]
-            scores = logits.detach().cpu().numpy()
-            if filter_results:
-                scores = np.extract(scores[:, 0] < scores[:, 1], scores)
-            if len(scores.shape) > 1 and scores.shape[1] == 2:
-                scores = np.reshape(scores[:, 1], (-1,))
+            logits = logits.detach().cpu().numpy()
+            if len(logits.shape) > 1 and logits.shape[1] == 2:
+                scores = np.reshape(logits[:, 1], (-1,))
+
             sorted_indices = list(np.argsort(scores)[::-1])
+            if filter_results:
+                sorted_indices = list(filter(lambda x, i: logits[i, 0] < logits[i, 1], sorted_indices))
             return sorted_indices, [scores[i] for i in sorted_indices]
 
     def encode(self, query: str, choices: List[str]):
