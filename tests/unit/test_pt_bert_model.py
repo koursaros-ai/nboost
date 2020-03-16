@@ -17,7 +17,7 @@ class TestPtBertRerankModelPlugin(unittest.TestCase):
         ranks, scores = self.model.rank('O wherefore art thou', CHOICES)
         self.assertEqual(self.model.__class__.__name__, 'PtBertRerankModelPlugin')
         self.assertIsInstance(ranks, list)
-        self.assertEqual(6, len(ranks))
+        self.assertEqual(len(CHOICES), len(ranks))
 
     def test_filter(self):
         ranks, scores = self.model.rank('What is fish oil?', CHOICES, filter_results=True)
