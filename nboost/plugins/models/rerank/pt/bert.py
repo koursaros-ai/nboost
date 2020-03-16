@@ -51,22 +51,25 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
                                        attention_mask=attention_mask,
                                        token_type_ids=token_type_ids)[0]
             logits = logits.detach().cpu().numpy()
-            if len(logits.shape) > 1 and logits.shape[1] == 2:
-                scores = np.reshape(logits[:, 1], (-1,))
+            # if len(logits.shape) > 1 and logits.shape[1] == 2:
+            #     scores = np.reshape(logits[:, 1], (-1,))
+            # else:
+            #     scores = logits
 
-            sorted_indices = list(np.argsort(scores)[::-1])
-            if filter_results:
-                sorted_indices = list(map(
-                    lambda x: x[1],
-                    filter(
-                        lambda x: logits[x[0], 0] < logits[x[0], 1],
-                        enumerate(sorted_indices)))
-                )
-                if len(sorted_indices) > 0:
-                    print("SET TRACE")
-                    import pdb
-                    pdb.set_trace()
-            return sorted_indices, [scores[i] for i in sorted_indices]
+            # print(sorted_indices)
+
+            scores = []
+            all_scores = []
+            index_map = []
+            for i, logit in enumerate(logits):
+                neg_logit = logit[0]
+                score = logit[1]
+                all_scores.append(score)
+                if score > neg_logit or not filter_results:
+                    scores.append(score)
+                    index_map.append(i)
+            sorted_indices = [index_map[i] for i in np.argsort(scores)[::-1]]
+            return sorted_indices, [all_scores[i] for i in sorted_indices]
 
     def encode(self, query: str, choices: List[str]):
         """
