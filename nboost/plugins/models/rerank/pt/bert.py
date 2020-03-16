@@ -51,12 +51,6 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
                                        attention_mask=attention_mask,
                                        token_type_ids=token_type_ids)[0]
             logits = logits.detach().cpu().numpy()
-            # if len(logits.shape) > 1 and logits.shape[1] == 2:
-            #     scores = np.reshape(logits[:, 1], (-1,))
-            # else:
-            #     scores = logits
-
-            # print(sorted_indices)
 
             scores = []
             all_scores = []

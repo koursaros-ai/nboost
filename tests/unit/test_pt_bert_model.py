@@ -21,7 +21,8 @@ class TestPtBertRerankModelPlugin(unittest.TestCase):
 
     def test_filter(self):
         ranks, scores = self.model.rank('What is fish oil?', CHOICES, filter_results=True)
-        self.assertEqual(CHOICES[ranks[0]], "EPA Fish Oil can be defined as fish oil that contains a high concentration   of EPA. EPA (Eicosapentaenoic Acid) and DHA (Docosahexaenoic Acid) are both   Omega 3 essential Fatty Acids, both of which are beneficial in their own right.   However, research has shown that EPA can be more effective, over time, when   there is less DHA to compete with it. Therefore, to be considered a high EPA   fish oil, we would want to see a much higher concentration of EPA than DHA.   There are some fish oils claiming EPA/DHA ratios in the region of 8 to 1, but   not many. Pure EPA fish oil, on the other hand, contains no DHA at all, and   as such, has an EPA concentration of 93%, arguably one of the strongest and most concentrated, high-grade EPA fish oils on the market today.")
+        self.assertEqual("EPA Fish Oil can be defined as fish oil that contains a high concentration   of EPA. EPA (Eicosapentaenoic Acid) and DHA (Docosahexaenoic Acid) are both   Omega 3 essential Fatty Acids, both of which are beneficial in their own right.   However, research has shown that EPA can be more effective, over time, when   there is less DHA to compete with it. Therefore, to be considered a high EPA   fish oil, we would want to see a much higher concentration of EPA than DHA.   There are some fish oils claiming EPA/DHA ratios in the region of 8 to 1, but   not many. Pure EPA fish oil, on the other hand, contains no DHA at all, and   as such, has an EPA concentration of 93%, arguably one of the strongest and most concentrated, high-grade EPA fish oils on the market today.",
+                         CHOICES[ranks[0]])
         self.assertIsInstance(ranks, list)
         self.assertEqual(2, len(ranks))
 

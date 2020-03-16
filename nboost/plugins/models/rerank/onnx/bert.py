@@ -39,18 +39,24 @@ class ONNXBertRerankModelPlugin(RerankModelPlugin):
             return [], []
         input_ids, attention_mask, token_type_ids = self.encode(query, choices)
 
-        scores = np.array(self.session.run(None, {
+        logits = np.array(self.session.run(None, {
             'input_ids': np.array(input_ids), #.reshape(-1, self.max_seq_len),
             'input_mask': np.array(attention_mask), #.reshape(-1, self.max_seq_len),
             'segment_ids': np.array(token_type_ids) #.reshape(-1, self.max_seq_len)
         }))[0]
 
-        if filter_results:
-            scores = np.extract(scores[:, 0] < scores[:, 1], scores)
-        if len(scores.shape) > 1 and scores.shape[1] == 2:
-            scores = np.reshape(scores[:, 1], (-1,))
-        sorted_indices = list(np.argsort(scores)[::-1])
-        return sorted_indices, [scores[i] for i in sorted_indices]
+        scores = []
+        all_scores = []
+        index_map = []
+        for i, logit in enumerate(logits):
+            neg_logit = logit[0]
+            score = logit[1]
+            all_scores.append(score)
+            if score > neg_logit or not filter_results:
+                scores.append(score)
+                index_map.append(i)
+        sorted_indices = [index_map[i] for i in np.argsort(scores)[::-1]]
+        return sorted_indices, [all_scores[i] for i in sorted_indices]
 
     def encode(self, query: str, choices: List[str]):
         """
