@@ -74,6 +74,7 @@ In an **NBoost search request**, the user sends a query to the *model*. Then, th
 
 > 🔬 Note that we are evaluating models on differently constructed sets than they were trained on (MS Marco vs TREC-CAR), suggesting the generalizability of these models to many other real world search problems.
 
+**Model downloads temporarily down for migration**
 <center>
 
 Fine-tuned Models                                                                   | Dependency                                                                   | Eval Set                                                           | Search Boost<a href='#benchmarks'><sup>[1]</sup></a>  | Speed
