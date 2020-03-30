@@ -74,16 +74,14 @@ In an **NBoost search request**, the user sends a query to the *model*. Then, th
 
 > 🔬 Note that we are evaluating models on differently constructed sets than they were trained on (MS Marco vs TREC-CAR), suggesting the generalizability of these models to many other real world search problems.
 
-**Model downloads temporarily down for migration**
 <center>
 
-Fine-tuned Models                                                                   | Dependency                                                                   | Eval Set                                                           | Search Boost<a href='#benchmarks'><sup>[1]</sup></a>  | Speed
+Fine-tuned Models                          f                                         | Dependency                                                                   | Eval Set                                                           | Search Boost<a href='#benchmarks'><sup>[1]</sup></a>  | Speed
 ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------- | ----------------------------------
 `pt-tinybert-msmarco` (**default**)                                                 | <img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-red"/>          |  <a href ='http://www.msmarco.org/'>bing queries</a>               | **+45%** <sub><sup>(0.26 vs 0.18)</sup></sub>         | ~50ms/query <a href='#footnotes'>
 `pt-bert-base-uncased-msmarco`                                                      | <img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-red"/>          | <a href ='http://www.msmarco.org/'>bing queries</a>                | **+62%** <sub><sup>(0.29 vs 0.18)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
-`tf-bert-base-uncased-msmarco`<a href='#benchmarks'><sup>[2]</sup></a>              | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://www.msmarco.org/'>bing queries</a>                | **+62%** <sub><sup>(0.29 vs 0.18)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
-`tf-bert-base-uncased-msmarco`                                                      | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='http://trec-car.cs.unh.edu/'>wiki search</a>             | **+60%** <sub><sup>(0.28 vs 0.18)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
-`biobert-base-uncased-msmarco`                                                      | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='https://github.com/naver/biobert-pretrained'>biomed</a>  | **+66%** <sub><sup>(0.17 vs 0.10)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
+`pt-bert-large-uncased-msmarco`                                                     | <img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-red"/>          | <a href ='http://www.msmarco.org/'>bing queries</a>                | **+62%** <sub><sup>(0.29 vs 0.18)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
+`tf-biobert-base-uncased-msmarco`                                                   | <img alt="TensorFlow" src="https://img.shields.io/badge/TensorFlow-orange"/> | <a href ='https://github.com/naver/biobert-pretrained'>biomed</a>  | **+66%** <sub><sup>(0.17 vs 0.10)</sup></sub>         | ~300 ms/query<a href='#footnotes'>
 
 
 </center>

@@ -1,16 +1,21 @@
 from typing import Tuple
 import time
-from nboost.plugins.models.base import ModelPlugin
+from nboost.plugins import Plugin
 from nboost.delegates import ResponseDelegate
 from nboost.database import DatabaseRow
 from nboost import defaults
 
 
-class QAModelPlugin(ModelPlugin):
-    def __init__(self, max_query_length: type(defaults.max_query_length) = defaults.max_query_length,
+class QAModelPlugin(Plugin):
+    def __init__(self,
+                 max_query_length: type(defaults.max_query_length) = defaults.max_query_length,
+                 model_dir: str = defaults.qa_model_dir,
+                 max_seq_len: int = defaults.max_seq_len,
                  **kwargs):
         super().__init__(**kwargs)
+        self.model_dir = model_dir
         self.max_query_length = max_query_length
+        self.max_seq_len = max_seq_len
 
     def on_response(self, response: ResponseDelegate, db_row: DatabaseRow):
         if response.cvalues:

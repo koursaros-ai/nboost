@@ -1,21 +1,20 @@
-from nboost.plugins.models import resolve_model
+from nboost.plugins import resolve_plugin
 from nboost import defaults
 import unittest
 from random import shuffle
 
 
-class TestPtBertRerankModelPlugin(unittest.TestCase):
+class TestPtTransformersRerankPlugin(unittest.TestCase):
     def setUp(self):
-        self.model = resolve_model(
-            model_dir='pt-bert-base-uncased-msmarco',
-            data_dir=defaults.data_dir,
-            model_cls=''
+        self.model = resolve_plugin(
+            'PtTransformersRerankPlugin',
+            model_dir='nboost/pt-bert-base-uncased-msmarco',
         )
         shuffle(CHOICES)
 
     def test_rank(self):
         ranks, scores = self.model.rank('O wherefore art thou', CHOICES)
-        self.assertEqual(self.model.__class__.__name__, 'PtBertRerankModelPlugin')
+        self.assertEqual(self.model.__class__.__name__, 'PtTransformersRerankPlugin')
         self.assertIsInstance(ranks, list)
         self.assertEqual(len(CHOICES), len(ranks))
 

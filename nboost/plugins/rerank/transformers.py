@@ -1,19 +1,25 @@
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from typing import List
-import numpy as np
 import torch.nn
 import torch
-from nboost.plugins.models.rerank.base import RerankModelPlugin
+from nboost.plugins.rerank.base import RerankModelPlugin
 from nboost import defaults
+from nboost.logger import set_logger
 
-MAX_BATCH_SIZE=32
 
+class PtTransformersRerankPlugin(RerankModelPlugin):
+    """Reranker models based on huggingface/transformers library"""
 
-class PtBertRerankModelPlugin(RerankModelPlugin):
+    def __init__(self,
+                 model_dir: str = 'nboost/pt-tinybert-msmarco',
+                 verbose: bool = defaults.verbose,
+                 max_seq_len: int = defaults.max_seq_len,
+                 **kwargs):
+        super().__init__(**kwargs)
+        self.logger = set_logger(model_dir, verbose=verbose)
+        self.max_seq_len = max_seq_len
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.logger.info('Loading from checkpoint %s' % self.model_dir)
+        self.logger.info('Loading from checkpoint %s' % model_dir)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         if self.device == torch.device("cpu"):
@@ -22,28 +28,17 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
             self.logger.info("RUNNING ON CUDA")
             torch.cuda.synchronize(self.device)
 
-        self.rerank_model = AutoModelForSequenceClassification.from_pretrained(self.model_dir)
-        try:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
-        except:
-            self.logger.warn('Unable to find tokenizer, using bert or albert tokenizer by default')
-            if 'albert' in self.model_dir:
-                self.tokenizer = AutoTokenizer.from_pretrained('albert-base-v2')
-            else:
-                self.tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
+        self.rerank_model = AutoModelForSequenceClassification.from_pretrained(model_dir)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_dir)
+
         self.rerank_model.to(self.device, non_blocking=True)
 
-    def rank(self, query: str, choices: List[str],
-             filter_results=defaults.filter_results):
+    def get_logits(self, query: str, choices: List[str]):
         """
-
         :param query:
         :param choices:
-        :param filter_results:
-        :return:
+        :return: logits
         """
-        if len(choices) == 0:
-            return [], []
         input_ids, attention_mask, token_type_ids = self.encode(query, choices)
 
         with torch.no_grad():
@@ -52,25 +47,13 @@ class PtBertRerankModelPlugin(RerankModelPlugin):
                                        token_type_ids=token_type_ids)[0]
             logits = logits.detach().cpu().numpy()
 
-            scores = []
-            all_scores = []
-            index_map = []
-            for i, logit in enumerate(logits):
-                neg_logit = logit[0]
-                score = logit[1]
-                all_scores.append(score)
-                if score > neg_logit or not filter_results:
-                    scores.append(score)
-                    index_map.append(i)
-            sorted_indices = [index_map[i] for i in np.argsort(scores)[::-1]]
-            return sorted_indices, [all_scores[i] for i in sorted_indices]
+            return logits
 
     def encode(self, query: str, choices: List[str]):
         """
-
         :param query:
         :param choices:
-        :return:
+        :return: Encoded tokens
         """
         inputs = [self.tokenizer.encode_plus(query, choice, add_special_tokens=True)
                   for choice in choices]

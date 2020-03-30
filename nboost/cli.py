@@ -31,7 +31,6 @@ QA = 'whether or not to output qa responses'
 MAX_SEQ_LEN = 'max combined token length'
 VERBOSE = 'turn on detailed logging'
 BUFSIZE = 'size of the http buffer'
-LR = 'learning rate of the model'
 DATA_DIR = 'dir for model binary'
 UHOST = 'host of the server'
 UPORT = 'port of the server'
@@ -65,7 +64,6 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--uport', type=type(defaults.uport), default=defaults.uport, help=UPORT)
     parser.add_argument('--ussl', type=type(defaults.ussl), default=defaults.ussl, help=USSL)
     parser.add_argument('--delim', type=type(defaults.query_delim), default=defaults.query_delim, help=DELIM)
-    parser.add_argument('--lr', type=type(defaults.lr), default=defaults.lr, help=LR)
     parser.add_argument('--max_seq_len', type=type(defaults.max_seq_len), default=defaults.max_seq_len, help=MAX_SEQ_LEN)
     parser.add_argument('--bufsize', type=type(defaults.bufsize), default=defaults.bufsize, help=BUFSIZE)
     parser.add_argument('--batch_size', type=type(defaults.batch_size), default=defaults.batch_size, help=BATCH_SIZE)
@@ -75,7 +73,6 @@ def set_parser() -> ArgumentParser:
     parser.add_argument('--model', type=type(defaults.model), default=defaults.model, help=MODEL)
     parser.add_argument('--model_dir', type=type(defaults.model_dir), default=defaults.model_dir, help=MODEL_DIR)
     parser.add_argument('--qa', type=type(defaults.qa), default=defaults.qa, help=QA)
-    parser.add_argument('--prerank', type=type(defaults.prerank), default=defaults.prerank, help="Prerank results w/BM25")
     parser.add_argument('--qa_model', type=type(defaults.qa_model), default=defaults.qa_model, help=QA_MODEL)
     parser.add_argument('--qa_model_dir', type=type(defaults.qa_model_dir), default=defaults.qa_model_dir, help=QA_MODEL_DIR)
     parser.add_argument('--filter_results', type=type(defaults.filter_results), default=defaults.filter_results, help=FILTER_RESULTS)

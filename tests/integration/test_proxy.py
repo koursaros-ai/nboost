@@ -20,7 +20,7 @@ class TestProxy(unittest.TestCase):
 
         proxy = Proxy(
             model_dir='shuffle-model',
-            model='ShuffleModelPlugin',
+            model='ShuffleRerankPlugin',
             uport=9200,
             debug=True,
             verbose=True, query_prep='lambda query: query.split(":")[-1]'
@@ -49,9 +49,9 @@ class TestProxy(unittest.TestCase):
         self.assertEqual(3, len(response['cvalues']))
 
         # fallback
-        fallback_res = requests.get('http://localhost:8000/')
-        self.assertTrue(fallback_res.ok)
-        print(fallback_res.content.decode())
+        # fallback_res = requests.get('http://localhost:8000/')
+        # self.assertTrue(fallback_res.ok)
+        # print(fallback_res.content.decode())
 
         # status
         status_res = requests.get('http://localhost:8000/nboost/status')
@@ -62,3 +62,5 @@ class TestProxy(unittest.TestCase):
         invalid_res = requests.get('http://localhost:8000/example/_search', params={'uport': 2000})
         print(invalid_res.content)
         self.assertFalse(invalid_res.ok)
+
+        t.join()

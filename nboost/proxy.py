@@ -6,13 +6,10 @@ from flask import (
     send_from_directory,
     jsonify,
     Flask)
-import traceback
-from nboost.plugins.models.rerank.base import RerankModelPlugin
+from nboost.plugins.rerank.base import RerankModelPlugin
 from nboost.delegates import RequestDelegate, ResponseDelegate
-from nboost.plugins.models.qa.base import QAModelPlugin
-from nboost.plugins.prerank import PrerankPlugin
-from nboost.compat import BackwardsCompatibility
-from nboost.plugins.models import resolve_model
+from nboost.plugins.qa.base import QAModelPlugin
+from nboost.plugins import resolve_plugin
 from nboost.plugins.debug import DebugPlugin
 from nboost import defaults, PKG_PATH
 from nboost.database import Database
@@ -22,47 +19,36 @@ from nboost.translators import *
 from json.decoder import JSONDecodeError
 from werkzeug.routing import Rule
 
-
 class Proxy:
     def __init__(self, host: type(defaults.host) = defaults.host,
                  port: type(defaults.port) = defaults.port,
                  verbose: type(defaults.verbose) = defaults.verbose,
-                 data_dir: type(defaults.data_dir) = defaults.data_dir,
                  no_rerank: type(defaults.no_rerank) = defaults.no_rerank,
                  model: type(defaults.model) = defaults.model,
                  model_dir: type(defaults.model_dir) = defaults.model_dir,
                  qa: type(defaults.qa) = defaults.qa,
                  qa_model: type(defaults.qa_model) = defaults.qa_model,
                  qa_model_dir: type(defaults.qa_model_dir) = defaults.qa_model_dir,
-                 search_route: type(defaults.search_route) = defaults.search_route,
                  frontend_route: type(defaults.frontend_route) = defaults.frontend_route,
                  status_route: type(defaults.status_route) = defaults.status_route,
                  debug: type(defaults.debug) = defaults.debug,
-                 prerank: type(defaults.prerank) = defaults.prerank,
                  **cli_args):
         self.logger = set_logger(self.__class__.__name__, verbose=verbose)
-        BackwardsCompatibility().set()
         db = Database()
         plugins = []  # type: List[Plugin]
 
-        if prerank:
-            preRankPlugin = PrerankPlugin()
-            plugins.append(preRankPlugin)
-
-        if not no_rerank:
-            rerank_model_plugin = resolve_model(
-                data_dir=data_dir,
+        if not no_rerank:  # TODO: FIX SO WORKS WITH DYNAMIC SETTING
+            rerank_model_plugin = resolve_plugin(
+                model,
                 model_dir=model_dir,
-                model_cls=model,
                 **cli_args)  # type: RerankModelPlugin
 
             plugins.append(rerank_model_plugin)
 
         if qa:
-            qa_model_plugin = resolve_model(
-                data_dir=data_dir,
+            qa_model_plugin = resolve_plugin(
+                qa_model,
                 model_dir=qa_model_dir,
-                model_cls=qa_model,
                 **cli_args)  # type: QAModelPlugin
 
             plugins.append(qa_model_plugin)

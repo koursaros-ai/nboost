@@ -1,6 +1,13 @@
 """Base Plugin module"""
 from nboost.delegates import RequestDelegate, ResponseDelegate
 from nboost.database import DatabaseRow
+from nboost.helpers import import_class
+from nboost.maps import MODULE_MAP
+
+
+def resolve_plugin(plugin, **cli_args):
+    model = import_class(MODULE_MAP[plugin], plugin)
+    return model(**cli_args)
 
 
 class Plugin:

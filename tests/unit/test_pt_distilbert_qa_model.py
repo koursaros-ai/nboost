@@ -1,16 +1,14 @@
-from nboost.plugins.models import resolve_model
-from nboost import defaults
+from nboost.plugins import resolve_plugin
 import unittest
 
 
 class TestPtDistilBertQAModel(unittest.TestCase):
 
     def setUp(self):
-        self.qa_model = resolve_model(
+        self.qa_model = resolve_plugin(
+            'PtDistilBertQAModelPlugin',
             model_dir='distilbert-base-uncased-distilled-squad',
-            data_dir=defaults.data_dir,
-            model_cls='PtDistilBertQAModelPlugin',
-            max_seq_length = 32
+            max_seq_length=32
         )
 
     def test_rank(self):
@@ -34,8 +32,6 @@ class TestPtDistilBertQAModel(unittest.TestCase):
         CONTEXT = '''High School ReUnion Small Website – including a custom memorable High School ReUnion domain name. Bring old classmates together with an awesome class reunion website. For $500 you get a custom School ReUnion domain name, a 5 Page secure (httpS) website with maps, and a TEXT widget to capture re-union staff – TEXT Messages – […]'''
         answer, start_pos, end_pos, score = self.qa_model.get_answer(QUESTION, CONTEXT)
 
-    def tearDown(self) -> None:
-        self.qa_model.close()
 
 
 CONTEXT = 'His tender heir might bear his memory, but thou contracted to thine own bright eyes'
