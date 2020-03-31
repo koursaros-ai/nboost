@@ -26,3 +26,4 @@ class TestESIndexer(unittest.TestCase):
 
         proxy_res = requests.get('http://localhost:9200/travel/_search', params=params)
         self.assertTrue(proxy_res.ok)
+        exit(0)
