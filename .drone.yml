@@ -8,7 +8,7 @@ steps:
   image: tensorflow/tensorflow:1.15.0-gpu-py3
   commands:
     - pip install -e .[all]
-    - python -m unittest discover tests
+    - python -m unittest discover tests/unit
 
 trigger:
   branch:
