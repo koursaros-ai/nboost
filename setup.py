@@ -34,9 +34,9 @@ setup(
         'nltk'
     ],
     extras_require={
-        'pt': ['torch', 'transformers==2.2.1'],
+        'pt': ['torch', 'transformers==2.7.0'],
         'tf': ['tensorflow>=2.1.0', 'sentencepiece'],
-        'all': ['torch', 'tensorflow>=2.1.0', 'transformers==2.2.1'],
+        'all': ['torch', 'tensorflow>=2.1.0', 'transformers==2.7.0'],
     },
     entry_points={'console_scripts': [
         'nboost=nboost.__main__:main',
