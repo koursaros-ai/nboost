@@ -1,3 +1,4 @@
+import os
 import time
 from typing import Optional
 from sqlite3 import Cursor
@@ -7,6 +8,7 @@ from nboost import defaults
 
 class Database:
     def __init__(self, db_file: type(defaults.db_file) = defaults.db_file, **_):
+        os.makedirs(db_file.parent, exist_ok=True)
         self.db_file = db_file
 
     def new_row(self):
