@@ -1,4 +1,5 @@
-
+import re
+import collections.abc
 from typing import Optional
 from nboost.helpers import get_jsonpath, set_jsonpath, JSONTYPES, flatten
 from nboost.exceptions import *
@@ -13,10 +14,46 @@ class Delegate:
         self.dict = None  # type: Optional[dict]
 
     def get_path(self, path: str) -> JSONTYPES:
-        return get_jsonpath(self.dict, path)
+        # To improve performance, don't use get_jsonpath if the key is easily accessible using dotted path syntax (e.g. "path.to.my.key")
+        is_dotted_path = True if re.match("^([\w]+[.]?)+$", path) else False
+        if is_dotted_path:
+            return [self._get_dict_by_path(self.dict, path)]
+        else:
+            return get_jsonpath(self.dict, path)
 
     def set_path(self, path: str, value: JSONTYPES):
-        set_jsonpath(self.dict, path, value)
+        # To improve performance, don't use set_jsonpath if the key is easily accessible using dotted path syntax (e.g. "path.to.my.key")
+        is_dotted_path = True if re.match("^([\w]+[.]?)+$", path) else False
+        if is_dotted_path:
+            self._update_dict_by_path(self.dict, path, value)
+        else:
+            set_jsonpath(self.dict, path, value)
+
+    def _update_dict_by_path(self, obj, path, value):
+        """ 
+        Update a nested dictionary using dotted path of a key and its value
+        Example: _update_dict_by_path(my_dict, "path.to.my.key", 7)
+        """
+        split_path = path.split('.', maxsplit=1)
+
+        if len(split_path) == 1:
+            obj[split_path[0]] = value
+        else:
+            if split_path[0] not in obj.keys():
+                obj[split_path[0]] = {}
+            self._update_dict_by_path(obj[split_path[0]], split_path[1], value)
+
+    def _get_dict_by_path(self, obj, path):
+        """ 
+        Retrieve a value in a nested dictionary using dotted path of its key
+        Example: _get_dict_by_path(my_dict, "path.to.my.key")
+        """
+        split_path = path.split('.', maxsplit=1)
+
+        if len(split_path) == 1:
+            return obj[split_path[0]]
+        else:
+            return self._get_dict_by_path(obj[split_path[0]], split_path[1])
 
 
 class RequestDelegate(Delegate):
