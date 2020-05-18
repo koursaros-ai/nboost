@@ -10,7 +10,7 @@ class SolrIndexer(BaseIndexer):
     def format(self, passage: str, cid: str):
         """Format a passage for indexing"""
         body = {
-            '_text_': passage
+            'passage_t': passage
         }
 
         if cid is not None:
