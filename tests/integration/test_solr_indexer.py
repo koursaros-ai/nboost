@@ -26,7 +26,10 @@ class TestSolrIndexer(unittest.TestCase):
         ])
 
         # search
-        params = dict(size=2, q='_text_:hotels in vegas, baby')
+        params = dict(size=2, q='passage_t:hotels in vegas, baby')
 
         proxy_res = requests.get('http://localhost:8983/solr/travel/select', params=params)
         self.assertTrue(proxy_res.ok)
+        
+        subprocess.call("docker rm -f solr_integration", shell=True)
+
