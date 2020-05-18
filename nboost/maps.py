@@ -13,5 +13,6 @@ IMAGE_MAP = {
 }
 
 INDEXER_MAP = {
+    'SolrIndexer': 'indexers.solr',
     'ESIndexer': 'indexers.es'
 }
