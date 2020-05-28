@@ -8,4 +8,4 @@ class ShuffleRerankPlugin(RerankModelPlugin):
     """Model that randomly shuffles choices. Useful for benchmarking/testing"""
     def get_logits(self, query, choices, **kwargs):
         """random shuffle with no regard for query"""
-        return np.zeros((len(choices), 2))
+        return np.random.uniform(0, 1, (len(choices), 2))
