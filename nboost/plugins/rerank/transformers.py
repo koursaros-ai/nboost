@@ -29,7 +29,7 @@ class PtTransformersRerankPlugin(RerankModelPlugin):
             torch.cuda.synchronize(self.device)
 
         self.rerank_model = AutoModelForSequenceClassification.from_pretrained(model_dir)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_dir)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_dir, use_fast=True)
 
         self.rerank_model.to(self.device, non_blocking=True)
 
