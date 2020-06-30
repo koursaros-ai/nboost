@@ -35,7 +35,8 @@ class RerankModelPlugin(Plugin):
         )
         db_row.rerank_time = time.perf_counter() - start_time
 
-        # raise helpful error if choices is shorter than ranks
+        # remove ranks which are higher than total choices
+        ranks = [rank for rank in ranks if rank < len(response.choices)]
         reranked_choices = [response.choices[rank] for rank in ranks]
 
         response.choices = reranked_choices
