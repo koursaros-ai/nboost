@@ -18,6 +18,7 @@ from nboost.plugins import Plugin
 from nboost.translators import *
 from json.decoder import JSONDecodeError
 from werkzeug.routing import Rule
+import traceback
 
 class Proxy:
     def __init__(self, host: type(defaults.host) = defaults.host,
@@ -130,6 +131,7 @@ class Proxy:
         @flask_app.errorhandler(Exception)
         def handle_json_response(error):
             self.logger.error('', exc_info=True)
+            print(traceback.format_exc())
             return jsonify({
                 'type': error.__class__.__name__,
                 'doc': error.__class__.__doc__,
